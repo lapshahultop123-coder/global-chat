@@ -1,14 +1,32 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { iso31661, iso31662 } from 'npm:iso-3166@4.4.0';
 
-const url=Deno.env.get('SUPABASE_URL')!;
-const secret=Deno.env.get('CHAT_SECRET_KEY')!;
-const admin=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
-const allowedEmoji=new Set(['👍','❤️','😂','😮','😢','😡','🎉','🙏','👋','😊','🔥','⭐']);
-const bad=['fuck','fucking','shit','bitch','bastard','asshole','dick','pussy','cunt','motherfucker','slut','whore'];
-const normalize=(s:string)=>s.normalize('NFKC').toLowerCase().replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/[^a-z0-9]+/g,'').replace(/(.)\1+/g,'$1');
-function englishOnly(s:string){let i=0;while(i<s.length){let matched=false;for(const emoji of allowedEmoji){if(s.startsWith(emoji,i)){i+=emoji.length;matched=true;break}}if(matched)continue;const cp=s.codePointAt(i)!;const ch=String.fromCodePoint(cp);if(/[A-Za-z0-9\s\p{P}\p{S}]/u.test(ch)){i+=ch.length;continue}return false}return true}
-function offensive(s:string){const n=normalize(s);return bad.some(w=>n.includes(w))}
-function okProfile(p:any){const c=iso31661.find(x=>x.state==='assigned'&&x.alpha2===p.country);const sub=iso31662.find(x=>x.code===p.subdivision && x.code.startsWith(`${p.country}-`));return !!c&&!!sub&&Number.isInteger(p.avatarId)&&p.avatarId>=1&&p.avatarId<=100&&typeof p.name==='string'&&p.name.trim().length>=2&&p.name.trim().length<=32&&p.agreed===true}
-Deno.serve(async(req)=>{try{if(req.method!=='POST')return new Response(JSON.stringify({error:'Method not allowed.'}),{status:405});const auth=req.headers.get('Authorization')||'';const token=auth.replace(/^Bearer\s+/i,'');const {data:{user},error:uerr}=await admin.auth.getUser(token);if(uerr||!user||!user.is_anonymous)return new Response(JSON.stringify({error:'Session expired. Please re-enter the chat.'}),{status:401});const {text,profile}=await req.json();if(!okProfile(profile))return new Response(JSON.stringify({error:'Your profile information is invalid. Please update it.'}),{status:400});const body=String(text??'');if([...body].length<1||[...body].length>500)return new Response(JSON.stringify({error:'Messages can contain up to 500 characters.'}),{status:400});if(!englishOnly(body))return new Response(JSON.stringify({error:'English only. Please use English letters, numbers, symbols, and approved emojis.'}),{status:400});if(offensive(body))return new Response(JSON.stringify({error:'Please use respectful language. Offensive language is not allowed.'}),{status:400});const {data,error}=await admin.rpc('accept_global_message',{p_user_id:user.id,p_name:profile.name.trim(),p_country:profile.country,p_subdivision:profile.subdivision,p_avatar_id:profile.avatarId,p_body:body});if(error){const map:any={rate_limited:'Please wait a moment before sending more messages.',message_length:'Messages can contain up to 500 characters.',invalid_avatar:'Invalid avatar selection.',invalid_name:'Invalid nickname.'};return new Response(JSON.stringify({error:map[error.message]||'Unable to send message.'}),{status:400})}return new Response(JSON.stringify({message:data}),{headers:{'Content-Type':'application/json'}})}catch{return new Response(JSON.stringify({error:'Unable to send message right now.'}),{status:500})}});
+const SUPABASE_SECRET_KEYS = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')!);
+const admin = createClient(Deno.env.get('SUPABASE_URL')!, SUPABASE_SECRET_KEYS['default'], { auth: { persistSession: false, autoRefreshToken: false } });
+const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
+const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+const allowedEmoji = new Set(['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','👍','👎','👏','🙌','🙏','👋','💪','🔥','❤️','💯']);
+const bad = ['fuck','fucking','shit','bitch','bastard','asshole','dick','pussy','cunt','motherfucker','slut','whore'];
+const normalize = (s: string) => s.normalize('NFKC').toLowerCase().replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/[^a-z0-9]+/g,'').replace(/(.)\1+/g,'$1');
+function englishOnly(s:string){ let i=0; while(i<s.length){ let matched=false; for(const emoji of allowedEmoji){ if(s.startsWith(emoji,i)){ i+=emoji.length; matched=true; break; } } if(matched) continue; const cp=s.codePointAt(i)!; const ch=String.fromCodePoint(cp); if(/[A-Za-z0-9\s\p{P}\p{S}]/u.test(ch)){ i+=ch.length; continue; } return false; } return true; }
+function offensive(s:string){ const n=normalize(s); return bad.some(w=>n.includes(w)); }
+function okProfile(p:any){ const c=iso31661.find(x=>x.state==='assigned'&&x.alpha2===p.country); const sub=iso31662.find(x=>x.code===p.subdivision && x.code.startsWith(`${p.country}-`)); return !!c&&!!sub&&Number.isInteger(p.avatarId)&&p.avatarId>=1&&p.avatarId<=100&&typeof p.name==='string'&&p.name.trim().length>=2&&p.name.trim().length<=32&&p.agreed===true; }
 
+Deno.serve(async(req)=>{
+  if(req.method==='OPTIONS') return new Response('ok',{headers:corsHeaders});
+  try {
+    if(req.method!=='POST') return json({error:'Method not allowed.'},405);
+    const token=(req.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+    const {data:{user},error:uerr}=await admin.auth.getUser(token);
+    if(uerr||!user||!user.is_anonymous) return json({error:'Session expired. Please re-enter the chat.'},401);
+    const {text,profile}=await req.json();
+    if(!okProfile(profile)) return json({error:'Your profile information is invalid. Please update it.'},400);
+    const body=String(text??'');
+    if([...body].length<1||[...body].length>500) return json({error:'Messages can contain up to 500 characters.'},400);
+    if(!englishOnly(body)) return json({error:'English only. Please use English letters, numbers, symbols, and approved emojis.'},400);
+    if(offensive(body)) return json({error:'Please use respectful language. Offensive language is not allowed.'},400);
+    const {data,error}=await admin.rpc('accept_global_message',{p_user_id:user.id,p_name:profile.name.trim(),p_country:profile.country,p_subdivision:profile.subdivision,p_avatar_id:profile.avatarId,p_body:body});
+    if(error){ const map:any={rate_limited:'Please wait a moment before sending more messages.',message_length:'Messages can contain up to 500 characters.',invalid_avatar:'Invalid avatar selection.',invalid_name:'Invalid nickname.'}; return json({error:map[error.message]||'Unable to send message.'},400); }
+    return json({message:data});
+  } catch { return json({error:'Unable to send message right now.'},500); }
+});
