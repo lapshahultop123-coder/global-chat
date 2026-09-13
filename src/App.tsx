@@ -89,7 +89,7 @@ function Chat({profile,settings,onSettings,onProfile}:{profile:Profile;settings:
       if(!channel)return;
       const state=channel.presenceState() as Record<string,any[]>;
       const ids=Object.entries(state)
-        .filter(([id,metas])=>id!==authUserId&&Array.isArray(metas)&&metas.some(meta=>meta?.typing===true))
+        .filter(([id,metas])=>id!==(sessionRef.current?.user?.id||authUserId)&&Array.isArray(metas)&&metas.some(meta=>meta?.typing===true))
         .map(([id])=>id);
       if(mounted)setTypingUsers(ids);
       if(mounted)setOnline(Object.keys(state).length);
