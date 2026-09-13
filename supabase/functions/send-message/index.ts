@@ -25,7 +25,7 @@ Deno.serve(async(req)=>{
     if(offensive(body)) return json({error:'Please use respectful language. Offensive language is not allowed.'},400);
     const replyId=typeof replyToId==='string'&&replyToId?replyToId:null;
     const {data,error}=await admin.rpc('accept_global_message',{p_user_id:user.id,p_name:profile.name.trim(),p_country:profile.country,p_subdivision:profile.subdivision,p_avatar_id:profile.avatarId,p_body:body,p_reply_to_id:replyId});
-    if(error){ const map:any={rate_limited:'Please wait a moment before sending more messages.',message_length:'Messages can contain up to 500 characters.',invalid_avatar:'Invalid avatar selection.',invalid_name:'Invalid nickname.',reply_target_invalid:'That message can no longer be replied to.'}; return json({error:map[error.message]||'Unable to send message.'},400); }
+    if(error){ const map:any={rate_limited:'Please wait a moment before sending more messages.',duplicate_message:'Please do not send the same message again so quickly.',message_length:'Messages can contain up to 500 characters.',invalid_avatar:'Invalid avatar selection.',invalid_name:'Invalid nickname.',reply_target_invalid:'That message can no longer be replied to.'}; return json({error:map[error.message]||'Unable to send message.'},400); }
     return json({message:data});
   } catch { return json({error:'Unable to send message right now.'},500); }
 });

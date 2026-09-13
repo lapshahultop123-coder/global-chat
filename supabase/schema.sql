@@ -65,7 +65,8 @@ create or replace function public.accept_global_message(
   p_country text,
   p_subdivision text,
   p_avatar_id integer,
-  p_body text
+  p_body text,
+  p_reply_to_id uuid default null
 ) returns public.messages
 language plpgsql security definer set search_path = public
 as $$
@@ -85,12 +86,26 @@ begin
   where user_id=p_user_id and created_at > now() - interval '10 seconds';
   if recent_count >= 3 then raise exception 'rate_limited'; end if;
 
-  insert into public.messages(user_id,name,country,subdivision,avatar_id,body)
-  values(p_user_id,p_name,p_country,p_subdivision,p_avatar_id,p_body)
+  if exists(
+    select 1 from public.messages
+    where user_id=p_user_id and body=p_body
+      and created_at > now() - interval '10 seconds'
+  ) then raise exception 'duplicate_message'; end if;
+
+  if p_reply_to_id is not null and not exists(
+    select 1 from public.messages where id=p_reply_to_id and expires_at > now()
+  ) then raise exception 'reply_target_invalid'; end if;
+
+  insert into public.messages(user_id,name,country,subdivision,avatar_id,body,reply_to_id)
+  values(p_user_id,p_name,p_country,p_subdivision,p_avatar_id,p_body,p_reply_to_id)
   returning * into result;
   return result;
 end;
 $$;
+
+revoke all on function public.accept_global_message(uuid,text,text,text,integer,text) from public, anon, authenticated;
+revoke all on function public.accept_global_message(uuid,text,text,text,integer,text,uuid) from public, anon, authenticated;
+grant execute on function public.accept_global_message(uuid,text,text,text,integer,text,uuid) to service_role;
 
 create or replace function public.toggle_global_reaction(p_user_id uuid, p_message_id uuid, p_reaction text)
 returns boolean language plpgsql security definer set search_path = public as $$
