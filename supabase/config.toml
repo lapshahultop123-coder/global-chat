@@ -1,10 +1,10 @@
 project_id = "your-project-ref"
 
 [functions.send-message]
-verify_jwt = true
+verify_jwt = false
 
 [functions.toggle-reaction]
-verify_jwt = true
+verify_jwt = false
 
 [functions.save-profile]
-verify_jwt = true
+verify_jwt = false
