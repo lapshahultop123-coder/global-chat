@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { iso31661, iso31662 } from 'iso-3166';
 import { Check, ChevronDown, MicOff, Send, Settings, Smile, Volume2, X } from 'lucide-react';
 import { supabase } from './lib/supabase';
-import { AVATARS, EMOJIS, REACTIONS, THEMES, TEXT_SIZES, type TextSize } from './data/catalog';
+import { AVATARS, REACTIONS, THEMES, TEXT_SIZES, type TextSize } from './data/catalog';
+
+const EMOJIS = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','👍','👎','👏','🙌','🙏','👋','💪','🔥','❤️','💯'];
 import { validateMessage } from './lib/validation';
 import './styles.css';
 
