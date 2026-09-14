@@ -31,11 +31,11 @@ Deno.serve(async req=>{
     const {data:p,error:pe}=await admin.from('profiles').select('name,country,subdivision,avatar_id,agreed').eq('user_id',user.id).maybeSingle();
     if(pe||!p?.agreed){await admin.storage.from('voice-messages').remove([path]);return json({error:'Your profile information is invalid. Please update it.'},400)}
 
-    const {data,messageError}=await admin.rpc('accept_voice_message',{p_user_id:user.id,p_name:p.name,p_country:p.country,p_subdivision:p.subdivision,p_avatar_id:p.avatar_id,p_audio_url:publicUrl,p_storage_path:path,p_duration_ms:durationMs,p_file_size:audio.size});
-    if(messageError){
+    const {data,error}=await admin.rpc('accept_voice_message',{p_user_id:user.id,p_name:p.name,p_country:p.country,p_subdivision:p.subdivision,p_avatar_id:p.avatar_id,p_audio_url:publicUrl,p_storage_path:path,p_duration_ms:durationMs,p_file_size:audio.size});
+    if(error){
       await admin.storage.from('voice-messages').remove([path]);
       const m:any={rate_limited:'Please wait a moment before sending more messages.',duration_invalid:'Voice recordings can be up to 1 minute.',file_too_large:'Voice message is too large. Please record a shorter message.'};
-      return json({error:m[messageError.message]||'Unable to send voice message.'},400);
+      return json({error:m[error.message]||'Unable to send voice message.'},400);
     }
     return json({message:data});
   }catch{return json({error:'Unable to send voice message right now.'},500)}});
