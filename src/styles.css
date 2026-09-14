@@ -113,3 +113,10 @@ button,input,textarea{touch-action:manipulation}
 
 /* Icon-only settings button */
 .settings-btn{width:42px;height:42px;padding:0;display:grid;place-items:center;gap:0;font-size:0}.settings-btn svg{width:19px;height:19px}
+
+/* Delete message choice modal */
+.delete-modal-backdrop{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:18px;background:rgba(2,6,23,.72);backdrop-filter:blur(10px)}
+.delete-modal{width:min(420px,100%);padding:22px;border:1px solid rgba(255,255,255,.1);border-radius:22px;background:color-mix(in srgb,var(--surface,#10172b) 96%,transparent);box-shadow:0 28px 90px rgba(0,0,0,.45)}
+.delete-modal-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:rgba(239,68,68,.12);color:#fda4af;margin-bottom:12px}
+.delete-modal h3{margin:0;color:#f8fafc;font-size:1.05rem}.delete-modal p{margin:7px 0 16px;color:#94a3b8;font-size:.88rem}
+.delete-modal-actions{display:grid;gap:9px}.delete-option-btn{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:12px 13px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.045);color:#f8fafc}.delete-option-btn:hover:not(:disabled){background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16)}.delete-option-btn span{font-weight:750}.delete-option-btn small{color:#94a3b8;font-size:.76rem}.delete-option-btn.danger{border-color:rgba(239,68,68,.24);background:rgba(239,68,68,.07);color:#fecaca}.delete-option-btn.danger:hover:not(:disabled){background:rgba(239,68,68,.13);border-color:rgba(239,68,68,.38)}.delete-option-btn:disabled,.clear-cancel-btn:disabled{opacity:.55;cursor:not-allowed}.delete-modal .clear-cancel-btn{width:100%;margin-top:2px}
