@@ -109,3 +109,7 @@ button,input,textarea{touch-action:manipulation}
 .brand-mark.brand-image{font-size:0}
 .brand-mini.brand-image{font-size:0}
 @media(prefers-reduced-motion:reduce){.boot .logo-image{animation:none}}
+
+
+/* Icon-only settings button */
+.settings-btn{width:42px;height:42px;padding:0;display:grid;place-items:center;gap:0;font-size:0}.settings-btn svg{width:19px;height:19px}
