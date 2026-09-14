@@ -120,3 +120,17 @@ button,input,textarea{touch-action:manipulation}
 .delete-modal-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:rgba(239,68,68,.12);color:#fda4af;margin-bottom:12px}
 .delete-modal h3{margin:0;color:#f8fafc;font-size:1.05rem}.delete-modal p{margin:7px 0 16px;color:#94a3b8;font-size:.88rem}
 .delete-modal-actions{display:grid;gap:9px}.delete-option-btn{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:12px 13px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.045);color:#f8fafc}.delete-option-btn:hover:not(:disabled){background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16)}.delete-option-btn span{font-weight:750}.delete-option-btn small{color:#94a3b8;font-size:.76rem}.delete-option-btn.danger{border-color:rgba(239,68,68,.24);background:rgba(239,68,68,.07);color:#fecaca}.delete-option-btn.danger:hover:not(:disabled){background:rgba(239,68,68,.13);border-color:rgba(239,68,68,.38)}.delete-option-btn:disabled,.clear-cancel-btn:disabled{opacity:.55;cursor:not-allowed}.delete-modal .clear-cancel-btn{width:100%;margin-top:2px}
+
+/* Theme-safe GLOBAL CHAT logo: fixed high-contrast backing on every theme */
+.brand-mark.brand-image,
+.brand-mini.brand-image{
+  background:#0b1224;
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:0 8px 26px rgba(0,0,0,.38),0 0 0 1px rgba(34,211,238,.12);
+  padding:4px;
+  isolation:isolate;
+}
+.brand-mark.brand-image img,
+.brand-mini.brand-image img{display:block;width:100%;height:100%}
+.boot .logo-image{filter:drop-shadow(0 8px 20px rgba(0,0,0,.55)) drop-shadow(0 0 5px rgba(255,255,255,.45));}
+.brand-image{filter:drop-shadow(0 4px 10px rgba(0,0,0,.35));}
