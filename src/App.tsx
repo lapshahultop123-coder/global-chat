@@ -109,12 +109,18 @@ function Chat({profile,settings,onSettings,onProfile}:{profile:Profile;settings:
       const selfId=session.user.id;
       setAuthUserId(selfId);
       await supabase.realtime.setAuth(session.access_token);
-      channel=supabase.channel('global-chat',{config:{presence:{key:selfId},private:true}});
+      channel=supabase.channel('global-chat',{config:{presence:{key:selfId}}});
       channelRef.current=channel;
       channel
         .on('presence',{event:'sync'},presenceUsers)
         .on('presence',{event:'join'},presenceUsers)
         .on('presence',{event:'leave'},presenceUsers)
+        .on('broadcast',{event:'typing',config:{self:false}},({payload}:any)=>{
+          const id=payload?.userId;
+          if(!id||id===selfId)return;
+          setTypingUsers(prev=>prev.includes(id)?prev:[...prev,id]);
+          window.setTimeout(()=>setTypingUsers(prev=>prev.filter(x=>x!==id)),1800);
+        })
         .on('broadcast',{event:'message-meta'},({payload}:any)=>{
           const messageId=payload?.messageId;
           const replyToId=payload?.replyToId;
@@ -181,7 +187,21 @@ function Chat({profile,settings,onSettings,onProfile}:{profile:Profile;settings:
   useEffect(()=>{const el=listRef.current;if(!el)return;const grew=messages.length>previousMessageCountRef.current;const near=shouldStickToBottom();if(grew&&near&&!activeSearch)el.scrollTop=el.scrollHeight;else if(!near&&messages.length)setShowJump(true);previousMessageCountRef.current=messages.length},[messages.length,activeSearch]);
   const handleScroll=()=>{const el=listRef.current;if(!el)return;const near=el.scrollHeight-el.scrollTop-el.clientHeight<120;if(near){setShowJump(false);setNewMessageCount(0)}else setShowJump(messages.length>0)};
   const jumpToLatest=()=>{const el=listRef.current;if(!el)return;el.scrollTop=el.scrollHeight;setShowJump(false);setNewMessageCount(0)};
-  const updateTyping=(value:string)=>{setText(value);if(!channelRef.current||!authUserId)return;void channelRef.current.track({online_at:new Date().toISOString(),typing:Boolean(value.trim())});if(typingStopRef.current)window.clearTimeout(typingStopRef.current);if(value.trim())typingStopRef.current=window.setTimeout(()=>{void channelRef.current?.track({online_at:new Date().toISOString(),typing:false})},1200)};
+  const updateTyping=(value:string)=>{
+    setText(value);
+    if(!channelRef.current||!authUserId)return;
+    if(typingStopRef.current)window.clearTimeout(typingStopRef.current);
+    if(value.trim()){
+      void channelRef.current.send({
+        type:'broadcast',
+        event:'typing',
+        payload:{userId:authUserId}
+      });
+      typingStopRef.current=window.setTimeout(()=>{
+        setTypingUsers(prev=>prev.filter(id=>id!==authUserId));
+      },1200);
+    }
+  };
   const beginReply=(m:ChatMessage)=>{if(m.id.startsWith('optimistic-'))return;setReplyTarget(m);requestAnimationFrame(()=>document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus())};
   const send=async()=>{if(sendLockRef.current)return;sendLockRef.current=true;setError('');const body=text.trim();const problem=validateMessage(text);if(problem){setError(problem);sendLockRef.current=false;return}const duplicate=messagesRef.current.some(m=>m.user_id===authUserId&&m.body===body&&Date.now()-new Date(m.created_at).getTime()<10000&&!m.id.startsWith('optimistic-'));if(duplicate){setError('Please do not send the same message again so quickly.');sendLockRef.current=false;return}const tempId=`optimistic-${crypto.randomUUID()}`;const createdAt=new Date().toISOString();const optimistic:ChatMessage={id:tempId,user_id:authUserId,name:profile.name,country:profile.country,subdivision:profile.subdivision,avatar_id:profile.avatarId,body,created_at:createdAt,expires_at:new Date(Date.now()+5*60*1000).toISOString(),reply_to_id:replyTarget?.id||null,reply_to_preview:replyTarget?.body||null,reply_to_name:replyTarget?.name||null};pendingRef.current[tempId]={tempId,body,createdAt};setText('');setEmojiOpen(false);const sentReply=replyTarget;setReplyTarget(null);setMessages(prev=>prev.some(m=>m.id===tempId)?prev:[...prev,optimistic]);play('send');setSending(true);try{let session=sessionRef.current;if(!session){const {data}=await supabase.auth.getSession();session=data.session;sessionRef.current=session}const {data,error}=await supabase.functions.invoke('send-message',{body:{text:body,profile,replyToId:sentReply&&!sentReply.id.startsWith('optimistic-')?sentReply.id:null},headers:session?{Authorization:`Bearer ${session.access_token}`}:{}});if(error||data?.error)throw new Error(data?.error||'Unable to send message.');const serverMessage={...(data?.message||data) as ChatMessage,reply_to_id:sentReply&&!sentReply.id.startsWith('optimistic-')?sentReply.id:null,reply_to_preview:sentReply?.body||null,reply_to_name:sentReply?.name||null};setMessages(prev=>{if(serverMessage?.id&&prev.some(m=>m.id===serverMessage.id))return prev;const exists=prev.some(m=>m.id===tempId);return exists&&serverMessage?.id?prev.map(m=>m.id===tempId?serverMessage:m):prev});delete pendingRef.current[tempId];if(sentReply&&!sentReply.id.startsWith('optimistic-')&&serverMessage?.id&&channelRef.current)void channelRef.current.send({type:'broadcast',event:'message-meta',payload:{messageId:serverMessage.id,replyToId:sentReply.id,replyToPreview:sentReply.body,replyToName:sentReply.name}})}catch(e:any){setMessages(prev=>prev.filter(m=>m.id!==tempId));delete pendingRef.current[tempId];setError(e.message||'Unable to send message. Please try again.')}finally{setSending(false);sendLockRef.current=false}};
   const persistLocalDeleted=(next:Record<string,number>)=>{setLocalDeleted(next);try{localStorage.setItem(LOCAL_DELETED_KEY,JSON.stringify(next))}catch{}};
