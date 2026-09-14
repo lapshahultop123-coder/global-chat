@@ -134,3 +134,21 @@ button,input,textarea{touch-action:manipulation}
 .brand-mini.brand-image img{display:block;width:100%;height:100%}
 .boot .logo-image{filter:drop-shadow(0 8px 20px rgba(0,0,0,.55)) drop-shadow(0 0 5px rgba(255,255,255,.45));}
 .brand-image{filter:drop-shadow(0 4px 10px rgba(0,0,0,.35));}
+
+/* Long message Read more */
+.read-more-btn{
+  display:inline-block;
+  margin:8px 0 0;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:var(--primary);
+  font:inherit;
+  font-size:.9em;
+  font-weight:700;
+  cursor:pointer;
+  text-decoration:none;
+}
+.read-more-btn:hover{text-decoration:underline}
+.read-more-btn:focus-visible{outline:2px solid var(--primary);outline-offset:3px;border-radius:4px}
+.bubble>span{white-space:pre-wrap;overflow-wrap:anywhere}
