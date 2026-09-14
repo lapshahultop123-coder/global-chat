@@ -101,3 +101,11 @@ button,input,textarea{touch-action:manipulation}
   .message-copy,.message-reply,.message-delete{opacity:.72}
   .message-list{padding:18px 10px 14px}
 }
+
+/* GLOBAL CHAT logo refresh: message bubble + globe */
+.logo-image{object-fit:contain;display:block}
+.boot .logo-image{width:78px;height:78px;margin:0 auto 2px;animation:float 2.5s ease-in-out infinite}
+.brand-image{object-fit:contain;padding:5px}
+.brand-mark.brand-image{font-size:0}
+.brand-mini.brand-image{font-size:0}
+@media(prefers-reduced-motion:reduce){.boot .logo-image{animation:none}}
