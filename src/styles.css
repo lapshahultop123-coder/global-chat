@@ -261,3 +261,11 @@ html[data-theme="mono"] .send-btn svg{
   color:#111 !important;
   stroke:#111 !important;
 }
+
+
+/* Voice menu click-through fix */
+.message-list .message-row { position: relative; }
+.message-list .message-row:has(.voice-menu) { z-index: 10001 !important; }
+.message-list .message-row:has(.voice-menu) .voice-bubble { position: relative; z-index: 10002 !important; }
+.message-list .message-row:has(.voice-menu) .voice-menu { z-index: 10003 !important; pointer-events: auto !important; }
+.voice-menu button { position: relative; z-index: 10004 !important; pointer-events: auto !important; }
