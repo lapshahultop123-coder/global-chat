@@ -1,0 +1,6 @@
+import { createClient } from 'npm:@supabase/supabase-js@2';
+const K=JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')!);
+const admin=createClient(Deno.env.get('SUPABASE_URL')!,K.default,{auth:{persistSession:false,autoRefreshToken:false}});
+const C={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS'};
+const json=(x:unknown,s=200)=>new Response(JSON.stringify(x),{status:s,headers:{...C,'Content-Type':'application/json'}});
+Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response('ok',{headers:C});try{if(req.method!=='POST')return json({error:'Method not allowed.'},405);const token=(req.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');const {data:{user},error:u}=await admin.auth.getUser(token);if(u||!user?.is_anonymous)return json({error:'Session expired. Please re-enter the chat.'},401);const {voiceId,reaction}=await req.json();const {data,error}=await admin.rpc('toggle_voice_reaction',{p_user_id:user.id,p_voice_id:voiceId,p_reaction:reaction});if(error)return json({error:error.message==='invalid_reaction'?'Invalid reaction.':error.message==='voice_not_found'?'Voice message no longer exists.':'Could not update reaction.'},400);return json({reacted:data});}catch{return json({error:'Could not update reaction.'},500)}});

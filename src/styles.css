@@ -167,3 +167,21 @@ button,input,textarea{touch-action:manipulation}
 .mic-permission-notice{display:flex;align-items:center;gap:9px;margin-top:8px;padding:9px 12px;border:1px solid rgba(255,185,90,.35);border-radius:12px;background:rgba(255,185,90,.08);font-size:.82rem}.mic-permission-notice span{flex:1;opacity:.82}.mic-permission-notice button{border:0;background:transparent;color:var(--primary);font-weight:800;font-size:.76rem;cursor:pointer;white-space:nowrap}
 @media(max-width:640px){.voice-bubble{min-width:0;width:min(100%,360px);padding:9px}.voice-row .message-content{max-width:94%}.voice-wave{gap:2px}.voice-wave i{width:2px}.voice-menu{bottom:44px}.mic-permission-notice{align-items:flex-start;flex-wrap:wrap}.mic-permission-notice button{margin-left:25px}}
 @media(prefers-reduced-motion:reduce){.recording-dot,.voice-wave i{animation:none}.voice-bubble,.voice-btn,.voice-play-btn{transition:none}}
+
+/* Voice final UX/accessibility pass */
+.voice-message-time{display:block;margin-top:5px;font-size:.68rem;color:color-mix(in srgb,#fff 72%,var(--accent));opacity:.95}
+.voice-reactions{margin-top:6px}
+.voice-reactions button{display:inline-flex;align-items:center;gap:2px}
+.voice-reactions button small{font-size:10px}
+.voice-menu button{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.voice-reply-preview{margin-bottom:5px}
+.voice-menu{min-width:185px}
+.bubble,.voice-bubble,.message-head strong,.message-head span,.message-time,.composer textarea,.composer-meta,.reply-composer,.delete-modal,.settings-panel{color-scheme:dark}
+/* Keep all theme text readable even when theme surfaces are bright or low-contrast. */
+.message-head strong,.top-brand b,.empty h2,.voice-duration,.voice-rec-left strong,.settings-panel,.settings-panel label{color:#f8fafc}
+.message-head span,.message-time,.voice-message-time,.composer-meta,.top-brand span,.brand p{color:rgba(226,232,240,.82)}
+.bubble{color:#f8fafc}
+.bubble span{color:#f8fafc}
+.voice-bubble{color:#f8fafc}
+.voice-menu{color:#f8fafc;background:color-mix(in srgb,var(--surface) 88%,#05070d)}
+@media(max-width:520px){.voice-menu{min-width:170px}.voice-message-time{font-size:.62rem}.voice-reactions button{min-height:27px;padding:3px 6px}}

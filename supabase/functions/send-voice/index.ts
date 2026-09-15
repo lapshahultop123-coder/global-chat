@@ -13,7 +13,7 @@ Deno.serve(async req=>{
     const token=(req.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
     const {data:{user},error:u}=await admin.auth.getUser(token);
     if(u||!user?.is_anonymous)return json({error:'Session expired. Please re-enter the chat.'},401);
-    const f=await req.formData(),audio=f.get('audio'),durationMs=Number(f.get('durationMs')||0);
+    const f=await req.formData(),audio=f.get('audio'),durationMs=Number(f.get('durationMs')||0),replyToVoiceId=String(f.get('replyToVoiceId')||'')||null;
     if(!(audio instanceof File))return json({error:'Voice recording is required.'},400);
     if(durationMs<500||durationMs>60000)return json({error:'Voice recordings can be up to 1 minute.'},400);
     if(audio.size<1||audio.size>358400)return json({error:'Voice message is too large. Please record a shorter message.'},400);
@@ -31,7 +31,7 @@ Deno.serve(async req=>{
     const {data:p,error:pe}=await admin.from('profiles').select('name,country,subdivision,avatar_id,agreed').eq('user_id',user.id).maybeSingle();
     if(pe||!p?.agreed){await admin.storage.from('voice-messages').remove([path]);return json({error:'Your profile information is invalid. Please update it.'},400)}
 
-    const {data,error}=await admin.rpc('accept_voice_message',{p_user_id:user.id,p_name:p.name,p_country:p.country,p_subdivision:p.subdivision,p_avatar_id:p.avatar_id,p_audio_url:publicUrl,p_storage_path:path,p_duration_ms:durationMs,p_file_size:audio.size});
+    const {data,error}=await admin.rpc('accept_voice_message',{p_user_id:user.id,p_name:p.name,p_country:p.country,p_subdivision:p.subdivision,p_avatar_id:p.avatar_id,p_audio_url:publicUrl,p_storage_path:path,p_duration_ms:durationMs,p_file_size:audio.size,p_reply_to_voice_id:replyToVoiceId});
     if(error){
       await admin.storage.from('voice-messages').remove([path]);
       const m:any={rate_limited:'Please wait a moment before sending more messages.',duration_invalid:'Voice recordings can be up to 1 minute.',file_too_large:'Voice message is too large. Please record a shorter message.'};

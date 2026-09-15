@@ -17,14 +17,14 @@ Deno.serve(async(req)=>{
     const token=(req.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
     const {data:{user},error:uerr}=await admin.auth.getUser(token);
     if(uerr||!user||!user.is_anonymous) return json({error:'Session expired. Please re-enter the chat.'},401);
-    const {text,profile,replyToId}=await req.json();
+    const {text,profile,replyToId,replyToVoiceId}=await req.json();
     if(!okProfile(profile)) return json({error:'Your profile information is invalid. Please update it.'},400);
     const body=String(text??'');
     if([...body].length<1||[...body].length>500) return json({error:'Messages can contain up to 500 characters.'},400);
     if(!englishOnly(body)) return json({error:'English only. Please use English letters, numbers, symbols, and approved emojis.'},400);
     if(offensive(body)) return json({error:'Please use respectful language. Offensive language is not allowed.'},400);
     const replyId=typeof replyToId==='string'&&replyToId?replyToId:null;
-    const {data,error}=await admin.rpc('accept_global_message',{p_user_id:user.id,p_name:profile.name.trim(),p_country:profile.country,p_subdivision:profile.subdivision,p_avatar_id:profile.avatarId,p_body:body,p_reply_to_id:replyId});
+    const {data,error}=await admin.rpc('accept_global_message',{p_user_id:user.id,p_name:profile.name.trim(),p_country:profile.country,p_subdivision:profile.subdivision,p_avatar_id:profile.avatarId,p_body:body,p_reply_to_id:replyId,p_reply_to_voice_id:typeof replyToVoiceId==='string'&&replyToVoiceId?replyToVoiceId:null});
     if(error){ const map:any={rate_limited:'Please wait a moment before sending more messages.',duplicate_message:'Please do not send the same message again so quickly.',message_length:'Messages can contain up to 500 characters.',invalid_avatar:'Invalid avatar selection.',invalid_name:'Invalid nickname.',reply_target_invalid:'That message can no longer be replied to.'}; return json({error:map[error.message]||'Unable to send message.'},400); }
     return json({message:data});
   } catch { return json({error:'Unable to send message right now.'},500); }
