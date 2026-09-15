@@ -205,3 +205,26 @@ button,input,textarea{touch-action:manipulation}
 .message-row{content-visibility:visible;contain:layout style}
 .voice-bubble{overflow:visible}
 .voice-menu{position:absolute;z-index:9999;overflow:visible;max-height:none}
+
+
+/* GLOBAL CHAT voice final polish styles */
+.voice-menu.voice-menu-below{
+  top:calc(100% + 8px)!important;
+  bottom:auto!important;
+}
+.voice-menu:not(.voice-menu-below){
+  max-height:min(260px,calc(100vh - 24px));
+}
+.voice-bubble,
+.voice-bubble *{
+  box-sizing:border-box;
+}
+.voice-menu{
+  z-index:10000!important;
+}
+@media(max-width:520px){
+  .voice-menu.voice-menu-below{
+    right:0!important;
+    left:auto!important;
+  }
+}

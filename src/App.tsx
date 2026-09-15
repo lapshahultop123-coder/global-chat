@@ -215,7 +215,7 @@ function Chat({profile,settings,onSettings,onProfile}:{profile:Profile;settings:
   };
   const stopRecording=()=>{if(recordingTimerRef.current)window.clearInterval(recordingTimerRef.current);recordingTimerRef.current=undefined;mediaRecorderRef.current?.stop();setRecording(false);};
   const requestMic=async()=>{try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('Microphone recording is not supported in this browser.');const stream=await navigator.mediaDevices.getUserMedia({audio:true});setMicPermission('granted');setMicNotice(false);return stream}catch(e:any){setMicPermission('denied');setMicNotice(true);setError(e?.name==='NotAllowedError'?'Microphone permission was denied. Please allow microphone access in your browser site settings.':(e?.message||'Microphone access is unavailable.'));return null}};
-  const startRecording=async()=>{if(recording)return;if(!navigator.onLine){setError('You are offline. Please reconnect before recording.');return} const stream=await requestMic();if(!stream)return;try{const mime=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(x=>MediaRecorder.isTypeSupported(x))||'';const recorder=new MediaRecorder(stream,mime?{mimeType:mime,audioBitsPerSecond:32000}:undefined);mediaRecorderRef.current=recorder;mediaChunksRef.current=[];recordingStartedRef.current=Date.now();setRecordingSeconds(0);setRecording(true);recorder.ondataavailable=e=>{if(e.data.size)mediaChunksRef.current.push(e.data)};recorder.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(mediaChunksRef.current,{type:recorder.mimeType||'audio/webm'});const duration=Math.min(60000,Date.now()-recordingStartedRef.current);if(blob.size>350*1024){setError('Voice message is too large. Please record a shorter message.');return}if(duration<500){setError('Voice message is too short.');return}await uploadVoice(blob,duration,replyTarget?.reply_to_voice_id||null);setReplyTarget(null)};recorder.start(250);recordingTimerRef.current=window.setInterval(()=>{const elapsed=Math.floor((Date.now()-recordingStartedRef.current)/1000);if(elapsed>=60){stopRecording();return}setRecordingSeconds(elapsed)},250)}catch{stream.getTracks().forEach(t=>t.stop());setRecording(false);setError('Could not start microphone recording. Please try again.')}};
+  const startRecording=async()=>{if(recording)return;if(!navigator.onLine){setError('You are offline. Please reconnect before recording.');return} const stream=await requestMic();if(!stream)return;try{const mime=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(x=>MediaRecorder.isTypeSupported(x))||'';const recorder=new MediaRecorder(stream,mime?{mimeType:mime,audioBitsPerSecond:24000}:undefined);mediaRecorderRef.current=recorder;mediaChunksRef.current=[];recordingStartedRef.current=Date.now();setRecordingSeconds(0);setRecording(true);recorder.ondataavailable=e=>{if(e.data.size)mediaChunksRef.current.push(e.data)};recorder.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(mediaChunksRef.current,{type:recorder.mimeType||'audio/webm'});const duration=Math.min(60000,Date.now()-recordingStartedRef.current);if(blob.size>350*1024){setError('Voice message is too large. Please record a shorter message.');return}if(duration<500){setError('Voice message is too short.');return}await uploadVoice(blob,duration,replyTarget?.reply_to_voice_id||null);setReplyTarget(null)};recorder.start(250);recordingTimerRef.current=window.setInterval(()=>{const elapsed=Math.floor((Date.now()-recordingStartedRef.current)/1000);if(elapsed>=60){stopRecording();return}setRecordingSeconds(elapsed)},250)}catch{stream.getTracks().forEach(t=>t.stop());setRecording(false);setError('Could not start microphone recording. Please try again.')}};
   const uploadVoice=async(blob:Blob,duration:number,replyToVoiceId:string|null=null)=>{setError('');setSending(true);try{const ext=blob.type.includes('mp4')?'m4a':'webm';const file=new File([blob],`voice.${ext}`,{type:blob.type||'audio/webm'});const form=new FormData();form.append('audio',file);form.append('durationMs',String(duration));if(replyToVoiceId)form.append('replyToVoiceId',replyToVoiceId);const {data,error}=await supabase.functions.invoke('send-voice',{body:form});if(error||data?.error)throw new Error(data?.error||'Unable to send voice message.');if(data?.message)setVoiceMessages(prev=>[...prev.filter(v=>v.id!==data.message.id),data.message as VoiceMessage].sort((a,b)=>a.created_at.localeCompare(b.created_at)));play('send')}catch(e:any){setError(e.message||'Unable to send voice message.')}finally{setSending(false)}};
   const cancelRecording=()=>{if(recordingTimerRef.current)window.clearInterval(recordingTimerRef.current);recordingTimerRef.current=undefined;const r=mediaRecorderRef.current;mediaRecorderRef.current=null;if(r){r.onstop=null;r.stop();r.stream.getTracks().forEach(t=>t.stop())}setRecording(false);setRecordingSeconds(0)};
   const toggleVoicePlayback=(v:VoiceMessage)=>{if(playingVoiceId===v.id){voiceAudioRef.current?.pause();setPlayingVoiceId(null);return} if(voiceAudioRef.current){voiceAudioRef.current.pause();voiceAudioRef.current=null} const a=new Audio(v.audio_url);voiceAudioRef.current=a;setPlayingVoiceId(v.id);a.onended=()=>setPlayingVoiceId(null);a.onerror=()=>setPlayingVoiceId(null);void a.play().catch(()=>setPlayingVoiceId(null))};
@@ -246,3 +246,70 @@ function SettingsPanel({profile,settings,onClose,onSave}:{profile:Profile;settin
 
 
 function OfflineGame({onClose}:{onClose:()=>void}){const [score,setScore]=useState(0);const [seconds,setSeconds]=useState(10);const [running,setRunning]=useState(true);useEffect(()=>{const t=window.setInterval(()=>setSeconds(s=>{if(s<=1){window.clearInterval(t);setRunning(false);return 0}return s-1}),1000);return()=>window.clearInterval(t)},[]);return <div className="offline-game-backdrop"><div className="offline-game"><div className="offline-game-head"><div><span className="game-kicker"><Gamepad2 size={15}/> OFFLINE MODE</span><h3>Tap Rush</h3><p>Internet is unavailable. Beat the timer!</p></div><button onClick={onClose}><X/></button></div><div className="game-score"><span>Score <b>{score}</b></span><span>Time <b>{seconds}s</b></span></div><button className="tap-target" disabled={!running} onClick={()=>setScore(v=>v+1)}>{running?'TAP!':'TIME UP'}</button><small>{running?'Tap as fast as you can.':'You can close this and return when the connection comes back.'}</small></div></div>}
+
+
+/* GLOBAL CHAT voice final polish runtime */
+if (typeof window !== 'undefined') {
+  const placeVoiceMenus = () => {
+    document.querySelectorAll<HTMLElement>('.voice-menu').forEach((menu) => {
+      const rect = menu.getBoundingClientRect();
+      const row = menu.closest('.message-row') as HTMLElement | null;
+      const bubble = menu.closest('.voice-bubble') as HTMLElement | null;
+      if (!row || !bubble) return;
+
+      const topSpace = rect.top;
+      const bottomSpace = window.innerHeight - rect.bottom;
+      const needBelow = topSpace < 112 && bottomSpace > rect.height + 16;
+      menu.classList.toggle('voice-menu-below', needBelow);
+    });
+  };
+
+  const voiceMenuObserver = new MutationObserver(() => {
+    requestAnimationFrame(placeVoiceMenus);
+  });
+
+  const startVoiceMenuObserver = () => {
+    voiceMenuObserver.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('resize', placeVoiceMenus, { passive: true });
+    window.addEventListener('scroll', placeVoiceMenus, { passive: true });
+    requestAnimationFrame(placeVoiceMenus);
+  };
+
+  if (document.body) startVoiceMenuObserver();
+  else window.addEventListener('DOMContentLoaded', startVoiceMenuObserver, { once: true });
+}
+
+// 3) Lightweight click sound for voice play/pause and voice action/delete buttons.
+// Uses Web Audio, so no extra sound file is required.
+if (typeof window !== 'undefined') {
+  let voiceUiAudioContext: AudioContext | null = null;
+  const voiceUiClick = (frequency = 620, duration = 0.045) => {
+    try {
+      voiceUiAudioContext ??= new AudioContext();
+      if (voiceUiAudioContext.state === 'suspended') void voiceUiAudioContext.resume();
+      const osc = voiceUiAudioContext.createOscillator();
+      const gain = voiceUiAudioContext.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.0001, voiceUiAudioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.045, voiceUiAudioContext.currentTime + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.0001, voiceUiAudioContext.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(voiceUiAudioContext.destination);
+      osc.start();
+      osc.stop(voiceUiAudioContext.currentTime + duration);
+    } catch {}
+  };
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement | null;
+    const button = target?.closest('button') as HTMLButtonElement | null;
+    if (!button || !button.closest('.voice-bubble')) return;
+
+    const text = (button.textContent || '').trim().toLowerCase();
+    const isDelete = text.includes('delete');
+    const isPlayPause = !!button.querySelector('svg') && !text && !!button.closest('.voice-bubble');
+    if (isDelete) voiceUiClick(420, 0.06);
+    else if (isPlayPause) voiceUiClick(700, 0.04);
+  }, true);
+}
