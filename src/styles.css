@@ -185,3 +185,16 @@ button,input,textarea{touch-action:manipulation}
 .voice-bubble{color:#f8fafc}
 .voice-menu{color:#f8fafc;background:color-mix(in srgb,var(--surface) 88%,#05070d)}
 @media(max-width:520px){.voice-menu{min-width:170px}.voice-message-time{font-size:.62rem}.voice-reactions button{min-height:27px;padding:3px 6px}}
+
+
+/* Voice UI final correction: unclipped menu + recording waveform */
+.voice-bubble{overflow:visible}
+.voice-menu{z-index:1000;min-width:190px;max-width:min(290px,calc(100vw - 24px));overflow:visible}
+.voice-menu button{min-height:40px;white-space:nowrap}
+.voice-rec-left{gap:12px}
+.recording-wave{display:flex;align-items:center;gap:2px;height:34px;flex:1;min-width:90px;max-width:220px;overflow:hidden}
+.recording-wave i{width:3px;height:7px;border-radius:999px;background:color-mix(in srgb,var(--primary) 62%,#fff 18%);animation:recordingWave 620ms ease-in-out infinite alternate;transform-origin:center}
+.recording-wave i:nth-child(2n){animation-delay:-90ms}.recording-wave i:nth-child(3n){animation-delay:-180ms}.recording-wave i:nth-child(4n){animation-delay:-270ms}.recording-wave i:nth-child(5n){animation-delay:-360ms}
+@keyframes recordingWave{from{height:6px;opacity:.55}to{height:30px;opacity:1}}
+@media(max-width:520px){.voice-recorder{gap:8px;padding-left:10px}.recording-wave{min-width:72px;max-width:150px}.recording-wave i{width:2px}.voice-menu{right:4px;max-width:calc(100vw - 20px)}}
+@media(prefers-reduced-motion:reduce){.recording-wave i{animation:none;height:14px!important;opacity:.85}}
