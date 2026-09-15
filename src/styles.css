@@ -198,3 +198,10 @@ button,input,textarea{touch-action:manipulation}
 @keyframes recordingWave{from{height:6px;opacity:.55}to{height:30px;opacity:1}}
 @media(max-width:520px){.voice-recorder{gap:8px;padding-left:10px}.recording-wave{min-width:72px;max-width:150px}.recording-wave i{width:2px}.voice-menu{right:4px;max-width:calc(100vw - 20px)}}
 @media(prefers-reduced-motion:reduce){.recording-wave i{animation:none;height:14px!important;opacity:.85}}
+
+
+/* Voice menu containment fix: allow menu to escape message paint containment */
+.message-list{contain:layout}
+.message-row{content-visibility:visible;contain:layout style}
+.voice-bubble{overflow:visible}
+.voice-menu{position:absolute;z-index:9999;overflow:visible;max-height:none}
