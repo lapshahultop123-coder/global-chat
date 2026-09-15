@@ -228,3 +228,36 @@ button,input,textarea{touch-action:manipulation}
     left:auto!important;
   }
 }
+
+/* GLOBAL CHAT — theme-aware contrast for light-accent themes */
+.primary-btn,
+.send-btn{
+  color:#fff !important;
+}
+
+.primary-btn svg,
+.send-btn svg{
+  color:currentColor !important;
+  stroke:currentColor !important;
+}
+
+/* Carbon Black, Golden Light and Monochrome use very light button gradients,
+   so dark text/icons give them proper contrast. */
+html[data-theme="carbon"] .primary-btn,
+html[data-theme="gold"] .primary-btn,
+html[data-theme="mono"] .primary-btn,
+html[data-theme="carbon"] .send-btn,
+html[data-theme="gold"] .send-btn,
+html[data-theme="mono"] .send-btn{
+  color:#111 !important;
+}
+
+html[data-theme="carbon"] .primary-btn svg,
+html[data-theme="gold"] .primary-btn svg,
+html[data-theme="mono"] .primary-btn svg,
+html[data-theme="carbon"] .send-btn svg,
+html[data-theme="gold"] .send-btn svg,
+html[data-theme="mono"] .send-btn svg{
+  color:#111 !important;
+  stroke:#111 !important;
+}
