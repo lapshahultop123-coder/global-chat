@@ -1,0 +1,34 @@
+GLOBAL CHAT — FINAL SOURCE CHECK — 2026-09-19
+
+Applied in this source package:
+- Public text UI uses the same message structure/alignment/action-row pattern as Private Chat: Reply, reactions, Copy, Delete for me, Delete for everyone, Cancel, consistent left/right placement.
+- Public voice UI uses the same compact recording row pattern as Private Chat: recording timer, animated waveform, X cancel, Finish control, then explicit Send.
+- Public and private voice recordings stop at 60 seconds without auto-sending; the finished recording remains available until Send or Cancel.
+- Public and private voice uploads keep the pending recording when an upload fails, allowing retry.
+- Voice playback uses direct public URLs for public voice messages and signed URLs only for private storage, reducing unnecessary playback latency; seek and 1x/1.5x/2x speed remain supported.
+- Private voice polling no longer re-signs every voice URL every second; realtime is the primary delivery path and fallback polling is throttled.
+- Private reaction loading no longer performs one auth request per reaction.
+- Public and private typing indicators send realtime start/stop only on state transitions rather than on every keystroke, reducing realtime traffic and typing lag.
+- Public and private recording indicators use explicit realtime broadcasts.
+- Empty-state earth video uses an explicit MP4 source, preload, muted autoplay, inline playback, and loop.
+- Private voice Delete for everyone removes the database row first and performs Storage cleanup through the Storage API.
+- Private voice reply/delete/reaction flow retained.
+- Private room uses unique 8-character code only; no password UI.
+- Private members/admin remove/block/unblock and creator rename retained.
+- Non-message avatar emoji text was replaced with local SVG image assets (100 fixed avatar images). Lucide SVG icons are used for website controls instead of decorative emoji text.
+- Mojibake scan of active source files returned no broken encoding markers.
+- Release `.env`, `node_modules`, `dist`, and backup folders are excluded from the final archive.
+
+Validation performed:
+- TypeScript `tsc -b`: PASS after the final source changes.
+- Static verification: 62/62 checks PASS.
+- Earth MP4 decode validation: PASS (ffmpeg decode completed with exit code 0).
+- WAV media validation: PASS for send/receive sounds.
+- Windows Vite production build must be run in the user's Windows project folder because the packaging environment cannot use the Windows-installed Rollup optional binary.
+
+Windows final verification:
+1. Copy `.env` from the working project into this package.
+2. `npm.cmd install`
+3. `npm.cmd run build`
+4. `npm.cmd run dev`
+5. Test Public and Private Chat with two browser sessions.
