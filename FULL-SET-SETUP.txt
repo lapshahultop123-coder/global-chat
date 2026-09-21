@@ -1,0 +1,17 @@
+GLOBAL CHAT — FULL FIXED SOURCE SET
+
+This package is the cleaned project source after the private-chat audit/fix pass.
+
+1) Copy/extract the project.
+2) Create .env from .env.example and keep your existing Supabase values.
+3) Install dependencies: npm install
+4) Apply the new private-chat migration in Supabase (or run: npx supabase db push if the project is linked).
+   Migration: supabase/migrations/20260916190000_private_chat_complete.sql
+5) Build: npm run build
+6) Run locally: npm run dev
+
+IMPORTANT:
+- Public chat source was preserved; private functionality was extended/fixed.
+- Private voice now uses a separate private storage bucket and signed URLs.
+- The Supabase migration must be applied to the live project for private backend functions/tables/storage policies.
+- The large-chunk Vite warning is a performance warning, not a build error.

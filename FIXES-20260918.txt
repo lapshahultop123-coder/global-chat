@@ -1,0 +1,23 @@
+GLOBAL CHAT - FIXES 2026-09-18
+
+Fixed:
+1. Private Chat -> Delete for me now removes both text and voice messages from the current UI/local view.
+2. Private Chat -> Delete for everyone for text messages uses the database RPC.
+3. Private Chat -> Delete for everyone for voice messages now removes the audio through the Supabase Storage API, then deletes the database row through the RPC.
+4. Removed the invalid database-side delete from storage.objects.
+5. Added migration:
+   supabase/migrations/20260918150000_fix_private_voice_delete_storage_api.sql
+   Run your Supabase migrations (for example: supabase db push).
+6. Restored the private/public emoji picker list that had been corrupted to "??".
+7. Fixed the corrupted voice-message copy text.
+
+Validation:
+- TypeScript check passed.
+- Project static verification: 35 checks passed.
+- A full Vite production build could not be executed in this Linux inspection environment because the uploaded node_modules is missing Rollup's Linux optional native package. This is environment-specific; run `npm.cmd run build` on the Windows project machine.
+
+Recommended Windows commands from the project folder:
+npm.cmd run build
+
+If Supabase migrations are not automatically deployed:
+supabase db push

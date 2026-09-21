@@ -1,0 +1,17 @@
+PRIVATE VOICE SEND FIX — 2026-09-19
+
+The live Supabase project reported:
+Could not find the function public.send_private_voice(...) in the schema cache.
+
+This means the client was calling the 9-argument private voice RPC, but that RPC had not been applied to the linked Supabase database (or PostgREST had an old schema cache).
+
+Added migration:
+supabase/migrations/20260919040000_fix_private_voice_rpc.sql
+
+On the Windows project after copying your existing .env, run:
+1) supabase.cmd db push
+2) npm.cmd install
+3) npm.cmd run build
+4) npm.cmd run dev
+
+Do not skip `supabase.cmd db push`; otherwise the browser can still show the old missing-RPC error even though the source code is fixed.
