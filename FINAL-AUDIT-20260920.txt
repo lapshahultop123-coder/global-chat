@@ -1,0 +1,36 @@
+GLOBAL CHAT — FINAL AUDIT 2026-09-20
+
+Source basis:
+- User-provided GLOBAL-CHAT-MAIN-FINAL-ALL-CHECKED-FIXED(1).zip
+- User-provided shield/lock animation video: sheild and lock 6 sec.mp4
+
+Fixes applied in this final pass:
+1. Replaced the private empty-state shield/lock icons with the supplied shield/lock animation.
+2. Cropped the supplied animation to remove the bottom-right watermark/sparkle and excess background.
+3. Converted it to a compact MP4 and made the animation ping-pong (forward + reverse) so the loop has no hard reset/break.
+4. Added screen blending and fixed desktop/mobile sizing for the private shield/lock animation.
+5. Fixed private-room startup so presence waits for authUserId before subscribing/tracking.
+6. Fixed private text realtime reconciliation so an incoming realtime row replaces the optimistic row instead of duplicating it.
+7. Added a private-send lock to prevent rapid double-send clicks.
+8. Fixed private Delete for everyone visibility so it is shown only to the sender.
+9. Improved private reply targeting: text/voice reply previews can jump to the exact target and briefly highlight it.
+10. Improved voice reply composer text with the voice duration.
+11. Fixed public text replies to voice messages so the reply preview can jump to the voice message.
+12. Added IDs to public voice messages for reply navigation.
+13. Repaired reaction encoding in source SQL and added migration 20260920100000_fix_reaction_encoding_and_validation.sql to repair deployed reaction constraints/functions safely.
+14. Fixed reaction server whitelist validation.
+15. Removed mojibake/control-character corruption from source TypeScript/SQL/verifier files.
+16. Replaced private emoji picker data with the clean catalog EMOJIS list.
+17. Updated static verifier checks for the final animation, auth gating, optimistic reconciliation, sender-gated deletion, reply navigation, and mojibake scanning.
+
+Verification:
+- Static verification: 69 checks PASS.
+- TypeScript project build step (tsc -b): PASS.
+- Source mojibake scan: CLEAN.
+- New shield asset exists and is used by the private empty state.
+- Release .env is excluded from the final package.
+- node_modules/dist/.git/Supabase temporary files are excluded from the final package.
+
+Build note:
+- The user's Windows environment previously completed `npm.cmd run build` successfully on this project (Vite 7.3.6, 1634 modules transformed).
+- In this Linux audit container, TypeScript passed, but Vite could not execute because the Linux Rollup optional native package was unavailable in the copied node_modules. This is an audit-environment dependency issue, not a TypeScript/source error.
