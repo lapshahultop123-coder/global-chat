@@ -9,7 +9,7 @@
 select cron.schedule('global-chat-expiry', '* * * * *', $$delete from public.messages where expires_at <= now()$$);
 ```
 
-5. Set Edge Function secret `SUPABASE_SECRET_KEY`.
+5. Set the Edge Function service key secret used by the functions (`SUPABASE_SECRET_KEYS`, `SUPABASE_SECRET_KEY`, or the platform-provided `SUPABASE_SERVICE_ROLE_KEY`).
 6. Deploy all included Edge Functions: `save-profile`, `send-message`, `send-voice`, `delete-voice-for-everyone`, `toggle-reaction`, `toggle-voice-reaction`, and `cleanup-voice-messages`.
 7. Copy `.env.example` to `.env` and add the browser-safe Supabase URL and publishable key.
 8. Run `npm install` and `npm run build`.

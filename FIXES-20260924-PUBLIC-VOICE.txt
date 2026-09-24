@@ -1,0 +1,18 @@
+PUBLIC VOICE SEND FIX — 2026-09-24
+
+The supplied video showed the recorder stopping at about 5 seconds, then remaining in the recorded-voice state because the public voice upload failed after recording stopped.
+
+Fixes included:
+- Public voice upload keeps the existing recording flow but adds a raw fetch fallback to the send-voice Edge Function.
+- Fresh Supabase session token is used for the upload.
+- Multipart FormData is sent without manually forcing Content-Type, preserving the browser boundary.
+- Public send-voice Edge Function accepts SUPABASE_SECRET_KEYS, SUPABASE_SECRET_KEY, or SUPABASE_SERVICE_ROLE_KEY.
+- Existing 11-argument accept_voice_message RPC/reply support is preserved.
+- Upload failure now surfaces a useful deployment/status error instead of silently leaving the recording stuck.
+
+IMPORTANT BACKEND DEPLOYMENT:
+Run the latest database migrations and deploy the latest send-voice function to the linked Supabase project before production testing:
+  supabase.cmd db push
+  supabase.cmd functions deploy send-voice
+
+Then restart the Vite dev server and test Public Chat voice send.

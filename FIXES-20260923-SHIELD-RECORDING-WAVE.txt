@@ -1,0 +1,20 @@
+GLOBAL CHAT — 2026-09-23 FINAL SHIELD + RECORDING WAVE FIX
+
+1. PRIVATE SHIELD
+- Removed the CSS polygon clip that was cutting the shield's left/right edges.
+- Preserved the full shield animation frame with object-fit: contain.
+- Kept black/background visually blended away with screen blending.
+- Kept light-blue border/glow using drop-shadow filters.
+- Full shield and glow remain visible on desktop and mobile.
+
+2. LIVE VOICE RECORDING WAVEFORM
+- The live waveform is shown only while microphone recording is active.
+- Web Audio analyser continues to drive bar heights from microphone amplitude.
+- Added a visible voiceWave animation to the live bars so they move continuously while recording.
+- When recording stops and the voice is being sent/uploaded, the live waveform is removed.
+- Voice playback waveform remains static.
+- Public and private voice recorders use the same behavior.
+
+3. VERIFICATION
+- 73 static checks pass.
+- Source mojibake scan remains clean.

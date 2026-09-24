@@ -1,7 +1,9 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-const K=JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')!);
-const admin=createClient(Deno.env.get('SUPABASE_URL')!,K.default,{auth:{persistSession:false,autoRefreshToken:false}});
+const rawSecret=Deno.env.get('SUPABASE_SECRET_KEYS')||Deno.env.get('SUPABASE_SECRET_KEY')||Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'';
+let serviceKey=rawSecret;
+try{const parsed=JSON.parse(rawSecret);serviceKey=parsed.default||parsed.service_role||parsed.key||rawSecret}catch{}
+const admin=createClient(Deno.env.get('SUPABASE_URL')!,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
 
 const C={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(x:unknown,s=200)=>new Response(JSON.stringify(x),{status:s,headers:{...C,'Content-Type':'application/json'}});

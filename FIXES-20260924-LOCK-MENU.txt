@@ -1,0 +1,27 @@
+GLOBAL CHAT — FINAL FIXES 2026-09-24
+
+1. PRIVATE EMPTY-STATE ANIMATION
+- Removed the previous shield/lock animation assets and references.
+- Added the supplied chat-bubble lock animation as a cropped transparent WebM.
+- Cropped out the decorative lower-right watermark/mark from the supplied animation.
+- Updated the private empty-state to use the new animation with responsive sizing.
+- No shield background rectangle is used.
+
+2. PUBLIC MESSAGE MENUS
+- Fixed public text and voice message action menus so Reply, Delete for me, Delete for everyone and Cancel stay visible.
+- Added an explicit open-menu stacking layer so menus render above neighbouring messages.
+- Added overflow-safe menu positioning and viewport-aware sizing.
+- Applied the fix to both public text and public voice messages.
+
+3. VALIDATION
+- 73 verification checks pass.
+- TypeScript project build/typecheck (`tsc -b`) passes.
+- Vite production bundling could not be executed in this Linux inspection environment because the supplied node_modules tree lacks the platform-specific Rollup native optional package. This does not affect the source changes; Windows `npm.cmd install` should restore platform dependencies before `npm.cmd run build`.
+
+
+2026-09-24 PUBLIC CHAT VOICE + DELETE MENU FIX
+- Public voice upload now refreshes/validates the active anonymous session and sends an explicit Bearer token with FormData.
+- Public voice MIME is normalized to supported audio/webm or audio/mp4 before upload.
+- Public voice send now surfaces server errors and rejects empty/oversized recordings before the request.
+- Public text/voice action menus now open below the action row instead of upward into the previous message area.
+- Removed paint containment that could clip public action menus.
