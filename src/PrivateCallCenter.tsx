@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Phone, PhoneCall, PhoneOff, Mic, MicOff, X, Users, ShieldOff, ShieldCheck } from 'lucide-react';
+import { Phone, PhoneCall, PhoneOff, Mic, MicOff, Volume2, VolumeX, X, Users, ShieldOff, ShieldCheck, CheckSquare, Square } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { AVATARS } from './data/catalog';
 
 const ICE_SERVERS: RTCConfiguration = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
 };
-const MAX_PARTICIPANTS = 4;
 
 type Member = { user_id:string; name:string; avatar_id:number; is_blocked_by_me?:boolean; has_blocked_me?:boolean };
 type ActiveCall = { id:string; callerId:string; callerName:string; participantIds:string[]; startedAt:number };
@@ -27,6 +26,7 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
   const [activeCall,setActiveCall]=useState<ActiveCall|null>(null);
   const [callStatus,setCallStatus]=useState<'idle'|'calling'|'connecting'|'connected'|'ended'>('idle');
   const [muted,setMuted]=useState(false);
+  const [speakerMuted,setSpeakerMuted]=useState(false);
   const [selected,setSelected]=useState<string[]>([]);
   const [error,setError]=useState('');
   const [remoteStreams,setRemoteStreams]=useState<Record<string,MediaStream>>({});
@@ -74,7 +74,7 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
     localStreamRef.current=null;
     await leaveCallChannel();
     callRef.current=null;
-    if(mountedRef.current){setActiveCall(null);setIncoming(null);setMuted(false);setCallStatus('idle');}
+    if(mountedRef.current){setActiveCall(null);setIncoming(null);setMuted(false);setSpeakerMuted(false);setCallStatus('idle');}
   },[clearPeers,leaveCallChannel]);
 
   const sendCallEvent=useCallback((event:string,payload:any)=>{
@@ -156,7 +156,7 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
 
   const startCall=async()=>{
     setError('');
-    const targets=selected.slice(0,MAX_PARTICIPANTS-1);
+    const targets=[...selected];
     if(!targets.length){setError('Select at least one member.');return;}
     try{
       const {data,error:checkError}=await supabase.rpc('check_private_call_targets',{p_room_id:roomId,p_target_ids:targets});
@@ -195,7 +195,18 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
     setError('');
     const {error}=await supabase.rpc('set_private_call_block',{p_room_id:roomId,p_user_id:member.user_id,p_blocked:shouldBlock});
     if(error){setError(error.message);return;}
+    setSelected(prev=>shouldBlock?prev.filter(id=>id!==member.user_id):prev);
     await loadMembers();
+  };
+
+  const callableMembers=useMemo(()=>members.filter(m=>!m.is_blocked_by_me&&!m.has_blocked_me),[members]);
+  const allCallableSelected=callableMembers.length>0&&callableMembers.every(m=>selected.includes(m.user_id));
+  const toggleSelectAll=()=>{
+    setSelected(allCallableSelected?[]:callableMembers.map(m=>m.user_id));
+  };
+
+  const toggleSpeaker=()=>{
+    setSpeakerMuted(prev=>!prev);
   };
 
   useEffect(()=>{
@@ -224,12 +235,13 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
     <button className="private-call-btn" onClick={()=>{setError('');void loadMembers();setPanelOpen(true)}} title="Voice call" aria-label="Voice call"><PhoneCall size={16}/><span>CALL</span></button>
 
     {panelOpen&&<div className="private-call-backdrop" role="dialog" aria-modal="true"><div className="private-call-panel">
-      <div className="private-call-head"><div><b><PhoneCall size={17}/> VOICE CALL</b><span>Select one member for a private call or up to {MAX_PARTICIPANTS-1} members for a group call.</span></div><button onClick={()=>setPanelOpen(false)} aria-label="Close"><X size={18}/></button></div>
+      <div className="private-call-head"><div><b><PhoneCall size={17}/> VOICE CALL</b><span>Select one member or use Select All to call every available member in this private chat.</span></div><button onClick={()=>setPanelOpen(false)} aria-label="Close"><X size={18}/></button></div>
       {error&&<div className="private-call-error">{error}</div>}
+      <div className="private-call-list-head"><span>{callableMembers.length} available member{callableMembers.length===1?'':'s'}</span><button type="button" className="private-call-select-all" onClick={toggleSelectAll} disabled={!callableMembers.length} title={allCallableSelected?'Clear all selections':'Select all available members'}>{allCallableSelected?<CheckSquare size={15}/>:<Square size={15}/>}<span>{allCallableSelected?'CLEAR ALL':'SELECT ALL'}</span></button></div>
       <div className="private-call-list">
         {members.length===0?<div className="private-call-empty">No callable members in this private chat.</div>:members.map(m=>{
           const checked=selected.includes(m.user_id);
-          return <div className="private-call-member" key={m.user_id}><img src={avatarSrc(Number(m.avatar_id))} alt=""/><div><strong>{m.name||'User'}</strong><small>{m.has_blocked_me?'Call blocked by this member':'Available for voice call'}</small></div><label className="private-call-check"><input type="checkbox" checked={checked} disabled={Boolean(m.has_blocked_me)||(!checked&&selected.length>=MAX_PARTICIPANTS-1)} onChange={()=>setSelected(prev=>checked?prev.filter(x=>x!==m.user_id):[...prev,m.user_id])}/><span>{checked?'SELECTED':'SELECT'}</span></label><button className="private-call-block-btn" onClick={()=>void toggleBlock(m,!m.is_blocked_by_me)} title={m.is_blocked_by_me?'Unblock calls':'Block calls'}>{m.is_blocked_by_me?<ShieldCheck size={16}/>:<ShieldOff size={16}/>}<span>{m.is_blocked_by_me?'UNBLOCK':'BLOCK'}</span></button></div>;
+          return <div className="private-call-member" key={m.user_id}><img src={avatarSrc(Number(m.avatar_id))} alt=""/><div><strong>{m.name||'User'}</strong><small>{m.has_blocked_me?'Call blocked by this member':'Available for voice call'}</small></div><label className="private-call-check"><input type="checkbox" checked={checked} disabled={Boolean(m.has_blocked_me)} onChange={()=>setSelected(prev=>checked?prev.filter(x=>x!==m.user_id):[...prev,m.user_id])}/><span>{checked?'SELECTED':'SELECT'}</span></label><button className="private-call-block-btn" onClick={()=>void toggleBlock(m,!m.is_blocked_by_me)} title={m.is_blocked_by_me?'Unblock calls':'Block calls'}>{m.is_blocked_by_me?<ShieldCheck size={16}/>:<ShieldOff size={16}/>}<span>{m.is_blocked_by_me?'UNBLOCK':'BLOCK'}</span></button></div>;
         })}
       </div>
       {blocked.length>0&&<div className="private-call-blocked"><b>CALL BLOCKED</b><span>{blocked.map(m=>m.name).join(', ')}</span></div>}
@@ -238,6 +250,6 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
 
     {incoming&&<div className="private-call-backdrop" role="alertdialog" aria-modal="true"><div className="private-incoming-call"><div className="private-incoming-icon"><PhoneCall size={28}/></div><span className="private-call-kicker">INCOMING VOICE CALL</span><h3>{incoming.callerName}</h3><p>{incoming.participantIds.length>2?`Group call · ${incoming.participantIds.length} invited`: 'Private one-to-one call'}</p><div className="private-incoming-actions"><button className="private-call-decline" onClick={declineCall}><PhoneOff size={17}/> DECLINE</button><button className="private-call-accept" onClick={()=>void acceptCall()}><Phone size={17}/> ACCEPT</button></div></div></div>}
 
-    {activeCall&&<div className="private-active-call"><div className="private-active-call-head"><div><span>VOICE CALL</span><strong>{callStatus==='connected'?'Connected':callStatus==='calling'?'Calling…':'Connecting…'}</strong></div><button onClick={()=>void endCall()} title="End call" aria-label="End call"><PhoneOff size={18}/></button></div><div className="private-active-participants">{activeParticipants.map(id=><div key={id} className="private-active-person"><div className="private-active-avatar">{id===currentUserId?<Mic size={17}/>:<Users size={17}/>}</div><span>{id===currentUserId?'You':remoteNames[id]||'Member'}</span>{id!==currentUserId&&remoteStreams[id]&&<audio autoPlay playsInline ref={el=>{if(el&&el.srcObject!==remoteStreams[id])el.srcObject=remoteStreams[id]}}/>}</div>)}</div><div className="private-active-controls"><button onClick={toggleMute} className={muted?'active':''} title={muted?'Unmute microphone':'Mute microphone'}>{muted?<MicOff size={18}/>:<Mic size={18}/>}<span>{muted?'MIC OFF':'MIC ON'}</span></button><button className="danger" onClick={()=>void endCall()}><PhoneOff size={18}/><span>END</span></button></div></div>}
+    {activeCall&&<div className="private-active-call"><div className="private-active-call-head"><div><span>VOICE CALL</span><strong>{callStatus==='connected'?'CONNECTED':callStatus==='calling'?'CALLING...':callStatus==='connecting'?'CONNECTING...':'CALLING...'}</strong></div></div><div className="private-active-participants">{activeParticipants.map(id=><div key={id} className="private-active-person"><div className="private-active-avatar">{id===currentUserId?<Mic size={17}/>:<Users size={17}/>}</div><span>{id===currentUserId?'You':remoteNames[id]||'Member'}</span>{id!==currentUserId&&remoteStreams[id]&&<audio autoPlay playsInline muted={speakerMuted} ref={el=>{if(el&&el.srcObject!==remoteStreams[id])el.srcObject=remoteStreams[id]}}/>}</div>)}</div><div className="private-active-controls"><button onClick={toggleMute} className={muted?'active':''} title={muted?'Turn microphone on':'Mute microphone'}>{muted?<MicOff size={18}/>:<Mic size={18}/>}<span>{muted?'MIC OFF':'MIC ON'}</span></button><button onClick={toggleSpeaker} className={speakerMuted?'active':''} title={speakerMuted?'Unmute call audio':'Mute call audio'}>{speakerMuted?<VolumeX size={18}/>:<Volume2 size={18}/>}<span>{speakerMuted?'SOUND OFF':'SOUND ON'}</span></button><button className="danger" onClick={()=>void endCall()}><PhoneOff size={18}/><span>END</span></button></div></div>}
   </>;
 }

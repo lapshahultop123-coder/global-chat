@@ -2,15 +2,18 @@ GLOBAL CHAT — PRIVATE VOICE CALLS — 2026-09-25
 
 Implemented:
 1. One-to-one private voice calls.
-2. Group private voice calls, up to 4 participants in the current browser mesh.
+2. Group private voice calls for all currently callable members selected from the private chat. The current implementation uses a peer-to-peer browser mesh, so very large groups can become network/CPU intensive.
 3. Incoming call UI: Accept / Decline.
 4. Active call UI: End call.
 5. Mic ON / Mic OFF.
-6. Per-user call Block / Unblock.
-7. Blocked-call enforcement is mutual: if either user has blocked the other, the call target is rejected.
-8. Server-side RPC checks prevent the client from bypassing call blocks.
-9. WebRTC audio uses echo cancellation, noise suppression and automatic gain control.
-10. Supabase Realtime is used for call signaling and presence; audio itself is peer-to-peer.
+6. Call audio SOUND ON / SOUND OFF so the user can stop hearing remote participants without muting their microphone.
+7. Per-user call Block / Unblock.
+8. Blocked-call enforcement is mutual: if either user has blocked the other, the call target is rejected.
+9. Server-side RPC checks prevent the client from bypassing call blocks.
+10. WebRTC audio uses echo cancellation, noise suppression and automatic gain control.
+11. Supabase Realtime is used for call signaling and presence; audio itself is peer-to-peer.
+12. Call status is shown as CALLING..., CONNECTING..., and CONNECTED.
+13. Call picker includes SELECT ALL / CLEAR ALL for every available member.
 
 Backend migration:
 supabase/migrations/20260925120000_private_voice_calls.sql
