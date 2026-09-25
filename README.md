@@ -114,3 +114,20 @@ The project deliberately uses the `iso-3166` dataset rather than a hand-written 
 ## Verification
 
 Run `npm run verify` for the repository's static implementation checks. A successful production build requires npm registry access because dependencies are installed from npm. The supplied archive intentionally does not contain `node_modules`.
+
+## Private Voice Calls — 2026-09-25
+
+Added isolated private voice calling without changing the existing text/voice-message flows:
+
+- one-to-one voice calls
+- group voice calls (up to 4 participants in the browser mesh)
+- incoming call screen with Accept / Decline
+- End call
+- Mic ON / Mic OFF
+- per-user call Block / Unblock
+- blocked users cannot call each other in either direction
+- server-side call-target validation through Supabase RPCs
+- WebRTC audio with echo cancellation/noise suppression/auto gain control
+- Supabase Realtime is used only for call signaling/presence; audio is peer-to-peer
+
+The current implementation uses a public STUN server. For maximum reliability across restrictive NATs/mobile networks, a TURN service should be added before claiming universal production connectivity.

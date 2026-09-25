@@ -5,6 +5,7 @@ import { supabase } from './lib/supabase';
 import { AVATARS, EMOJIS, REACTIONS, THEMES, TEXT_SIZES, type TextSize } from './data/catalog';
 
 import { validateMessage } from './lib/validation';
+import PrivateCallCenter from './PrivateCallCenter';
 import './styles.css';
 
 type Profile = { name:string; country:string; subdivision:string; avatarId:number; themeId:string; agreed:boolean };
@@ -749,7 +750,7 @@ function PrivateRoomView({profile,room,messages,setMessages,text,setText,sending
     <div className="private-room-head">
       <div><b><LockKeyhole size={17}/> {room.name}</b><span>Private room · Code: <strong>{room.join_code}</strong></span><span className="private-online-status"><i></i>{privateOnline} Online</span></div>
       <div className="private-room-actions">
-        <button className="header-icon" onClick={()=>void navigator.clipboard?.writeText(room.join_code)} title="Copy join code"><Copy size={16}/></button><button className="private-members-btn" onClick={onMembers} title="Private chat members" aria-label="Private chat members"><Users size={16}/> MEMBERS</button>
+        <button className="header-icon" onClick={()=>void navigator.clipboard?.writeText(room.join_code)} title="Copy join code"><Copy size={16}/></button><PrivateCallCenter roomId={room.id} currentUserId={currentUserId} currentUserName={profile.name} sound={sound}/><button className="private-members-btn" onClick={onMembers} title="Private chat members" aria-label="Private chat members"><Users size={16}/> MEMBERS</button>
         
         <button className="private-leave-btn" onClick={onClose}>LEAVE</button>
       </div>
