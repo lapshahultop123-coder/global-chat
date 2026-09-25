@@ -1,0 +1,17 @@
+Zynyro Feedback / Bug Report
+
+UI is wired to the Supabase Edge Function:
+supabase/functions/submit-feedback/index.ts
+
+Secure email delivery uses Resend server-side secrets.
+Configure these in the Supabase project (do NOT put them in frontend .env or Git):
+
+RESEND_API_KEY=<your Resend API key>
+FEEDBACK_PRIMARY_EMAIL=shahulibrahim97@gmail.com
+FEEDBACK_SECONDARY_EMAIL=lapshahultop123@gmail.com
+FEEDBACK_FROM_EMAIL=<a verified sender address in Resend>
+
+Then deploy:
+supabase.cmd functions deploy submit-feedback
+
+The app menu opens the Feedback / Bug Report form even before email delivery is configured. If the secrets are missing, submission returns a clear configuration error instead of pretending the email was sent.

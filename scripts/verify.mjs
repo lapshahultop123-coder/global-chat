@@ -64,7 +64,7 @@ ok('public/private recording indicators present',/Someone is recording/.test(app
 ok('private send/delete action sounds',/playPrivateAction\('\/sounds\/send\.wav'\)/.test(app));
 ok('private voice recording and upload flow',/MediaRecorder/.test(app)&&/private-voice-messages/.test(app)&&/send_private_voice/.test(app)&&/sendRecordedPrivateVoice/.test(app));
 ok('private voice local-delete filter survives refresh',/filter\(v=>!localDeleted\['v:'\+v\.id\]\)/.test(app));
-ok('mobile search/clear/settings menu',/mobile-header-menu/.test(app)&&/Search/.test(app)&&/Clear Chat/.test(app)&&/Settings/.test(app));
+ok('header search/clear/settings menu',/header-more-menu/.test(app)&&/Search/.test(app)&&/Clear Chat/.test(app)&&/Settings/.test(app)&&/MoreVertical/.test(app));
 
 ok('production build script',pkg.scripts?.build==='tsc -b && vite build');
 ok('typecheck configs present',fs.existsSync(path.join(root,'tsconfig.app.json'))&&fs.existsSync(path.join(root,'tsconfig.node.json')));
