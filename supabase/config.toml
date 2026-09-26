@@ -1,4 +1,4 @@
-project_id = "your-project-ref"
+project_id = "swrjhypfsbvlxlrpbsve"
 
 [functions.send-message]
 verify_jwt = false
@@ -7,4 +7,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.save-profile]
+verify_jwt = false
+
+[functions.submit-feedback]
 verify_jwt = false

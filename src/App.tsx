@@ -924,8 +924,22 @@ function FeedbackPanel({profile,onClose}:{profile:Profile;onClose:()=>void}){
     if(body.length<5){setError('Please describe the issue in at least 5 characters.');return}
     setBusy(true);setError('');
     try{
-      const {error}=await supabase.functions.invoke('submit-feedback',{body:{type,description:body,page:page.trim().slice(0,120),profile:{name:profile.name,country:profile.country,subdivision:profile.subdivision}}});
-      if(error)throw error;
+      const payload={type,description:body,page:page.trim().slice(0,120),profile:{name:profile.name,country:profile.country,subdivision:profile.subdivision}};
+      let responseError:any=null;
+      const {data,error}=await supabase.functions.invoke('submit-feedback',{body:payload});
+      if(error) responseError=error;
+      if(responseError){
+        const {data:{session}}=await supabase.auth.getSession();
+        if(session?.access_token){
+          const url=`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-feedback`;
+          const raw=await fetch(url,{method:'POST',headers:{Authorization:`Bearer ${session.access_token}`,apikey:import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+          const text=await raw.text();
+          let parsed:any=null; try{parsed=JSON.parse(text)}catch{}
+          if(!raw.ok) throw new Error(parsed?.error||`Feedback service returned HTTP ${raw.status}.`);
+        }else{
+          throw new Error('Your session has expired. Please sign in again and retry.');
+        }
+      }
       setDone(true);
     }catch(e:any){setError(e?.message||'Could not submit the report. Please try again.');}
     finally{setBusy(false)}
