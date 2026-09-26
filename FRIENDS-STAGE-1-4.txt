@@ -1,0 +1,19 @@
+Zynyro Friends Feature — Stage 1–4
+
+This package covers only the first four items in the agreed development order:
+1. Friends header button and Friends panel entry point.
+2. Add Friend actions in public chat messages, private chat messages, private voice-message menus, and the private-room member list.
+3. Friend request send, accept, reject, and sender cancellation.
+4. Server-side five-minute resend cooldown, with a per-pair transaction lock to prevent concurrent sends bypassing the checks.
+
+The requested Futuristic Liquid Glass redesign has NOT been applied.
+Direct friend messaging shown in the earlier foundation is still a preliminary foundation and is not part of the completed stage claim. Voice messaging/calls, online presence, unread counts, blocking UI, and the remaining plan items are not completed in this stage.
+
+Supabase migration:
+- Fresh database: apply migrations in order, including 20260926140000_friends_foundation.sql and 20260926150000_friend_request_lifecycle_cooldown.sql.
+- If the foundation migration was already applied: apply only the new 20260926150000_friend_request_lifecycle_cooldown.sql migration.
+
+Validation performed in this environment:
+- TypeScript project check: passed (npx tsc -b).
+- Static verification: passed; see npm run verify.
+- Vite production build: not verified here because the uploaded Windows node_modules lacks the Linux Rollup optional binary. Reinstall dependencies on the target environment with npm.cmd ci, then npm.cmd run build.

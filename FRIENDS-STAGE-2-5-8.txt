@@ -1,0 +1,20 @@
+Zynyro Friends — Stage 2 (items 5–8)
+
+Included:
+5. Friends list shows avatar/name, online/offline presence for users currently sharing the Friends presence channel, and per-friend unread counts derived from friend_messages and friend_message_reads.
+6. Direct text chat retains separate per-friend conversations, realtime message refresh, sent/received alignment, and timestamps.
+7. Read cursors are stored in friend_message_reads and updated when a direct chat is opened. Unread counts are loaded again after refresh. A global Friends-button badge and sound/browser notifications are not included in this stage.
+8. Direct-chat voice recording, stop/preview/discard/send, duration/size checks, upload to a private bucket, and playback using signed URLs are included.
+
+Supabase setup:
+Apply the new migration:
+  supabase db push
+
+Migration: supabase/migrations/20260926160000_friend_chat_messages_presence.sql
+It creates friend_message_reads and friend_voice_messages, enables RLS, and creates the private friend-voice-messages storage bucket and policies.
+
+Notes:
+- Online status is realtime presence while a user has the Friends panel open; durable last-seen privacy/settings are not implemented yet.
+- Voice duration is measured in whole seconds in this UI; uploads are limited to 60 seconds and 350 KiB.
+- Existing public and private chat files are retained. No Liquid Glass redesign was made.
+- Stage 2 covers plan items 5–8 only; later items remain for subsequent stages.

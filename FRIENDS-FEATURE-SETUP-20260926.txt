@@ -1,0 +1,18 @@
+Zynyro Friends feature — setup and scope
+
+Added:
+- Friends header button and Liquid Glass Friends panel.
+- Friends list, incoming requests, outgoing-request state, and discovery from recent public chat participants.
+- Server-side request creation and acceptance RPCs.
+- Five-minute repeat-request cooldown and duplicate/self/friend/block checks.
+- Direct 1:1 text messaging with realtime refresh, 500-character database validation, and RLS requiring an accepted friendship and no block.
+
+Required Supabase step:
+Apply supabase/migrations/20260926140000_friends_foundation.sql to the linked Supabase project before testing the Friends panel. The migration is included in this project; it has NOT been applied remotely by this archive build.
+
+Important scope note:
+This is the first Friends foundation, not the complete extended feature list. Friend voice messages/calls, block/unblock UI, unfriend, message search/clear/delete/reactions/replies, unread/read receipts, and real online/last-seen presence are not implemented in this pass. Discovery currently uses recent public chat participants, so a user who has never posted publicly may not appear in Find people.
+
+Verification:
+- npm run verify: 80 static checks passed.
+- npm run build could not be completed in this environment because npm dependency installation timed out and left incomplete @types packages. Run npm.cmd install and npm.cmd run build locally before deployment.

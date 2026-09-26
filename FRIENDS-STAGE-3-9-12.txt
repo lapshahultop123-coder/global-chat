@@ -1,0 +1,13 @@
+Zynyro Friends Stage 3 (items 9-12)
+
+Included in this stage:
+9. Direct friend chat search, reply selection, reaction action, and copy action.
+10. Clear Chat (per-user hide), Delete for Me, and sender-gated Delete for Everyone actions.
+11. Block/unblock and delete friend actions backed by database RPCs. Blocking removes the friendship and existing database policies prevent message access while blocked. Unblocking does not recreate friendship.
+12. Friend chat options: search, clear, block, delete friend; message actions: reply, react, copy, delete for me, delete for everyone (sender only).
+
+No Liquid Glass redesign was applied.
+
+Setup: apply the new migration supabase/migrations/20260926170000_friend_chat_actions_block.sql after the previous Friends migrations.
+
+Validation: the repository's static verifier was run. A production build could not be confirmed because dependency installation timed out in this environment. Live Supabase behavior has not been tested against two accounts; apply migrations and test with separate accounts before deployment.

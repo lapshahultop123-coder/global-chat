@@ -1,0 +1,25 @@
+Zynyro Friends — Stage 4 (items 13–15)
+
+This package carries forward the Friends implementation from stages 1–3 and records the final integration/security/QA work that can be verified from this source snapshot.
+
+Included in this stage:
+- Added a release checklist for request lifecycle, messaging, unread state, voice uploads, block behavior, privacy, reconnect, and responsive layouts.
+- Added explicit deployment order and a two-account manual test matrix.
+- Added a note distinguishing automated source checks from live Supabase/browser verification.
+
+Important verification status:
+- `npm run verify`: 83/83 static checks passed.
+- `npm run build`: NOT verified. The available node_modules directory is incomplete (TypeScript cannot find installed @types packages), and package installation timed out in this environment.
+- Live two-account Supabase/Reatime tests: NOT performed.
+- WebRTC calls require HTTPS (or localhost), microphone permission, and a reachable STUN/TURN path. This snapshot uses a public STUN server; it does not include a TURN relay, so some NAT/firewall combinations may prevent calls.
+- Account-deletion cleanup and durable last-seen privacy controls are not demonstrated as implemented in this source snapshot. Do not treat these as complete without implementing and testing them.
+
+Before production:
+1. Install dependencies locally with `npm.cmd ci`.
+2. Run `npm.cmd run verify` and `npm.cmd run build`.
+3. Link the intended Supabase project and apply all migrations with `supabase.cmd db push`.
+4. Test with two separate authenticated accounts: request/accept/reject/cancel, duplicate/cooldown, text/voice, refresh/unread, delete/clear, block/unblock, and calls.
+5. Confirm RLS and Storage access using the Supabase SQL editor and authenticated clients; do not rely on UI checks alone.
+6. Configure a TURN service if calls must work across restrictive networks.
+
+No Liquid Glass redesign was applied.

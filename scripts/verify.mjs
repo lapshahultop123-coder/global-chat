@@ -94,7 +94,18 @@ ok('private text realtime reconciles optimistic send',/optimistic-private-/.test
 ok('private delete-for-everyone sender gated',/item\.data\.user_id===currentUserId&&<button className="danger"/.test(app));
 ok('reply jump supports text and voice targets',/item\.data\.reply_to_voice_id\|\|item\.data\.reply_to_id/.test(app)&&/jumpToPrivateReply/.test(app)&&/voice-\$\{id\}/.test(app));
 ok('source mojibake scan clean',!/[ðŸ]|[â]€|Â·|ï¸|�/.test(app)&&!/[ðŸ]|[â]€|Â·|ï¸|�/.test(schema)&&!/[ðŸ]|[â]€|Â·|ï¸|�/.test(migrations));
+const friends=fs.readFileSync(path.join(root,'src/FriendsPanel.tsx'),'utf8');
+const friendsSql=fs.readFileSync(path.join(root,'supabase/migrations/20260926140000_friends_foundation.sql'),'utf8');
+ok('Friends header button and panel integrated',/friends-top-btn/.test(app)&&/FriendsPanel/.test(app));
+ok('Friends requests, accepted list and discovery UI',/Requests/.test(friends)&&/Find people/.test(friends)&&/friendships/.test(friends));
+ok('Friends request and acceptance use secured RPCs',/send_friend_request/.test(friends)&&/respond_friend_request/.test(friends)&&/security definer/i.test(friendsSql));
+ok('Friends request cooldown enforced server-side',/interval '5 minutes'/.test(friendsSql));
+ok('Friend direct text messaging UI and database',/friend_messages/.test(friends)&&/friend_messages/.test(friendsSql));
+ok('Friend messages limited to 500 chars',/length\(btrim\(body\)\) between 1 and 500/.test(friendsSql));
+ok('Friend messages require accepted friendship and no blocks',/friendships/.test(friendsSql)&&/friend_blocks/.test(friendsSql)&&/friend_messages_read_friends/.test(friendsSql));
+ok('Friend requests can be rejected and cancelled',/respond\(r\.id,false\)/.test(friends)&&/cancel_friend_request/.test(friends)&&/status='cancelled'/.test(friendsSql+fs.readFileSync(path.join(root,'supabase/migrations/20260926150000_friend_request_lifecycle_cooldown.sql'),'utf8')));
+ok('Friend request cooldown serialized against concurrent sends',/pg_advisory_xact_lock/.test(fs.readFileSync(path.join(root,'supabase/migrations/20260926150000_friend_request_lifecycle_cooldown.sql'),'utf8')));
+ok('Public message menu includes Add Friend without duplicate Reply',/Add Friend/.test(app)&&!/onClick=\{\(\)=>\{onReply\(\);setMenu\(false\)\}\}>\s*<ReplyIcon/.test(app));
 let failed=0; for(const [name,passed] of checks){console.log(`${passed?'PASS':'FAIL'}  ${name}`);if(!passed)failed++;}
 if(failed)process.exit(1); console.log(`\n${checks.length} static checks passed.`);
-
 
