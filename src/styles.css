@@ -1567,3 +1567,104 @@ html[data-theme="mono"] .send-btn svg{
 .friends-top-btn{position:relative}.friends-unread-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:#f45f83;color:#fff;font-size:10px;font-style:normal;font-weight:800;line-height:17px;text-align:center;box-shadow:0 0 0 2px #0a1223}.friend-recording-label{padding-top:4px}
 /* Friends stage 3 message tools */
 .friend-chat-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.08)}.friend-chat-tools label{display:flex;align-items:center;gap:6px;flex:1 1 150px;min-width:0;color:#9fb6d4}.friend-chat-tools input{min-width:0;width:100%;padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:rgba(255,255,255,.05);color:inherit}.friend-chat-tools>button,.friend-message-actions button{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#dbeafe;border-radius:8px;padding:6px 8px;font-size:11px;cursor:pointer}.friend-message-actions{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px}.friend-message-actions button{padding:4px 6px}.friend-reply-preview{display:flex;align-items:center;gap:8px;padding:7px 16px;color:#b7dfff;font-size:12px;border-top:1px solid rgba(255,255,255,.08)}.friend-reply-preview button{margin-left:auto;border:0;background:transparent;color:inherit;cursor:pointer}
+
+
+/* Friends actions: accessible button menu replacing the old prompt. */
+.friend-options-wrap{position:relative;flex:0 0 auto}
+.friend-options-trigger{min-width:40px;justify-content:center}
+.friend-options-menu{position:absolute;right:0;top:calc(100% + 7px);z-index:40;min-width:190px;padding:6px;border:1px solid rgba(122,203,255,.28);border-radius:13px;background:rgba(10,20,38,.98);box-shadow:0 14px 36px rgba(0,0,0,.42);display:grid;gap:3px}
+.friend-options-menu button{display:flex;align-items:center;gap:9px;width:100%;min-height:38px;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:#e4efff;text-align:left;cursor:pointer;font:inherit;font-size:13px}
+.friend-options-menu button:hover,.friend-options-menu button:focus-visible{background:rgba(87,177,255,.16);outline:none}
+.friend-options-menu button:disabled{opacity:.45;cursor:not-allowed}
+.friend-options-menu button:nth-last-child(2){color:#ff9ba9}
+.friend-pinned-indicator{display:inline-block;margin-left:6px;vertical-align:-1px;color:#ffd36b}
+.voice-send-pending{display:flex;align-items:center;gap:8px;align-self:flex-end;margin:8px 14px 12px;padding:8px 12px;border:1px solid rgba(83,198,255,.25);border-radius:12px;background:rgba(28,105,155,.16);color:#b9eaff;font-size:12px}
+.voice-send-pending-dot{width:7px;height:7px;border-radius:50%;background:#54d9ff;box-shadow:0 0 10px rgba(84,217,255,.8);animation:voicePendingPulse 1s ease-in-out infinite}
+@keyframes voicePendingPulse{50%{opacity:.35;transform:scale(.75)}}
+@media(prefers-reduced-motion:reduce){.voice-send-pending-dot{animation:none}}
+
+
+/* Friends direct chat: align the message experience with the main public chat. */
+.friend-chat-messages{gap:14px;padding:18px clamp(12px,2.2vw,22px);background:var(--bg,#080b16);}
+.friend-message-row{display:flex;align-items:flex-end;gap:9px;max-width:100%;}
+.friend-message-row.mine{align-self:flex-end;flex-direction:row-reverse;}
+.friend-message-avatar{width:30px;height:30px;flex:0 0 30px;border-radius:50%;object-fit:cover;border:1px solid rgba(148,163,184,.28);background:#172033;}
+.friend-message-content{display:flex;flex-direction:column;align-items:flex-start;min-width:0;max-width:min(82%,680px);}
+.friend-message-row.mine .friend-message-content{align-items:flex-end;}
+.friend-message-name{font-size:12px;font-weight:700;color:#aebed4;margin:0 4px 4px;max-width:100%;overflow-wrap:anywhere;}
+.friend-message-row.mine .friend-message-name{color:#8ed8ff;}
+.friend-bubble{max-width:100%;min-width:72px;padding:10px 12px;background:var(--surface,#10172b);border:1px solid rgba(148,163,184,.19);border-radius:16px 16px 16px 5px;color:#edf4ff;box-shadow:0 5px 16px rgba(0,0,0,.13);}
+.friend-message-row.mine .friend-bubble{background:linear-gradient(135deg,rgba(37,99,235,.34),rgba(8,145,178,.25));border-color:rgba(56,189,248,.3);border-radius:16px 16px 5px 16px;}
+.friend-bubble p{line-height:1.48;white-space:pre-wrap;overflow-wrap:anywhere;}
+.friend-bubble .friend-reply-quote{display:block;text-align:left;padding:5px 8px;margin:0 0 7px;border-left:2px solid #38bdf8;border-radius:5px;background:rgba(2,6,23,.22);color:#b8d9f6;font-size:11px;}
+.friend-bubble .friend-message-time{display:block;text-align:right;color:#9baec7;font-size:10px;margin-top:6px;white-space:nowrap;}
+.friend-message-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;max-width:100%;}
+.friend-message-actions button{min-height:28px;padding:4px 7px;font-size:10px;line-height:1.2;border-radius:8px;background:rgba(148,163,184,.09);border-color:rgba(148,163,184,.2);color:#dce9fa;}
+.friend-message-actions button:hover{background:rgba(56,189,248,.17);border-color:rgba(56,189,248,.38);}
+.friend-chat-head{min-height:58px;flex-wrap:wrap;}
+.friend-chat-tools{gap:8px;padding:9px clamp(10px,2vw,16px);}
+.friend-chat-tools label{flex:1 1 190px;}
+.friend-chat-tools>button{min-height:34px;padding:7px 10px;font-size:11px;}
+.friend-compose{align-items:center;gap:8px;padding:10px clamp(10px,2vw,16px) max(10px,env(safe-area-inset-bottom));}
+.friend-compose input{min-height:42px;padding:10px 12px;font-size:16px;}
+.friend-compose button{width:42px;height:42px;flex:0 0 42px;}
+.friend-compose button.friend-send-btn{background:linear-gradient(135deg,#2563eb,#06b6d4);color:#fff;box-shadow:0 6px 18px rgba(37,99,235,.25);}
+.friend-compose button:focus-visible,.friend-chat-tools button:focus-visible,.friend-message-actions button:focus-visible{outline:2px solid #67e8f9;outline-offset:2px;}
+@media(max-width:600px){
+ .friends-overlay{padding:0;}
+ .friends-panel{width:100%;height:100%;height:100dvh;max-height:100dvh;border-radius:0;border-left:0;border-right:0;}
+ .friends-panel>header{padding:12px 14px;min-height:62px;}
+ .friend-chat-head{gap:8px;padding:9px 10px;}
+ .friend-chat-head button{padding:8px;font-size:12px;}
+ .friend-chat-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
+ .friend-chat-tools label{grid-column:1/-1;width:100%;}
+ .friend-chat-tools>button{min-width:0;white-space:normal;}
+ .friend-chat-messages{padding:12px 9px;gap:12px;}
+ .friend-message-content{max-width:calc(100% - 40px);}
+ .friend-message-avatar{width:26px;height:26px;flex-basis:26px;}
+ .friend-message-actions{gap:4px;}
+ .friend-message-actions button{font-size:10px;min-height:30px;padding:5px 6px;}
+ .friend-compose{gap:6px;}
+}
+@media(max-width:360px){
+ .friend-chat-tools{grid-template-columns:1fr 1fr;}
+ .friend-chat-tools label{grid-column:1/-1;}
+ .friend-chat-tools>button:last-child{grid-column:1/-1;}
+ .friend-message-content{max-width:calc(100% - 34px);}
+ .friend-message-actions button{font-size:9px;padding:4px 5px;}
+}
+
+
+/* Private Members popup icon buttons */
+.private-members-head .private-members-control {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  border-radius: 12px;
+  background: rgba(255,255,255,.035);
+  color: var(--primary);
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.private-members-head .private-members-control:hover {
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  border-color: var(--primary);
+}
+.private-members-head .private-members-control:active {
+  transform: scale(.96);
+}
+.private-members-head .private-members-control:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+@media (max-width: 560px) {
+  .private-members-head .private-members-control {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+}

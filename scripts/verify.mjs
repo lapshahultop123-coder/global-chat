@@ -83,10 +83,12 @@ ok('reply works across text/emoji and voice in public/private',/reply_to_message
 ok('private reply state is shared with parent sender',/const replyTargetForPrivate=replyTarget;/.test(app)&&!/const \[replyTargetForPrivate,setReplyTargetForPrivate\]=useState/.test(app));
 ok('public reply composer shows selected target',/className="reply-composer"/.test(app)&&/Replying to/.test(app));
 ok('private voice reply metadata',/reply_to_voice_id/.test(app)&&/private_voice_messages add column if not exists reply_to_voice_id/.test(migrations));
+ok('private voice message has inline Reply action',/Reply to voice message/.test(app)&&/setReplyTargetForPrivate\(\{\.\.\.item\.data,id:`voice-reply-/.test(app));
+ok('public and private voice uploads render optimistically',/optimistic-public-voice-/.test(app)&&/optimistic-private-voice-/.test(app)&&/URL\.createObjectURL\(blob\)/.test(app));
 ok('no release .env',!releaseAudit||!fs.existsSync(path.join(root,'.env')));
 const reactionLoader=app.slice(app.indexOf('const loadReactions'),app.indexOf('useEffect(()=>{void loadReactions',app.indexOf('const loadReactions')));
 ok('private reaction loader avoids per-reaction auth calls',!reactionLoader.includes('supabase.auth.getUser'));
-ok('empty-state video uses robust MP4 source',/empty-earth-video[\s\S]*<source src=\"\/earth-animation\.mp4\" type=\"video\/mp4\"\/>/.test(app));
+ok('public empty state shows Earth animation',/className=\"empty-earth-video\"/.test(app)&&/src=\\?\"\/earth-animation\.mp4/.test(app)&&fs.existsSync(path.join(root,'public/earth-animation.mp4')));
 
 
 ok('private room waits for auth before presence',/if\(authUserId&&privateRoom\?\.id\)void enterPrivateRoom\(privateRoom\)/.test(app));
@@ -106,6 +108,14 @@ ok('Friend messages require accepted friendship and no blocks',/friendships/.tes
 ok('Friend requests can be rejected and cancelled',/respond\(r\.id,false\)/.test(friends)&&/cancel_friend_request/.test(friends)&&/status='cancelled'/.test(friendsSql+fs.readFileSync(path.join(root,'supabase/migrations/20260926150000_friend_request_lifecycle_cooldown.sql'),'utf8')));
 ok('Friend request cooldown serialized against concurrent sends',/pg_advisory_xact_lock/.test(fs.readFileSync(path.join(root,'supabase/migrations/20260926150000_friend_request_lifecycle_cooldown.sql'),'utf8')));
 ok('Public message menu includes Add Friend without duplicate Reply',/Add Friend/.test(app)&&!/onClick=\{\(\)=>\{onReply\(\);setMenu\(false\)\}\}>\s*<ReplyIcon/.test(app));
+
+const friendsSource=read('src/FriendsPanel.tsx');
+const friendFixSql=read('supabase/migrations/20260927150000_fix_friend_chat_rls_and_unblock.sql');
+ok('friend text send uses optimistic local bubble',/const optimistic:ChatItem/.test(friendsSource)&&/setMessages\(v=>\[\.\.\.v,optimistic\]\)/.test(friendsSource));
+ok('friend message UI has responsive public-chat-style rows',friendsSource.includes('friend-message-row')&&read('src/styles.css').includes('.friend-message-row'));
+ok('friend hidden-message upsert has update grant',/GRANT SELECT, INSERT, UPDATE, DELETE ON public\.friend_message_hidden TO authenticated/.test(friendFixSql));
+ok('friend unblock restores accepted relationship',/INSERT INTO public\.friendships/.test(friendFixSql)&&/CREATE OR REPLACE FUNCTION public\.unblock_friend/.test(friendFixSql));
+
 let failed=0; for(const [name,passed] of checks){console.log(`${passed?'PASS':'FAIL'}  ${name}`);if(!passed)failed++;}
 if(failed)process.exit(1); console.log(`\n${checks.length} static checks passed.`);
 
