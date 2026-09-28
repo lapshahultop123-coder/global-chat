@@ -612,13 +612,20 @@ html[data-theme="mono"] .send-btn svg{
 
 
 /* YOUR PRIVATE CHATS */
-.your-private-chats-top-btn{
-  min-width:42px!important;
+.your-private-chats-top-btn {
+  width: 42px !important;
+  min-width: 42px !important;
+  max-width: 42px !important;
+  height: 40px !important;
+  padding: 0 !important;
 }
 
-.your-private-chats-icon{
-  font-size:17px!important;
-  line-height:1!important;
+.your-private-chats-icon {
+  width: 36px !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .your-private-chats-modal{
@@ -1671,7 +1678,9 @@ html[data-theme="mono"] .send-btn svg{
 
 /* Larger Your Private Chats icon */
 .your-private-chats-icon svg {
-  width: 48px;
-  height: 48px;
+  width: 26px !important;
+  height: 26px !important;
+  flex: none !important;
 }
+
 
