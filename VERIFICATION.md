@@ -1,96 +1,52 @@
-# GLOBAL CHAT — Final Verification Report
+# Zynyro — Verification Report
 
-Date: 2026-09-13
+Date: 2026-09-28
 
 ## Static verification
 
-`npm run verify` completed successfully.
+`node scripts/verify.mjs` completed successfully: **96 static checks passed**.
 
-Result: **35 static checks passed.**
+The checks cover the existing public/private chat, voice-message, reactions, replies, presence, friends, and database safeguards, plus:
 
-The checks cover:
+- Friends 1:1 WebRTC call UI and signaling flow
+- Incoming call, accept/decline, connected/calling states, mic mute, speaker mute, and end-call controls
+- Server RPC validation that both users are accepted friends and neither has blocked the other
+- Persistent Friends call listener while the Friends panel is open
+- Unique database-assigned 10-digit numeric public UID and Settings display
+- Friends directory name and state/country display
+- Mojibake scan across application source files
 
-- Exactly 100 unique fixed avatar records and IDs 1–100
-- Exactly 25 fixed themes
-- Exactly 8 reactions
-- Client/server 500-character validation
-- Client/server English-only validation
-- Offensive-language filtering
-- Server-side 3 messages / 10 seconds enforcement
-- Atomic per-user rate-limit locking
-- 5-minute message expiry
-- Expired-message cleanup query
-- Fixed avatar/theme server validation
-- ISO country/subdivision server validation
-- Reaction constraints and server validation
-- RLS enabled
-- Direct message inserts blocked
-- Private Realtime channel authorization
-- Realtime table publication
-- Presence-based online count
-- Realtime cleanup
-- Anonymous authentication
-- No upload input
-- No browser Notification API
-- Exactly two audio assets
-- Four text sizes
-- Fixed emoji picker
-- No DM/group/admin UI
-- Production build script and TypeScript configs
+## Production build
 
-## TypeScript/build verification
-
-A production build could **not** be completed in this environment because npm dependencies are not available locally and npm registry access timed out.
+A production build could **not** be completed in this environment because npm dependencies could not be installed.
 
 Attempted:
 
-```bash
-npm install
+```powershell
+npm ci --ignore-scripts --no-audit --no-fund
+npm install --offline --ignore-scripts --no-audit --no-fund
 ```
 
-Result: command timed out after 300 seconds.
+The first command timed out; the offline attempt failed because the required package tarballs were not cached. A global TypeScript check also could not run because the project's installed type definitions and packages are unavailable. Therefore this report does **not** claim that `npm run build` passed.
 
-Offline fallback:
+Before deployment, run on Windows in the project folder:
 
-```bash
-npm install --offline --ignore-scripts
+```powershell
+npm.cmd install
+npm.cmd run verify
+npm.cmd run build
 ```
 
-Result: failed because the required npm packages were not cached locally.
+## Required Supabase migration
 
-A direct global TypeScript check was also attempted, but it reports missing installed packages (`react`, `@supabase/supabase-js`, `iso-3166`, `lucide-react`, etc.), which is expected when `npm install` cannot complete. It does not constitute a successful build.
+Apply this new migration before testing the new Friends features:
 
-Therefore this report deliberately does **not** claim `npm run build` passed.
-
-## Dataset verification
-
-The frontend and Edge Functions use `iso-3166` 4.4.0's `iso31661` assigned-country list and `iso31662` subdivision list. The package documentation confirms these exports are the assigned ISO 3166-1 countries and ISO 3166-2 subdivisions.
-
-## Backend review
-
-The Supabase implementation includes:
-
-- RLS on all public application tables
-- Direct message insertion blocked
-- Server-side message acceptance function
-- Per-user advisory transaction lock for rate limiting
-- Server-side Edge Function validation
-- Private Realtime channel authorization
-- Realtime message/reaction publication
-- Presence tracking keyed by anonymous user ID
-- Individual `expires_at` timestamps
-- Scheduled cleanup instructions using pg_cron
-- Fixed reaction constraint
-- Fixed avatar/theme validation
-
-## Final build requirement
-
-Before deploying to production, run on a machine with npm registry access:
-
-```bash
-npm install
-npm run verify
-npm run build
+```text
+supabase/migrations/20260928120000_friends_calls_and_public_uid.sql
 ```
 
-Only a successful local `npm run build` should be treated as final build confirmation.
+It assigns each existing profile a unique numeric UID, sets the default for new profiles, adds a restricted Friends directory RPC, and adds a server-side call eligibility check. The migration is included in the ZIP but has not been applied to the remote Supabase project by this packaging step.
+
+## Voice-call network note
+
+Friends calls use WebRTC audio and Supabase Realtime signaling, with a public STUN server. Calls may not connect on some restrictive mobile/corporate networks without a TURN server. Calls are intended for friends who are online with the Friends panel open to receive the incoming-call prompt.

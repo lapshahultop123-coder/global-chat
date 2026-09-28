@@ -1,0 +1,14 @@
+Zynyro update — 2026-09-27
+
+Changes:
+- Restored the Earth animation in the Public Chat empty state using /earth-animation.mp4.
+- Kept the Earth animation out of the Private Chat view.
+- Added an inline Reply action to private voice messages, alongside the existing reactions and copy/options actions.
+- Added optimistic local voice-message previews in Public Chat and Private Chat so a recording appears immediately while upload/send completes. Failed sends remove the temporary preview and show an error; successful sends replace it with the server message.
+- Kept optimistic text-message behavior already present in Public and Private Chat.
+
+Validation:
+- Static verification: 89 checks passed.
+- TypeScript project build step completed without errors.
+- Vite bundling could not be completed in this environment because the installed dependencies lack @rollup/rollup-linux-x64-gnu (an npm optional-dependency issue). Run npm.cmd install and npm.cmd run build on Windows before deployment.
+- No GitHub push or Supabase deployment was performed.
