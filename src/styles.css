@@ -1668,3 +1668,9 @@ html[data-theme="mono"] .send-btn svg{
     min-width: 40px;
   }
 }
+
+/* Larger Your Private Chats icon */
+.your-private-chats-icon svg {
+  width: 40px;
+  height: 40px;
+}
