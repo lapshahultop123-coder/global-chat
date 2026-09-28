@@ -1684,3 +1684,5 @@ html[data-theme="mono"] .send-btn svg{
 }
 
 
+
+.friend-chat-tools .friend-clear-chat-btn{display:inline-grid;place-items:center;width:36px;height:36px;padding:0;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:rgba(255,255,255,.06);color:#dbeafe;cursor:pointer}.friend-chat-tools .friend-clear-chat-btn:hover{background:rgba(255,255,255,.13)}
