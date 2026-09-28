@@ -1686,3 +1686,26 @@ html[data-theme="mono"] .send-btn svg{
 
 
 .friend-chat-tools .friend-clear-chat-btn{display:inline-grid;place-items:center;width:36px;height:36px;padding:0;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:rgba(255,255,255,.06);color:#dbeafe;cursor:pointer}.friend-chat-tools .friend-clear-chat-btn:hover{background:rgba(255,255,255,.13)}
+
+
+/* Friends voice calling and identity polish */
+.friends-panel>.friend-call-trigger{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:10px 16px 0 auto;min-height:38px;padding:0 14px;border:1px solid rgba(83,211,166,.36);border-radius:11px;background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(6,182,212,.16));color:#b9ffe3;font-weight:700;cursor:pointer}
+.friend-call-trigger:disabled{opacity:.45;cursor:not-allowed}
+.friend-call-toast{display:flex;align-items:center;gap:10px;margin:8px 16px;padding:9px 12px;border:1px solid rgba(248,113,113,.35);border-radius:10px;background:rgba(127,29,29,.18);color:#fecaca;font-size:12px}
+.friend-call-toast button{margin-left:auto;display:grid;place-items:center;border:0;background:transparent;color:inherit;cursor:pointer}
+.friend-chat-head{gap:10px}
+.friend-chat-identity{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
+.friend-chat-identity>b{font-size:14px;color:#f1f5ff;overflow-wrap:anywhere}
+.friend-chat-identity>small{font-size:11px;color:#9fb0c8;overflow-wrap:anywhere}
+.friend-chat-identity>.friend-online{color:#65e6a5;margin:0}
+.friend-chat-identity>.friend-offline{color:#a9b9d2;margin:0}
+.friend-chat-head .friend-call-trigger{flex:0 0 auto;margin-left:auto;min-height:36px;padding:0 12px}
+.friend-location{display:block;color:#91a5bf!important;font-size:11px;font-weight:500;margin-top:2px;overflow-wrap:anywhere}
+.friend-call-avatar{width:58px;height:58px;object-fit:cover;border-radius:50%;border:1px solid rgba(125,211,252,.35);background:#172033}
+.friend-active-call .private-active-person{gap:10px}
+.friend-active-call .private-active-person .friend-call-avatar{width:58px;height:58px}
+@media(max-width:600px){.friends-panel>.friend-call-trigger{margin:8px 12px 0 auto}.friend-chat-head .friend-call-trigger{margin-left:auto}.friend-chat-identity{max-width:calc(100% - 120px)}}
+.settings-uid-card{display:grid;gap:5px;margin:4px 0 16px;padding:13px 14px;border:1px solid rgba(56,189,248,.28);border-radius:13px;background:linear-gradient(135deg,rgba(14,165,233,.13),rgba(99,102,241,.1))}
+.settings-uid-card span{font-size:10px;letter-spacing:.12em;font-weight:800;color:#91a8c7}
+.settings-uid-card strong{font-size:18px;letter-spacing:.04em;color:#b9eaff;font-variant-numeric:tabular-nums}
+.settings-uid-card small{font-size:11px;color:#9fb0c8}

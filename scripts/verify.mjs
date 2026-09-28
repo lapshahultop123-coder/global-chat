@@ -115,6 +115,15 @@ ok('friend text send uses optimistic local bubble',/const optimistic:ChatItem/.t
 ok('friend message UI has responsive public-chat-style rows',friendsSource.includes('friend-message-row')&&read('src/styles.css').includes('.friend-message-row'));
 ok('friend hidden-message upsert has update grant',/GRANT SELECT, INSERT, UPDATE, DELETE ON public\.friend_message_hidden TO authenticated/.test(friendFixSql));
 ok('friend unblock restores accepted relationship',/INSERT INTO public\.friendships/.test(friendFixSql)&&/CREATE OR REPLACE FUNCTION public\.unblock_friend/.test(friendFixSql));
+const friendCalls=read('src/FriendsCallCenter.tsx');
+const uidMigration=read('supabase/migrations/20260928120000_friends_calls_and_public_uid.sql');
+ok('Friends voice call uses WebRTC and incoming-call controls',friendCalls.includes('RTCPeerConnection')&&friendCalls.includes('INCOMING VOICE CALL')&&friendCalls.includes('ACCEPT')&&friendCalls.includes('DECLINE'));
+ok('Friends voice calls validate accepted friendship and blocks',friendCalls.includes('check_friend_call_target')&&uidMigration.includes('check_friend_call_target'));
+ok('Friends call manager remains mounted while browsing Friends',friendsSource.includes('<FriendsCallCenter')&&friendsSource.indexOf('<FriendsCallCenter')<friendsSource.indexOf('{selected?'));
+ok('Numeric public UID is unique and assigned by database',uidMigration.includes('profile_public_uid_seq')&&uidMigration.includes('profiles_public_uid_unique'));
+ok('Settings displays numeric public UID',app.includes('YOUR UNIQUE USER ID')&&app.includes('UID : ${publicUid}'));
+ok('Friends directory shows name and location',friendsSource.includes('locationOf(p)')&&uidMigration.includes('get_friend_directory'));
+ok('Friends source mojibake scan clean',!/[ðŸ]|[â]€|Â·|ï¸|�/.test(friendsSource)&&!/[ðŸ]|[â]€|Â·|ï¸|�/.test(friendCalls));
 
 let failed=0; for(const [name,passed] of checks){console.log(`${passed?'PASS':'FAIL'}  ${name}`);if(!passed)failed++;}
 if(failed)process.exit(1); console.log(`\n${checks.length} static checks passed.`);

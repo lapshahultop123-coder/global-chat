@@ -3,9 +3,12 @@
 
 create extension if not exists pgcrypto;
 
+create sequence if not exists public.profile_public_uid_seq as bigint minvalue 1000000000 maxvalue 9999999999 start with 1000000000;
+
 create table if not exists public.profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
-  name text not null check (char_length(name) between 2 and 32),
+  public_uid bigint not null unique default nextval('public.profile_public_uid_seq'),
+  name not null check (char_length(name) between 2 and 32),
   country text not null,
   subdivision text not null,
   avatar_id integer not null check (avatar_id between 1 and 100),
