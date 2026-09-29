@@ -2399,7 +2399,7 @@ html[data-theme="mono"] .send-btn svg{
 }
 
 .friends-panel-chat .friend-message-row {
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 10px;
   width: 100%;
   animation: friend-message-enter .18s ease-out both;
@@ -2409,6 +2409,7 @@ html[data-theme="mono"] .send-btn svg{
   width: 32px;
   height: 32px;
   flex-basis: 32px;
+  margin-top: 18px;
   border-color: rgba(164, 197, 235, .28);
   box-shadow: 0 3px 10px rgba(0, 0, 0, .24);
 }
