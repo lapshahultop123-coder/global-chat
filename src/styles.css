@@ -2615,3 +2615,79 @@ html[data-theme="mono"] .send-btn svg{
     transition: none;
   }
 }
+
+.friends-panel-chat .friend-message-menu-wrap {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.friends-panel-chat .friend-message-actions .friend-message-menu-trigger {
+  display: inline-grid;
+  width: 36px;
+  min-width: 36px;
+  height: 34px;
+  min-height: 34px;
+  place-items: center;
+  padding: 0;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, .11);
+  color: #cbd9ec;
+}
+
+.friends-panel-chat .friend-message-menu-trigger[aria-expanded="true"] {
+  border-color: rgba(103, 214, 255, .4);
+  background: rgba(42, 112, 164, .3);
+  color: #eff9ff;
+}
+
+.friends-panel-chat .friend-message-menu {
+  position: absolute;
+  z-index: 40;
+  right: 0;
+  bottom: calc(100% + 7px);
+  display: grid;
+  min-width: 184px;
+  padding: 5px;
+  border: 1px solid rgba(153, 190, 231, .2);
+  border-radius: 13px;
+  background: #172238;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .42);
+}
+
+.friends-panel-chat .friend-message-menu button {
+  display: flex;
+  width: 100%;
+  min-height: 40px;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #dbe7f7;
+  font-size: 12px;
+  text-align: left;
+}
+
+.friends-panel-chat .friend-message-menu button:hover {
+  background: rgba(102, 157, 210, .16);
+}
+
+.friends-panel-chat .friend-message-menu button.destructive {
+  color: #f0b8c0;
+}
+
+.friends-panel-chat .friend-message-menu button.destructive:hover {
+  background: rgba(184, 64, 79, .2);
+  color: #ffe3e6;
+}
+
+@media (max-width: 600px) {
+  .friends-panel-chat .friend-message-actions .friend-message-menu-trigger {
+    width: 40px;
+    min-width: 40px;
+    height: 38px;
+    min-height: 38px;
+  }
+}
