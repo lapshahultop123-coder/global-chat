@@ -1947,3 +1947,84 @@ html[data-theme="mono"] .send-btn svg{
     margin-bottom: 4px;
   }
 }
+
+/* Friend Chat: extra compact layout */
+.friends-panel > header {
+  padding: 6px 12px !important;
+  min-height: 0 !important;
+}
+
+.friends-heading b {
+  font-size: 18px !important;
+}
+
+.friends-heading small {
+  font-size: 10px !important;
+  margin-top: 1px !important;
+}
+
+.friends-panel > .friend-chat-call-actions {
+  margin: 0 10px 0 auto !important;
+  min-height: 34px !important;
+  gap: 6px !important;
+}
+
+.friend-chat-call-actions .friend-back-icon-btn,
+.friend-chat-call-actions .friend-call-trigger {
+  min-height: 32px !important;
+  height: 32px !important;
+}
+
+.friend-chat-head {
+  min-height: 0 !important;
+  padding: 4px 10px !important;
+  gap: 7px !important;
+}
+
+.friend-chat-head img {
+  width: 27px !important;
+  height: 27px !important;
+}
+
+.friend-chat-identity {
+  gap: 0 !important;
+}
+
+.friend-chat-tools {
+  margin: 0 !important;
+  padding: 3px 8px !important;
+  gap: 5px !important;
+}
+
+.friend-chat-tools input {
+  padding: 5px 7px !important;
+}
+
+.friend-chat-tools > button {
+  min-height: 30px !important;
+  padding: 4px 7px !important;
+}
+
+.friend-chat-messages {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+@media (max-width: 600px) {
+  .friends-panel > header {
+    padding: 5px 10px !important;
+  }
+
+  .friends-panel > .friend-chat-call-actions {
+    margin: 0 8px 0 auto !important;
+  }
+
+  .friend-chat-head {
+    padding: 3px 8px !important;
+  }
+
+  .friend-chat-tools {
+    padding: 2px 7px !important;
+  }
+}
