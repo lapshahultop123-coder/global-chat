@@ -1709,3 +1709,46 @@ html[data-theme="mono"] .send-btn svg{
 .settings-uid-card span{font-size:10px;letter-spacing:.12em;font-weight:800;color:#91a8c7}
 .settings-uid-card strong{font-size:18px;letter-spacing:.04em;color:#b9eaff;font-variant-numeric:tabular-nums}
 .settings-uid-card small{font-size:11px;color:#9fb0c8}
+
+/* Friend Chat: compact back button beside Call */
+.friends-panel > .friend-chat-call-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 10px 16px 0 auto;
+}
+
+.friends-panel .friend-chat-call-actions .friend-call-trigger {
+  margin: 0;
+}
+
+.friend-back-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  padding: 0;
+  border: 1px solid rgba(148, 163, 184, .25);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .06);
+  color: #dbeafe;
+  cursor: pointer;
+}
+
+.friend-back-icon-btn:hover {
+  background: rgba(255, 255, 255, .13);
+}
+
+.friend-back-icon-btn:focus-visible {
+  outline: 2px solid #67e8f9;
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .friends-panel > .friend-chat-call-actions {
+    margin-right: 12px;
+  }
+}
