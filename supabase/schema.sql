@@ -8,7 +8,7 @@ returns bigint language plpgsql volatile security definer set search_path='' as 
 declare v_bytes bytea; v_random numeric; v_uid bigint;
 begin
   loop
-    v_bytes:=public.gen_random_bytes(6);
+    v_bytes:=extensions.gen_random_bytes(6);
     v_random:=pg_catalog.get_byte(v_bytes,0)::numeric*1099511627776
       +pg_catalog.get_byte(v_bytes,1)::numeric*4294967296
       +pg_catalog.get_byte(v_bytes,2)::numeric*16777216
@@ -169,4 +169,3 @@ exception when duplicate_object then null; end $$;
 -- Expired messages are never visible through RLS. This sweep removes them physically.
 -- Enable pg_cron in Supabase Dashboard if it is not already enabled, then run this schedule.
 -- select cron.schedule('global-chat-expiry', '* * * * *', $$delete from public.messages where expires_at <= now()$$);
-

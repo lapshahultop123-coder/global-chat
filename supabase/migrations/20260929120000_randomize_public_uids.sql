@@ -12,7 +12,7 @@ declare
   v_uid bigint;
 begin
   loop
-    v_bytes := public.gen_random_bytes(6);
+    v_bytes := extensions.gen_random_bytes(6);
     v_random := pg_catalog.get_byte(v_bytes, 0)::numeric * 1099511627776
       + pg_catalog.get_byte(v_bytes, 1)::numeric * 4294967296
       + pg_catalog.get_byte(v_bytes, 2)::numeric * 16777216
