@@ -2180,7 +2180,7 @@ html[data-theme="mono"] .send-btn svg{
 .friends-panel-chat .friend-chat-head {
   position: relative;
   min-height: 72px !important;
-  padding: 10px 148px 10px 16px !important;
+  padding: 10px 204px 10px 16px !important;
   gap: 12px !important;
   background: linear-gradient(90deg, rgba(84, 158, 219, .08), transparent 70%);
 }
@@ -2252,6 +2252,96 @@ html[data-theme="mono"] .send-btn svg{
   width: 40px;
   height: 40px;
   border-radius: 12px;
+}
+
+.friends-panel-chat .friend-chat-tools[hidden] {
+  display: none !important;
+}
+
+.friends-panel-chat .friend-close-search-btn {
+  display: inline-flex;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.friend-chat-tools-menu-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.friend-chat-tools-menu-trigger {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .07);
+  color: #e7f1ff;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.friend-chat-tools-menu-trigger:hover,
+.friend-chat-tools-menu-trigger[aria-expanded="true"] {
+  border-color: rgba(139, 220, 255, .4);
+  background: rgba(87, 177, 255, .16);
+}
+
+.friend-chat-tools-menu {
+  position: absolute;
+  z-index: 1300;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  min-width: 184px;
+  padding: 5px;
+  border: 1px solid rgba(153, 190, 231, .2);
+  border-radius: 13px;
+  background: #172238;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .42);
+}
+
+.friend-chat-tools-menu button {
+  display: flex;
+  width: 100%;
+  min-height: 40px;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #dbe7f7;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.friend-chat-tools-menu button:hover {
+  background: rgba(102, 157, 210, .16);
+}
+
+.friend-chat-tools-menu button.destructive {
+  color: #f0b8c0;
+}
+
+.friend-chat-tools-menu button.destructive:hover {
+  background: rgba(184, 64, 79, .2);
+  color: #ffe3e6;
+}
+
+.friend-chat-tools-menu button:focus-visible,
+.friend-chat-tools-menu-trigger:focus-visible,
+.friend-close-search-btn:focus-visible {
+  outline: 2px solid #73d9ff;
+  outline-offset: 2px;
 }
 
 .friends-panel-chat .friend-chat-messages {
@@ -2355,7 +2445,7 @@ html[data-theme="mono"] .send-btn svg{
 
   .friends-panel-chat .friend-chat-head {
     min-height: 66px !important;
-    padding: 8px 124px 8px 11px !important;
+    padding: 8px 178px 8px 11px !important;
     gap: 9px !important;
   }
 
@@ -2375,7 +2465,8 @@ html[data-theme="mono"] .send-btn svg{
   }
 
   .friends-panel-chat .friend-chat-call-actions .friend-back-icon-btn,
-  .friends-panel-chat .friend-chat-call-actions .friend-call-trigger {
+  .friends-panel-chat .friend-chat-call-actions .friend-call-trigger,
+  .friends-panel-chat .friend-chat-tools-menu-trigger {
     height: 38px !important;
     min-height: 38px !important;
   }
@@ -2401,8 +2492,24 @@ html[data-theme="mono"] .send-btn svg{
 .friends-panel-chat .friend-message-row {
   align-items: flex-start;
   gap: 10px;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   animation: friend-message-enter .18s ease-out both;
+}
+
+.friends-panel-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  background: rgba(3, 8, 18, .86);
+  color: #dcecff;
+  font-size: 14px;
+}
+
+.friends-panel-chat .friend-message-row.mine {
+  margin-left: auto;
 }
 
 .friends-panel-chat .friend-message-avatar {
@@ -2416,7 +2523,8 @@ html[data-theme="mono"] .send-btn svg{
 
 .friends-panel-chat .friend-message-content {
   gap: 0;
-  max-width: min(78%, 680px);
+  width: fit-content;
+  max-width: min(78vw, 680px);
 }
 
 .friends-panel-chat .friend-message-name {
@@ -2582,7 +2690,7 @@ html[data-theme="mono"] .send-btn svg{
   }
 
   .friends-panel-chat .friend-message-content {
-    max-width: min(82%, 560px);
+    max-width: min(calc(100vw - 76px), 560px);
   }
 
   .friends-panel-chat .friend-message-actions {

@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowLeft, Mic, MicOff, Phone, PhoneCall, PhoneOff, Volume2, VolumeX, X } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { AVATARS } from './data/catalog';
 
 type Friend = { user_id:string; name:string; avatar_id?:number };
 type Call = { id:string; callerId:string; callerName:string; callerAvatar:number; recipientId:string; recipientName:string; recipientAvatar:number };
-type Props = { userId:string; name:string; avatarId:number; friend:Friend|null; sound:boolean; blocked:boolean; onBack:()=>void };
+type Props = { userId:string; name:string; avatarId:number; friend:Friend|null; sound:boolean; blocked:boolean; onBack:()=>void; headerActions?:ReactNode };
 const ICE:RTCConfiguration={iceServers:[{urls:'stun:stun.l.google.com:19302'}]};
 const avatar=(id:number)=>AVATARS.find(x=>x.id===id)?.src||AVATARS[0].src;
 const publishInbox=async(to:string,event:string,payload:any)=>{const ch=supabase.channel(`friend-call-inbox-${to}`);try{await new Promise<void>((resolve,reject)=>ch.subscribe((s:string)=>{if(s==='SUBSCRIBED')resolve();if(s==='CHANNEL_ERROR'||s==='TIMED_OUT')reject(new Error('Call signaling connection failed.'))}));await ch.send({type:'broadcast',event,payload})}finally{await supabase.removeChannel(ch)}};
 
-export default function FriendsCallCenter({userId,name,avatarId,friend,sound,blocked,onBack}:Props){
+export default function FriendsCallCenter({userId,name,avatarId,friend,sound,blocked,onBack,headerActions}:Props){
  const [incoming,setIncoming]=useState<Call|null>(null),[active,setActive]=useState<Call|null>(null),[status,setStatus]=useState<'calling'|'connecting'|'connected'>('calling'),[muted,setMuted]=useState(false),[speakerMuted,setSpeakerMuted]=useState(false),[remote,setRemote]=useState<MediaStream|null>(null),[error,setError]=useState('');
  const inbox=useRef<any>(null),room=useRef<any>(null),stream=useRef<MediaStream|null>(null),peer=useRef<RTCPeerConnection|null>(null),callRef=useRef<Call|null>(null),incomingRef=useRef<Call|null>(null),mounted=useRef(true);
  useEffect(()=>{incomingRef.current=incoming},[incoming]);
@@ -44,7 +44,7 @@ export default function FriendsCallCenter({userId,name,avatarId,friend,sound,blo
  const end=async()=>{send('end',{from:userId});if(active)void publishInbox(userId===active.callerId?active.recipientId:active.callerId,'cancel',{callId:active.id,from:userId});await cleanup()};
  const toggleMic=()=>{const next=!muted;stream.current?.getAudioTracks().forEach(t=>t.enabled=!next);setMuted(next)};
  return <>
-  {friend&&<div className="friend-chat-call-actions"><button type="button" className="friend-back-icon-btn" onClick={onBack} title="Back to friends" aria-label="Back to friends"><ArrowLeft size={19}/></button><button type="button" className="friend-call-trigger" disabled={blocked||!!active} onClick={()=>void start()} title={blocked?'Unblock this friend to call':'Voice call'} aria-label="Start voice call"><PhoneCall size={17}/><span>Call</span></button></div>}
+  {friend&&<div className="friend-chat-call-actions"><button type="button" className="friend-back-icon-btn" onClick={onBack} title="Back to friends" aria-label="Back to friends"><ArrowLeft size={19}/></button><button type="button" className="friend-call-trigger" disabled={blocked||!!active} onClick={()=>void start()} title={blocked?'Unblock this friend to call':'Voice call'} aria-label="Start voice call"><PhoneCall size={17}/><span>Call</span></button>{headerActions}</div>}
   {error&&<div className="friend-call-toast" role="alert">{error}<button type="button" onClick={()=>setError('')} aria-label="Dismiss"><X size={14}/></button></div>}
   {incoming&&<div className="private-call-backdrop" role="alertdialog" aria-modal="true"><div className="private-incoming-call"><div className="private-incoming-icon"><PhoneCall size={28}/></div><span className="private-call-kicker">INCOMING VOICE CALL</span><img className="friend-call-avatar" src={avatar(incoming.callerAvatar)} alt=""/><h3>{incoming.callerName}</h3><p>Friends voice call</p><div className="private-incoming-actions"><button className="private-call-decline" onClick={decline}><PhoneOff size={17}/> DECLINE</button><button className="private-call-accept" onClick={()=>void accept()}><Phone size={17}/> ACCEPT</button></div></div></div>}
   {active&&<div className="private-active-call friend-active-call"><div className="private-active-call-head"><div><span>FRIENDS VOICE CALL</span><strong>{status==='connected'?'CONNECTED':status==='connecting'?'CONNECTING...':'CALLING...'}</strong></div></div><div className="private-active-participants"><div className="private-active-person"><img className="friend-call-avatar" src={avatar(userId===active.callerId?active.recipientAvatar:active.callerAvatar)} alt=""/><span>{userId===active.callerId?active.recipientName:active.callerName}</span>{remote&&<audio autoPlay playsInline muted={speakerMuted} ref={el=>{if(el&&el.srcObject!==remote)el.srcObject=remote}}/>}</div></div><div className="private-active-controls"><button onClick={toggleMic} className={muted?'active':''} title={muted?'Turn microphone on':'Mute microphone'}>{muted?<MicOff size={18}/>:<Mic size={18}/>}<span>{muted?'MIC OFF':'MIC ON'}</span></button><button onClick={()=>setSpeakerMuted(v=>!v)} className={speakerMuted?'active':''} title={speakerMuted?'Unmute call audio':'Mute call audio'}>{speakerMuted?<VolumeX size={18}/>:<Volume2 size={18}/>}<span>{speakerMuted?'SOUND OFF':'SOUND ON'}</span></button><button className="danger" onClick={()=>void end()}><PhoneOff size={18}/><span>END</span></button></div></div>}
