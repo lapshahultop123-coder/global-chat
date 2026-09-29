@@ -2028,3 +2028,363 @@ html[data-theme="mono"] .send-btn svg{
     padding: 2px 7px !important;
   }
 }
+
+/* Friends panel refresh: content-sized list and a single, balanced chat header. */
+.friends-panel.friends-panel-list {
+  height: auto !important;
+  min-height: 0;
+  max-height: min(760px, 86dvh);
+}
+
+.friends-panel-list > header,
+.friends-panel-chat > header {
+  min-height: 70px !important;
+  padding: 14px 18px !important;
+  background: rgba(255, 255, 255, .018);
+}
+
+.friends-heading {
+  gap: 12px;
+}
+
+.friends-heading > svg {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 0 10px rgba(103, 214, 255, .24));
+}
+
+.friends-close {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.friends-close:hover {
+  transform: rotate(4deg);
+  border-color: rgba(139, 220, 255, .42);
+  background: rgba(139, 220, 255, .12);
+}
+
+.friends-panel-list .friends-tabs {
+  padding: 12px 18px 4px;
+  gap: 8px;
+}
+
+.friends-panel-list .friends-tabs button {
+  min-height: 40px;
+  padding: 9px 14px;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.friends-panel-list .friends-tabs button:hover:not(.active) {
+  background: rgba(255, 255, 255, .055);
+  color: #eef7ff;
+}
+
+.friends-search {
+  min-height: 48px;
+  margin: 10px 18px 12px;
+  padding-inline: 14px;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.friends-search:focus-within {
+  border-color: rgba(103, 214, 255, .58);
+  background: rgba(90, 170, 240, .09);
+  box-shadow: 0 0 0 3px rgba(74, 183, 255, .1);
+}
+
+.friends-panel-list .friends-list {
+  flex: 0 1 auto;
+  min-height: 112px;
+  max-height: min(55dvh, 480px);
+  padding: 4px 16px 16px;
+  scrollbar-gutter: stable;
+}
+
+.friends-panel-list .friend-row {
+  min-height: 78px;
+  margin: 3px 0;
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.friends-panel-list .friend-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(151, 204, 255, .14);
+  background: rgba(255, 255, 255, .045);
+}
+
+.friends-panel-list .friend-avatar {
+  width: 46px;
+  height: 46px;
+  flex-basis: 46px;
+  border: 1px solid rgba(188, 220, 255, .18);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, .22);
+}
+
+.friends-panel-list .friend-details b {
+  font-size: 14px;
+  letter-spacing: .01em;
+}
+
+.friends-panel-list .friend-details small {
+  line-height: 1.35;
+}
+
+.friends-panel-list .friend-action {
+  min-height: 40px;
+  padding: 0 13px;
+  border-color: rgba(122, 203, 255, .27);
+  background: rgba(87, 177, 255, .1);
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.friends-panel-list .friend-action:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(139, 220, 255, .52);
+  background: rgba(87, 177, 255, .2);
+}
+
+.friends-panel-list .friend-options-trigger {
+  width: 40px;
+  justify-content: center;
+  padding: 0;
+}
+
+.friends-panel :is(button, input):focus-visible {
+  outline: 2px solid #73d9ff;
+  outline-offset: 3px;
+}
+
+.friends-panel-chat {
+  position: relative;
+  min-height: min(560px, 82dvh);
+  max-height: min(760px, 90dvh);
+}
+
+.friends-panel-chat > .friend-chat-call-actions {
+  position: absolute;
+  z-index: 3;
+  top: 84px;
+  right: 16px;
+  min-height: 0 !important;
+  margin: 0 !important;
+}
+
+.friends-panel-chat .friend-chat-head {
+  position: relative;
+  min-height: 72px !important;
+  padding: 10px 148px 10px 16px !important;
+  gap: 12px !important;
+  background: linear-gradient(90deg, rgba(84, 158, 219, .08), transparent 70%);
+}
+
+.friends-panel-chat .friend-chat-head > img {
+  width: 42px !important;
+  height: 42px !important;
+  border: 1px solid rgba(151, 204, 255, .25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .24);
+}
+
+.friends-panel-chat .friend-chat-identity {
+  gap: 2px !important;
+  max-width: none !important;
+}
+
+.friends-panel-chat .friend-chat-identity > b {
+  font-size: 14px;
+}
+
+.friends-panel-chat .friend-chat-head .friend-chat-call-actions {
+  margin-left: auto;
+  gap: 8px;
+}
+
+.friends-panel-chat .friend-chat-call-actions .friend-back-icon-btn,
+.friends-panel-chat .friend-chat-call-actions .friend-call-trigger {
+  height: 40px !important;
+  min-height: 40px !important;
+  border-radius: 12px;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.friends-panel-chat .friend-chat-call-actions .friend-back-icon-btn:hover,
+.friends-panel-chat .friend-chat-call-actions .friend-call-trigger:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(139, 220, 255, .4);
+  background: rgba(87, 177, 255, .16);
+}
+
+.friends-panel-chat .friend-chat-tools {
+  margin: 0 !important;
+  padding: 9px 14px !important;
+  gap: 10px;
+  background: rgba(255, 255, 255, .018);
+}
+
+.friends-panel-chat .friend-chat-tools label {
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .045);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.friends-panel-chat .friend-chat-tools label:focus-within {
+  border-color: rgba(103, 214, 255, .55);
+  box-shadow: 0 0 0 3px rgba(74, 183, 255, .09);
+}
+
+.friends-panel-chat .friend-chat-tools input {
+  border: 0;
+  background: transparent;
+  outline: 0;
+}
+
+.friends-panel-chat .friend-chat-tools .friend-clear-chat-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.friends-panel-chat .friend-chat-messages {
+  background: radial-gradient(ellipse at 50% 0%, rgba(45, 92, 133, .1), transparent 62%), #080d18;
+}
+
+.friends-panel-chat .friend-chat-messages:empty {
+  align-items: center;
+  justify-content: center;
+}
+
+.friends-panel-chat .friend-chat-messages:empty::after {
+  content: 'No messages yet — say hello to start chatting.';
+  max-width: 260px;
+  color: #8295b1;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.friends-panel-chat .friend-compose {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.friends-panel-chat .friend-compose input {
+  min-height: 44px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .055);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.friends-panel-chat .friend-compose input:focus {
+  border-color: rgba(103, 214, 255, .56);
+  box-shadow: 0 0 0 3px rgba(74, 183, 255, .09);
+}
+
+.friends-panel-chat .friend-compose button {
+  width: 44px;
+  min-height: 44px;
+  border-radius: 13px;
+  transition: transform .18s ease, filter .18s ease;
+}
+
+.friends-panel-chat .friend-compose button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.friends-panel-chat > .friend-call-toast {
+  position: fixed;
+  z-index: 5200;
+  top: 16px;
+  left: 50%;
+  width: min(460px, calc(100vw - 32px));
+  margin: 0;
+  transform: translateX(-50%);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .35);
+}
+
+@media (max-width: 600px) {
+  .friends-panel-list {
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+  }
+
+  .friends-panel-list > header,
+  .friends-panel-chat > header {
+    min-height: 64px !important;
+    padding: 10px 14px !important;
+  }
+
+  .friends-panel-list .friends-tabs {
+    padding-inline: 12px;
+  }
+
+  .friends-panel-list .friends-search {
+    margin-inline: 12px;
+  }
+
+  .friends-panel-list .friends-list {
+    max-height: none;
+    flex: 1 1 auto;
+    padding-inline: 10px;
+  }
+
+  .friends-panel-list .friend-row {
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .friends-panel-list .friend-action {
+    min-height: 38px;
+    padding-inline: 10px;
+  }
+
+  .friends-panel-chat {
+    min-height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  .friends-panel-chat .friend-chat-head {
+    min-height: 66px !important;
+    padding: 8px 124px 8px 11px !important;
+    gap: 9px !important;
+  }
+
+  .friends-panel-chat > .friend-chat-call-actions {
+    top: 74px;
+    right: 11px;
+    gap: 5px;
+  }
+
+  .friends-panel-chat .friend-chat-head > img {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .friends-panel-chat .friend-chat-head .friend-chat-call-actions {
+    gap: 6px;
+  }
+
+  .friends-panel-chat .friend-chat-call-actions .friend-back-icon-btn,
+  .friends-panel-chat .friend-chat-call-actions .friend-call-trigger {
+    height: 38px !important;
+    min-height: 38px !important;
+  }
+
+  .friends-panel-chat .friend-chat-tools {
+    padding: 7px 10px !important;
+  }
+
+  .friends-panel-chat .friend-compose {
+    padding: 9px 10px calc(9px + env(safe-area-inset-bottom));
+  }
+}
