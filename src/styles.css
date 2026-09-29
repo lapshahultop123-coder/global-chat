@@ -3136,3 +3136,90 @@ html[data-theme="mono"] .send-btn svg{
     min-height: 38px;
   }
 }
+
+/* Friends voice recording + reactions, sized for desktop, tablet, and phones */
+.friends-panel-chat .friend-voice-composer{
+  display:grid;
+  grid-template-columns:minmax(110px,auto) minmax(48px,1fr) auto;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  min-height:68px;
+  box-sizing:border-box;
+  padding:9px 12px;
+  border:1px solid rgba(92,190,246,.28);
+  border-radius:18px;
+  background:linear-gradient(105deg,rgba(16,29,51,.98),rgba(13,24,43,.98));
+  box-shadow:0 10px 28px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.04);
+  transition:border-color .18s ease,box-shadow .18s ease;
+}
+.friends-panel-chat .friend-voice-composer.is-recording{
+  border-color:rgba(255,105,133,.48);
+  box-shadow:0 10px 28px rgba(0,0,0,.2),0 0 22px rgba(255,91,123,.09),inset 0 1px rgba(255,255,255,.04);
+}
+.friend-voice-status{display:grid;grid-template-columns:9px minmax(0,1fr);align-items:center;column-gap:9px;min-width:0}
+.friend-voice-dot{grid-row:span 2;width:9px;height:9px;border-radius:50%;background:#42c9ff;box-shadow:0 0 12px rgba(66,201,255,.55)}
+.is-recording .friend-voice-dot{background:#ff5d79;box-shadow:0 0 0 0 rgba(255,93,121,.45);animation:friend-record-pulse 1.2s infinite}
+.friend-voice-status span{overflow:hidden;color:#e8f2ff;font-size:.76rem;font-weight:750;text-overflow:ellipsis;white-space:nowrap}
+.friend-voice-status strong{margin-top:3px;color:#a7b9d2;font-size:.73rem;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.friend-live-wave{display:flex;align-items:center;justify-content:center;gap:3px;width:100%;height:38px;min-width:0;overflow:hidden}
+.friend-live-wave i{flex:0 0 3px;width:3px;max-height:34px;border-radius:999px;background:linear-gradient(180deg,#9de9ff,#42bafa);opacity:.75;transform-origin:center;transition:height .12s ease,opacity .15s ease}
+.friend-live-wave.is-live i{animation:friend-wave-motion .56s ease-in-out infinite alternate;will-change:transform,height}
+.friend-live-wave.is-live i:nth-child(3n){animation-delay:.1s}
+.friend-live-wave.is-live i:nth-child(4n){animation-delay:.2s}
+.friend-preview-wave i{opacity:.58;box-shadow:0 0 8px rgba(66,201,255,.16)}
+.friend-voice-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px}
+.friend-voice-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:41px;border-radius:12px;cursor:pointer;white-space:nowrap;transition:transform .15s ease,filter .15s ease,background .15s ease,border-color .15s ease}
+.friend-voice-cancel{width:41px;flex:0 0 41px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);color:#c0cee0}
+.friend-voice-cancel:hover:not(:disabled){border-color:rgba(255,108,133,.35);background:rgba(255,108,133,.1);color:#ffb3c0}
+.friend-voice-primary{min-width:45px;padding:0 14px;border:1px solid rgba(56,189,248,.32);background:linear-gradient(135deg,#1689de,#078cae);color:#fff;font-size:.77rem;font-weight:800;box-shadow:0 6px 17px rgba(12,136,195,.2)}
+.is-recording .friend-voice-primary{min-width:78px;border-color:rgba(255,108,133,.4);background:linear-gradient(135deg,#f44f72,#d9315d);box-shadow:0 6px 17px rgba(225,48,91,.19)}
+.friend-voice-actions button:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.08)}
+.friend-voice-actions button:focus-visible,.friend-reaction-summary button:focus-visible{outline:2px solid #a9e9ff;outline-offset:2px}
+.friend-voice-actions button:disabled{cursor:wait;opacity:.58;box-shadow:none}
+@keyframes friend-wave-motion{from{transform:scaleY(.7)}to{transform:scaleY(1.14)}}
+@keyframes friend-record-pulse{70%{box-shadow:0 0 0 8px rgba(255,93,121,0)}100%{box-shadow:0 0 0 0 rgba(255,93,121,0)}}
+
+.friends-panel-chat .friend-reaction-summary{display:flex;flex-wrap:wrap;gap:5px;margin:6px 2px 0}
+.friends-panel-chat .friend-reaction-summary button{display:inline-flex;min-width:34px;min-height:29px;align-items:center;justify-content:center;gap:5px;padding:3px 8px;border:1px solid rgba(147,184,225,.2);border-radius:999px;background:rgba(20,37,60,.84);color:#e3efff;cursor:pointer;transition:transform .14s ease,background .14s ease,border-color .14s ease}
+.friends-panel-chat .friend-reaction-summary button:hover{transform:translateY(-1px);border-color:rgba(94,202,255,.5);background:rgba(39,106,149,.3)}
+.friends-panel-chat .friend-reaction-summary button.active{border-color:rgba(83,205,255,.52);background:rgba(26,132,183,.25);box-shadow:0 0 0 1px rgba(83,205,255,.1)}
+.friends-panel-chat .friend-reaction-summary button span{font-size:15px;line-height:1}
+.friends-panel-chat .friend-reaction-summary button small{color:#bbd0e9;font-size:10px;font-variant-numeric:tabular-nums}
+
+.friend-reaction-dialog-backdrop{padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));}
+.friend-reaction-dialog{width:min(410px,100%);max-height:min(90dvh,520px);overflow:auto;overscroll-behavior:contain;}
+.friend-reaction-choices button{min-width:0;min-height:46px;touch-action:manipulation;}
+@media(max-width:600px){
+  .friends-panel-chat .friend-voice-composer{grid-template-columns:minmax(78px,auto) minmax(26px,1fr) auto;gap:8px;min-height:62px;padding:8px 9px;border-radius:15px}
+  .friend-voice-status{grid-template-columns:8px minmax(0,1fr);column-gap:7px}
+  .friend-voice-dot{width:8px;height:8px}
+  .friend-voice-status span,.friend-voice-status strong{font-size:.68rem}
+  .friend-live-wave{height:32px;gap:2px}
+  .friend-live-wave i{flex-basis:2px;width:2px;max-height:28px}
+  .friend-voice-actions{gap:5px}
+  .friend-voice-actions button{height:39px;border-radius:11px}
+  .friend-voice-cancel{width:38px;flex-basis:38px}
+  .friend-voice-primary{padding:0 10px;font-size:.72rem}
+  .is-recording .friend-voice-primary{min-width:68px}
+  .friend-reaction-dialog{padding:15px;border-radius:18px}
+  .friend-reaction-choices{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:15px}
+  .friend-reaction-choices button{min-height:48px;border-radius:13px;font-size:24px}
+  .friends-panel-chat .friend-reaction-summary button{min-height:34px}
+}
+@media(max-width:380px){
+  .friends-panel-chat .friend-voice-composer{grid-template-columns:minmax(68px,auto) minmax(18px,1fr) auto;gap:6px;padding-inline:7px}
+  .friend-voice-actions{gap:4px}
+  .friend-voice-actions button{height:37px}
+  .friend-voice-cancel{width:36px;flex-basis:36px}
+  .friend-voice-primary{min-width:39px;padding:0 8px}
+  .friend-voice-primary span{display:none}
+  .is-recording .friend-voice-primary{min-width:39px}
+  .friend-reaction-dialog-head{gap:8px}
+  .friend-reaction-dialog-head h2{font-size:15px}
+  .friend-reaction-choices{gap:6px}
+}
+@media(prefers-reduced-motion:reduce){
+  .friends-panel-chat .friend-voice-composer,.friend-voice-actions button,.friends-panel-chat .friend-reaction-summary button{transition:none}
+  .friend-live-wave.is-live i,.is-recording .friend-voice-dot{animation:none;will-change:auto}
+}
