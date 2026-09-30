@@ -1521,7 +1521,7 @@ html[data-theme="mono"] .send-btn svg{
 .public-recording-copy strong{color:#91a6c2;font-size:.75rem;font-variant-numeric:tabular-nums;letter-spacing:.04em}
 .public-voice-composer-v2.is-ready .recording-dot{background:var(--primary);box-shadow:0 0 12px color-mix(in srgb,var(--primary) 50%,transparent);animation:none}
 .public-voice-composer-v2 .recording-wave{display:flex;align-items:center;justify-content:center;gap:3px;width:100%;min-width:0;height:38px;min-height:38px;overflow:hidden}
-.public-voice-composer-v2 .recording-wave i{flex:0 0 3px;width:3px;max-height:34px;border-radius:999px;background:color-mix(in srgb,var(--primary) 70%,#d7f5ff);opacity:.62;transform-origin:center;transition:height .12s ease,opacity .15s ease}
+.public-voice-composer-v2 .recording-wave i{flex:0 0 3px;width:3px;max-height:34px;border-radius:999px;background:color-mix(in srgb,var(--primary) 70%,#d7f5ff);opacity:.62;transform-origin:center;animation:none;will-change:auto;transition:height .12s ease,opacity .15s ease}
 .public-voice-composer-v2.is-recording .recording-wave i.active{opacity:.96;animation:voiceWave .55s ease-in-out infinite alternate;will-change:transform,height}
 .public-voice-composer-v2 .preview-wave i{opacity:.62;box-shadow:0 0 9px color-mix(in srgb,var(--primary) 22%,transparent)}
 .public-recording-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex:none}
