@@ -16,7 +16,7 @@ Deno.serve(async(req)=>{
     if(req.method!=='POST') return json({error:'Method not allowed.'},405);
     const token=(req.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
     const {data:{user},error:uerr}=await admin.auth.getUser(token);
-    if(uerr||!user||!user.is_anonymous) return json({error:'Session expired. Please re-enter the chat.'},401);
+    if(uerr||!user) return json({error:'Session expired. Please re-enter the chat.'},401);
     const {text,profile,replyToId,replyToVoiceId}=await req.json();
     if(!okProfile(profile)) return json({error:'Your profile information is invalid. Please update it.'},400);
     const body=String(text??'');

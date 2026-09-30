@@ -14,7 +14,7 @@ Deno.serve(async req=>{
     if(req.method!=='POST')return json({error:'Method not allowed.'},405);
     const token=(req.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
     const {data:{user},error:u}=await admin.auth.getUser(token);
-    if(u||!user?.is_anonymous)return json({error:'Session expired. Please re-enter the chat.'},401);
+    if(u||!user)return json({error:'Session expired. Please re-enter the chat.'},401);
     const f=await req.formData(),audio=f.get('audio'),durationMs=Number(f.get('durationMs')||0),replyToMessageId=String(f.get('replyToMessageId')||'')||null,replyToVoiceId=String(f.get('replyToVoiceId')||'')||null;
     if(!(audio instanceof File))return json({error:'Voice recording is required.'},400);
     if(durationMs<500||durationMs>60000)return json({error:'Voice recordings can be up to 1 minute.'},400);

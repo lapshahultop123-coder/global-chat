@@ -20,7 +20,7 @@ Deno.serve(async req => {
   try {
     const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
     const { data: { user }, error } = await admin.auth.getUser(token);
-    if (error || !user?.is_anonymous) return json({ error: 'Session expired. Please re-enter the chat.' }, 401);
+    if (error || !user) return json({ error: 'Session expired. Please re-enter the chat.' }, 401);
 
     const { voiceId } = await req.json();
     if (!voiceId) return json({ error: 'Could not delete this voice message.' }, 400);

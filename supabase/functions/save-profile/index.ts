@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     if (req.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
     const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
     const { data: { user }, error } = await admin.auth.getUser(token);
-    if (error || !user || !user.is_anonymous) return json({ error: 'Session expired.' }, 401);
+    if (error || !user) return json({ error: 'Session expired.' }, 401);
     const p = await req.json();
     const c = iso31661.find(x => x.state === 'assigned' && x.alpha2 === p.country);
     const s = iso31662.find(x => x.code === p.subdivision && x.code.startsWith(`${p.country}-`));

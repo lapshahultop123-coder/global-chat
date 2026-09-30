@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.submit-feedback]
 verify_jwt = false
+
+[functions.account-recovery]
+verify_jwt = false
+
+[functions.delete-account-chats]
+verify_jwt = false
