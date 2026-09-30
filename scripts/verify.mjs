@@ -72,7 +72,8 @@ ok('public voice direct-send/cancel flow',/recordedVoiceBlob/.test(app)&&/sendRe
 ok('private voice direct-send/cancel flow',/sendRecordedPrivateVoice/.test(app)&&/stopVoice/.test(app)&&/stopVoice\(true\)/.test(app)&&/cancelVoice/.test(app));
 ok('public/private voice recorder has live waveform UI',/LiveRecordingWaveform/.test(app)&&/recordingStream/.test(app)&&/getByteTimeDomainData/.test(app)&&/recording-wave/.test(app)&&/if\(!stream\)\{if\(!staticPreview\)return null;return/.test(app));
 ok('voice playback waveform is static',/voice-wave-player i\.active,\.voice-wave-player i\.static\{[^}]*animation:none/.test(css)&&/public-style-voice-recorder \.recording-wave i\.active\{animation:voiceWave/.test(css));
-ok('public voice preview waveform stays static after recording',/\.public-voice-composer-v2 \.recording-wave i\{[^}]*animation:none/.test(css)&&/\.public-voice-composer-v2\.is-recording \.recording-wave i\.active\{[^}]*animation:voiceWave/.test(css));
+ok('public voice ready preview hides waveform and keeps sent playback waveform',app.includes('{recording&&<LiveRecordingWaveform stream={recordingStream}/>}')&&app.includes('<VoicePlayer v={v}/><button className="voice-menu-btn"')&&/className="voice-seek"/.test(app));
+ok('public voice waveform animates only while recording',/\.public-voice-composer-v2 \.recording-wave i\{[^}]*animation:none/.test(css)&&/\.public-voice-composer-v2\.is-recording \.recording-wave i\.active\{[^}]*animation:voiceWave/.test(css));
 ok('public voice 60-second cap',/elapsed>=60/.test(app)&&/Math\.min\(60000/.test(app));
 ok('voice seek control',/type="range"/.test(app)&&/voice-seek/.test(app)&&/currentTime=value/.test(app));
 ok('voice playback speeds 1x 1.5x 2x',/1\.5/.test(app)&&/2:1/.test(app)&&/voice-speed-btn/.test(app));

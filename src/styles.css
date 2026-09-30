@@ -1525,6 +1525,7 @@ html[data-theme="mono"] .send-btn svg{
 .public-voice-composer-v2.is-recording .recording-wave i.active{opacity:.96;animation:voiceWave .55s ease-in-out infinite alternate;will-change:transform,height}
 .public-voice-composer-v2 .preview-wave i{opacity:.62;box-shadow:0 0 9px color-mix(in srgb,var(--primary) 22%,transparent)}
 .public-recording-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex:none}
+.public-voice-composer-v2.is-ready .public-recording-actions{grid-column:3}
 .public-recording-actions button{height:42px;border-radius:13px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;white-space:nowrap;transition:transform .16s ease,filter .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease}
 .public-record-cancel{width:42px;flex:0 0 42px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.045);color:#aebbd0}
 .public-record-cancel:hover:not(:disabled){border-color:rgba(251,113,133,.35);background:rgba(251,113,133,.1);color:#ff9aa8}
