@@ -3280,3 +3280,8 @@ html[data-theme="mono"] .send-btn svg{
 .friend-message-actions button:hover { border-color: color-mix(in srgb,var(--primary) 42%,transparent); background: color-mix(in srgb,var(--primary) 16%,transparent); }
 .friend-bubble .friend-reply-quote { border-left-color: var(--primary); }
 .friend-chat-tools-menu-trigger:focus-visible,.friend-message-menu-trigger:focus-visible { border-color: var(--primary); }
+.friends-panel-list .friends-search { border-radius: 999px; }
+.friends-panel-list .friends-search:focus-within { border-radius: 999px; border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb,var(--primary) 17%,transparent); }
+.friends-panel-list .friends-search input:focus-visible { outline: none; outline-offset: 0; }
+.friends-panel-list .friend-row.friend-menu-open,
+.friends-panel-list .friend-row.friend-menu-open:hover { transform: none; border-color: transparent; background: transparent; }
