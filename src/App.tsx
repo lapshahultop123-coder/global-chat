@@ -586,7 +586,7 @@ function VoicePlayer({v,bucket='voice-messages'}:{v:any;bucket?:string}){
   return <div className="voice-player">
     <button className="voice-play-btn" onClick={()=>void toggle()} aria-label={playing?'Pause voice':'Play voice'}>{playing?<Pause size={17}/>:<Play size={17}/>}</button>
     <div className="voice-player-main">
-      <div className="voice-wave voice-wave-player" aria-hidden="true">{Array.from({length:28},(_,i)=><i key={i} style={{height:`${7+(i%7)*2}px`}} className="static"/>)}</div>
+      <div className="voice-wave voice-wave-player" aria-hidden="true">{Array.from({length:28},(_,i)=><i key={i} style={{height:`${7+(i%7)*2}px`}} className={playing?'active':'static'}/>)}</div>
       <input className="voice-seek" type="range" min="0" max={Math.max(duration,0.1)} step="0.01" value={Math.min(current,duration||0)} onChange={seek} aria-label="Voice playback position"/>
       <div className="voice-player-meta"><span>{fmt(current)}</span><span>{fmt(duration)}</span></div>
     </div>
