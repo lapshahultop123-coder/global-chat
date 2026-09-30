@@ -2681,6 +2681,39 @@ html[data-theme="mono"] .send-btn svg{
   }
 }
 
+/* Friends panel follows the active profile theme and gives network waits a calm loading state. */
+.friends-panel {
+  border-color: color-mix(in srgb, var(--primary) 28%, rgba(255, 255, 255, .14));
+  background: linear-gradient(145deg,
+    color-mix(in srgb, var(--surface) 94%, var(--primary) 6%),
+    color-mix(in srgb, var(--bg) 88%, var(--surface) 12%));
+}
+
+.friends-heading > svg { color: var(--primary); }
+.friends-close:hover { border-color: color-mix(in srgb, var(--primary) 48%, transparent); background: color-mix(in srgb, var(--primary) 13%, transparent); }
+.friends-panel-list .friends-tabs button.active { border-color: color-mix(in srgb, var(--primary) 44%, transparent); background: color-mix(in srgb, var(--primary) 16%, transparent); }
+.friends-search:focus-within { border-color: color-mix(in srgb, var(--primary) 58%, transparent); background: color-mix(in srgb, var(--primary) 9%, var(--surface)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent); }
+.friends-panel-list .friend-row:hover { border-color: color-mix(in srgb, var(--primary) 20%, transparent); background: color-mix(in srgb, var(--primary) 6%, transparent); }
+.friends-panel-list .friend-action { border-color: color-mix(in srgb, var(--primary) 38%, transparent); background: color-mix(in srgb, var(--primary) 12%, transparent); color: #f2f7ff; }
+.friends-panel-list .friend-action:hover:not(:disabled) { border-color: color-mix(in srgb, var(--primary) 58%, transparent); background: color-mix(in srgb, var(--primary) 22%, transparent); }
+.friends-panel-chat .friend-chat-head { background: linear-gradient(90deg, color-mix(in srgb, var(--primary) 10%, transparent), transparent 74%); }
+.friends-panel-chat .friend-chat-messages { background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 64%), var(--bg); }
+.friends-panel-chat .friend-message-row.mine .friend-bubble { border-color: color-mix(in srgb, var(--primary) 38%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 28%, var(--surface)), color-mix(in srgb, var(--accent) 24%, var(--surface))); }
+.friends-panel-chat .friend-compose button.friend-send-btn { background: linear-gradient(135deg, var(--primary), var(--accent)); }
+.friends-panel :is(button, input):focus-visible { outline-color: var(--primary); }
+
+.friends-loading, .friend-chat-loading { display: grid; gap: 8px; }
+.friends-loading { padding: 6px 4px 12px; }
+.friend-chat-loading { width: min(100%, 560px); margin: auto; }
+.friend-loading-row { display: flex; align-items: center; gap: 12px; min-height: 66px; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent); border-radius: 15px; background: color-mix(in srgb, var(--surface) 70%, transparent); }
+.friend-loading-row > i { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 50%; background: color-mix(in srgb, var(--primary) 16%, var(--surface)); }
+.friend-loading-row > span { display: grid; flex: 1; gap: 8px; }
+.friend-loading-row b, .friend-loading-row small { display: block; height: 10px; border-radius: 99px; background: linear-gradient(100deg, color-mix(in srgb, var(--surface) 92%, white), color-mix(in srgb, var(--primary) 24%, var(--surface)), color-mix(in srgb, var(--surface) 92%, white)); background-size: 220% 100%; animation: friend-skeleton-shimmer 1.25s ease-in-out infinite; }
+.friend-loading-row b { width: min(42%, 180px); }
+.friend-loading-row small { width: min(64%, 250px); height: 8px; opacity: .76; }
+@keyframes friend-skeleton-shimmer { to { background-position: -220% 0; } }
+@media (prefers-reduced-motion: reduce) { .friend-loading-row b, .friend-loading-row small { animation: none; } }
+
 .friends-panel-chat .friend-chat-messages {
   background: radial-gradient(ellipse at 50% 0%, rgba(45, 92, 133, .1), transparent 62%), #080d18;
 }
@@ -3224,3 +3257,26 @@ html[data-theme="mono"] .send-btn svg{
   .friends-panel-chat .friend-voice-composer,.friend-voice-actions button,.friends-panel-chat .friend-reaction-summary button{transition:none}
   .friend-live-wave.is-live i,.is-recording .friend-voice-dot{animation:none;will-change:auto}
 }
+
+/* Keep sent messages steady while the server confirms them. */
+.message-list .public-message:not(.highlighted){animation:none}
+.send-btn.is-sending:disabled{opacity:1;filter:none}
+.voice-play-loading{animation:voicePlaySpin .7s linear infinite}
+@keyframes voicePlaySpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.voice-play-loading{animation:none}}
+
+/* Keep final Friends surfaces tied to the selected theme after responsive overrides. */
+.friends-panel { border-color: color-mix(in srgb, var(--primary) 28%, rgba(255,255,255,.14)); background: linear-gradient(145deg,color-mix(in srgb,var(--surface) 94%,var(--primary) 6%),color-mix(in srgb,var(--bg) 88%,var(--surface) 12%)); }
+.friends-panel-chat .friend-chat-head { background: linear-gradient(90deg,color-mix(in srgb,var(--primary) 10%,transparent),transparent 74%); }
+.friends-panel-chat .friend-chat-messages { background: radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 64%),var(--bg); }
+.friends-panel-chat .friend-message-row.mine .friend-bubble { border-color: color-mix(in srgb,var(--primary) 38%,transparent); background: linear-gradient(135deg,color-mix(in srgb,var(--primary) 28%,var(--surface)),color-mix(in srgb,var(--accent) 24%,var(--surface))); }
+.friends-panel-chat .friend-compose button.friend-send-btn { background: linear-gradient(135deg,var(--primary),var(--accent)); }
+.friends-heading > svg,.friend-message-row.mine .friend-message-name { color: var(--primary); }
+.friends-panel-list .friends-tabs button.active { border-color: color-mix(in srgb,var(--primary) 44%,transparent); background: color-mix(in srgb,var(--primary) 16%,transparent); }
+.friends-panel-list .friend-action { border-color: color-mix(in srgb,var(--primary) 38%,transparent); background: color-mix(in srgb,var(--primary) 12%,transparent); }
+.friends-panel-list .friend-action:hover:not(:disabled) { border-color: color-mix(in srgb,var(--primary) 58%,transparent); background: color-mix(in srgb,var(--primary) 22%,transparent); }
+.friends-panel :is(.friend-options-menu,.friend-chat-tools-menu,.friend-message-menu,.friend-reaction-dialog) { border-color: color-mix(in srgb,var(--primary) 32%,rgba(255,255,255,.14)); background: color-mix(in srgb,var(--surface) 94%,var(--bg)); }
+.friends-panel :is(.friend-options-menu button:hover,.friend-options-menu button:focus-visible,.friend-chat-tools-menu button:hover,.friend-message-menu button:hover,.friend-reaction-choices button:hover) { border-color: color-mix(in srgb,var(--primary) 34%,transparent); background: color-mix(in srgb,var(--primary) 16%,transparent); }
+.friend-message-actions button:hover { border-color: color-mix(in srgb,var(--primary) 42%,transparent); background: color-mix(in srgb,var(--primary) 16%,transparent); }
+.friend-bubble .friend-reply-quote { border-left-color: var(--primary); }
+.friend-chat-tools-menu-trigger:focus-visible,.friend-message-menu-trigger:focus-visible { border-color: var(--primary); }
