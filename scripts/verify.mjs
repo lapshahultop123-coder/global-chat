@@ -72,7 +72,7 @@ ok('public voice direct-send/cancel flow',/recordedVoiceBlob/.test(app)&&/sendRe
 ok('private voice direct-send/cancel flow',/sendRecordedPrivateVoice/.test(app)&&/stopVoice/.test(app)&&/stopVoice\(true\)/.test(app)&&/cancelVoice/.test(app));
 ok('public/private voice recorder has live waveform UI',/LiveRecordingWaveform/.test(app)&&/recordingStream/.test(app)&&/getByteTimeDomainData/.test(app)&&/recording-wave/.test(app)&&/if\(!stream\)\{if\(!staticPreview\)return null;return/.test(app));
 ok('voice playback waveform animates only while playing',app.includes("className={playing?'active':'static'}")&&/\.voice-wave-player i\.static\{[^}]*animation:none/.test(css)&&/\.voice-wave-player i\.active\{[^}]*animation:voiceWave/.test(css)&&/@media\(prefers-reduced-motion:reduce\)\{\.voice-wave-player i\.active\{animation:none/.test(css));
-ok('public voice ready preview hides waveform and keeps sent playback waveform',app.includes('{recording&&<LiveRecordingWaveform stream={recordingStream}/>}')&&app.includes('<VoicePlayer v={v}/><button className="voice-menu-btn"')&&/className="voice-seek"/.test(app));
+ok('public voice ready preview hides waveform and keeps sent playback waveform',app.includes('{recording&&<LiveRecordingWaveform stream={recordingStream}/>}')&&app.includes('<VoicePlayer key={v.id} v={v}/><button className="voice-menu-btn"')&&/className="voice-seek"/.test(app));
 ok('public voice waveform animates only while recording',/\.public-voice-composer-v2 \.recording-wave i\{[^}]*animation:none/.test(css)&&/\.public-voice-composer-v2\.is-recording \.recording-wave i\.active\{[^}]*animation:voiceWave/.test(css));
 ok('public voice 60-second cap',/elapsed>=60/.test(app)&&/Math\.min\(60000/.test(app));
 ok('voice seek control',/type="range"/.test(app)&&/voice-seek/.test(app)&&/currentTime=value/.test(app));
@@ -124,7 +124,7 @@ ok('Friends voice call uses WebRTC and incoming-call controls',friendCalls.inclu
 ok('Friends voice calls validate accepted friendship and blocks',friendCalls.includes('check_friend_call_target')&&uidBaseMigration.includes('check_friend_call_target'));
 ok('Friends call manager remains mounted while browsing Friends',friendsSource.includes('<FriendsCallCenter')&&friendsSource.indexOf('<FriendsCallCenter')<friendsSource.indexOf('{selected?<'));
 ok('Numeric public UID is random, unique and assigned by database',uidMigration.includes('generate_public_uid')&&uidMigration.includes('gen_random_bytes')&&uidBaseMigration.includes('profiles_public_uid_unique'));
-ok('Settings displays numeric public UID',app.includes('YOUR UNIQUE USER ID')&&app.includes('UID : ${publicUid}'));
+ok('Settings displays numeric public UID',app.includes('YOUR UNIQUE USER ID')&&/UID : \{publicUid\|\|/.test(app));
 ok('Friends directory shows name and location',friendsSource.includes('locationOf(p)')&&uidBaseMigration.includes('get_friend_directory'));
 ok('Friends source mojibake scan clean',!/[ðŸ]|[â]€|Â·|ï¸|�/.test(friendsSource)&&!/[ðŸ]|[â]€|Â·|ï¸|�/.test(friendCalls));
 
