@@ -3201,7 +3201,6 @@ html[data-theme="mono"] .send-btn svg{
 .friend-live-wave.is-live i{animation:friend-wave-motion .56s ease-in-out infinite alternate;will-change:transform,height}
 .friend-live-wave.is-live i:nth-child(3n){animation-delay:.1s}
 .friend-live-wave.is-live i:nth-child(4n){animation-delay:.2s}
-.friend-preview-wave i{opacity:.58;box-shadow:0 0 8px rgba(66,201,255,.16)}
 .friend-voice-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px}
 .friend-voice-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:41px;border-radius:12px;cursor:pointer;white-space:nowrap;transition:transform .15s ease,filter .15s ease,background .15s ease,border-color .15s ease}
 .friend-voice-cancel{width:41px;flex:0 0 41px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);color:#c0cee0}
