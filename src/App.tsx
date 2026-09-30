@@ -91,7 +91,7 @@ function Chat({profile,settings,onSettings,onProfile}:{profile:Profile;settings:
   const setReplyTargetForPrivate=setReplyTarget;
   const replyTargetForPrivateRef=useRef<any>(null);
   useEffect(()=>{replyTargetForPrivateRef.current=replyTargetForPrivate},[replyTargetForPrivate]);
-  const privateChannelRef=useRef<any>(null); const privatePollRef=useRef<number|undefined>(undefined); const [privateOnline,setPrivateOnline]=useState(0); const [privateTyping,setPrivateTyping]=useState(false); const [privateRecording,setPrivateRecording]=useState(false); const privateTypingStopRef=useRef<number|undefined>(undefined); const privateTypingActiveRef=useRef(false);
+  const privateChannelRef=useRef<any>(null); const privateRoomStartedRef=useRef<string|null>(null); const privatePollRef=useRef<number|undefined>(undefined); const [privateOnline,setPrivateOnline]=useState(0); const [privateTyping,setPrivateTyping]=useState(false); const [privateRecording,setPrivateRecording]=useState(false); const privateTypingStopRef=useRef<number|undefined>(undefined); const privateTypingActiveRef=useRef(false);
   const [yourPrivateChatsOpen,setYourPrivateChatsOpen]=useState(false);
   const [yourPrivateChats,setYourPrivateChats]=useState<any[]>([]);
   const [yourPrivateChatsLoading,setYourPrivateChatsLoading]=useState(false);
@@ -166,7 +166,31 @@ function Chat({profile,settings,onSettings,onProfile}:{profile:Profile;settings:
   useEffect(()=>{const vv=window.visualViewport;if(!vv)return;const apply=()=>document.documentElement.style.setProperty('--app-height',`${vv.height}px`);apply();vv.addEventListener('resize',apply);vv.addEventListener('scroll',apply);return()=>{vv.removeEventListener('resize',apply);vv.removeEventListener('scroll',apply)}},[]);
   useEffect(()=>{audioRef.current={send:new Audio('/sounds/send.wav'),receive:new Audio('/sounds/receive.wav')};},[]);
   const play=(which:'send'|'receive')=>{if(!settings.sound||!audioRef.current)return;const a=audioRef.current[which];a.currentTime=0;a.play().catch(()=>{});}; const playAction=(src:string)=>{if(!settings.sound)return;const a=new Audio(src);a.volume=0.45;a.play().catch(()=>{});};
-  const refresh=useCallback(async()=>{const {data,error}=await supabase.from('messages').select('*').gt('expires_at',new Date().toISOString()).order('created_at',{ascending:true}).limit(100);if(!error&&data){const rawServer=(data as ChatMessage[]).filter(m=>!localDeleted[localMessageKey(m)]);const server=rawServer.map(m=>{const target=rawServer.find(x=>x.id===m.reply_to_id);return target?{...m,reply_to_preview:target.body,reply_to_name:target.name}:m});setMessages(prev=>{const pending=prev.filter(m=>m.id.startsWith('optimistic-')&&pendingRef.current[m.id]&&!localDeleted[localMessageKey(m)]);const merged=[...server,...pending.filter(p=>!server.some(m=>m.user_id===p.user_id&&m.body===p.body&&Math.abs(new Date(m.created_at).getTime()-new Date(p.created_at).getTime())<15000))];return merged.sort((a,b)=>a.created_at.localeCompare(b.created_at))})} const vr=await supabase.from('voice_messages').select('*').gt('expires_at',new Date().toISOString()).order('created_at',{ascending:true}).limit(100); if(!vr.error&&vr.data)setVoiceMessages((vr.data as VoiceMessage[]).filter(v=>!voiceLocalDeleted[v.id]));},[localDeleted,voiceLocalDeleted]); const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.length)return;const {data}=await supabase.from('message_reactions').select('message_id,user_id,reaction').in('message_id',ids);const counts:Record<string,Record<string,number>>={};const mine:Record<string,string[]>={};(data||[]).forEach((r:any)=>{counts[r.message_id]??={};counts[r.message_id][r.reaction]=(counts[r.message_id][r.reaction]||0)+1;if(r.user_id===userId)(mine[r.message_id]??=[]).push(r.reaction)});setReactionCounts(counts);setMyReactions(mine)},[]);
+   const refresh=useCallback(async()=>{
+     const startedAt=Date.now();
+     const [messageResult,voiceResult]=await Promise.all([
+       supabase.from('messages').select('*').gt('expires_at',new Date().toISOString()).order('created_at',{ascending:true}).limit(100),
+       supabase.from('voice_messages').select('*').gt('expires_at',new Date().toISOString()).order('created_at',{ascending:true}).limit(100)
+     ]);
+     if(!messageResult.error&&messageResult.data){
+       const rawServer=(messageResult.data as ChatMessage[]).filter(m=>!localDeleted[localMessageKey(m)]);
+       const server=rawServer.map(m=>{const target=rawServer.find(x=>x.id===m.reply_to_id);return target?{...m,reply_to_preview:target.body,reply_to_name:target.name}:m});
+       setMessages(prev=>{
+         const pending=prev.filter(m=>m.id.startsWith('optimistic-')&&pendingRef.current[m.id]&&!localDeleted[localMessageKey(m)]);
+         const liveArrivals=prev.filter(m=>!m.id.startsWith('optimistic-')&&new Date(m.created_at).getTime()>=startedAt&&!server.some(x=>x.id===m.id));
+         return [...server,...liveArrivals,...pending.filter(m=>!server.some(x=>x.user_id===m.user_id&&x.body===m.body&&Math.abs(new Date(x.created_at).getTime()-new Date(m.created_at).getTime())<15000))].sort((a,b)=>a.created_at.localeCompare(b.created_at));
+       });
+     }
+     if(!voiceResult.error&&voiceResult.data){
+       const server=(voiceResult.data as VoiceMessage[]).filter(v=>!voiceLocalDeleted[v.id]);
+       setVoiceMessages(prev=>{
+         const merged=new Map(server.map(v=>[v.id,v]));
+         prev.filter(v=>new Date(v.created_at).getTime()>=startedAt&&!voiceLocalDeleted[v.id]).forEach(v=>{if(!merged.has(v.id))merged.set(v.id,v)});
+         return [...merged.values()].sort((a,b)=>a.created_at.localeCompare(b.created_at));
+       });
+     }
+   },[localDeleted,voiceLocalDeleted]);
+const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.length)return;const {data}=await supabase.from('message_reactions').select('message_id,user_id,reaction').in('message_id',ids);const counts:Record<string,Record<string,number>>={};const mine:Record<string,string[]>={};(data||[]).forEach((r:any)=>{counts[r.message_id]??={};counts[r.message_id][r.reaction]=(counts[r.message_id][r.reaction]||0)+1;if(r.user_id===userId)(mine[r.message_id]??=[]).push(r.reaction)});setReactionCounts(counts);setMyReactions(mine)},[]);
   const refreshVoiceReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.length)return;const {data}=await supabase.from('voice_reactions').select('voice_id,user_id,reaction').in('voice_id',ids);const counts:Record<string,Record<string,number>>={};const mine:Record<string,string[]>={};(data||[]).forEach((r:any)=>{counts[r.voice_id]??={};counts[r.voice_id][r.reaction]=(counts[r.voice_id][r.reaction]||0)+1;if(r.user_id===userId)(mine[r.voice_id]??=[]).push(r.reaction)});setVoiceReactionCounts(counts);setVoiceMyReactions(mine)},[]);
   useEffect(()=>{
     let mounted=true;
@@ -191,7 +215,7 @@ function Chat({profile,settings,onSettings,onProfile}:{profile:Profile;settings:
       if(mounted)setOnline(Object.keys(state).length);
     };
     (async()=>{
-      await refreshNow();
+       void refreshNow();
       const {data:{session}}=await supabase.auth.getSession();
       if(!session?.user||!mounted)return;
       sessionRef.current=session;
@@ -347,21 +371,29 @@ function Chat({profile,settings,onSettings,onProfile}:{profile:Profile;settings:
     if(privatePollRef.current){window.clearInterval(privatePollRef.current);privatePollRef.current=undefined}
     if(privateTypingStopRef.current){window.clearTimeout(privateTypingStopRef.current);privateTypingStopRef.current=undefined}
     privateTypingActiveRef.current=false;
+    privateRoomStartedRef.current=null;
     try{localStorage.removeItem(PRIVATE_CHAT_LOCAL_KEY)}catch{}
     setPrivateRoom(null);
     setPrivateMessages([]);
   };
   const loadPrivateMessages=async(roomId:string)=>{
+    const startedAt=Date.now();
     const {data,error}=await supabase.from('private_messages').select('*').eq('room_id',roomId).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:true}).limit(100);
-    if(!error)setPrivateMessages(data||[]);
+    if(!error&&data&&privateRoomStartedRef.current===roomId)setPrivateMessages(prev=>{
+      const merged=new Map<string,any>((data as any[]).map(message=>[message.id,message]));
+      prev.filter(message=>message.room_id===roomId&&(String(message.id).startsWith('optimistic-private-')||new Date(message.created_at).getTime()>=startedAt)).forEach(message=>merged.set(message.id,message));
+      return [...merged.values()].sort((a,b)=>a.created_at.localeCompare(b.created_at));
+    });
   };
   const enterPrivateRoom=async(room:any)=>{
+    if(privateRoomStartedRef.current===room.id)return;
+    privateRoomStartedRef.current=room.id;
+    if(privateRoom?.id!==room.id)setPrivateMessages([]);
     setPrivateRoom(room);
     setPrivateOnline(0);
     setPrivateTyping(false);
     setPrivateRecording(false);
     try{localStorage.setItem(PRIVATE_CHAT_LOCAL_KEY,JSON.stringify(room))}catch{}
-    await loadPrivateMessages(room.id);
     if(privateChannelRef.current)void supabase.removeChannel(privateChannelRef.current);
     if(privatePollRef.current)window.clearInterval(privatePollRef.current);
     const ch:any=supabase.channel('private-room-'+room.id,{config:{presence:{key:authUserId},broadcast:{self:false,ack:true}}})
@@ -410,6 +442,7 @@ function Chat({profile,settings,onSettings,onProfile}:{profile:Profile;settings:
         setPrivateOnline(0);
       }
     });
+    void loadPrivateMessages(room.id);
     privatePollRef.current=window.setInterval(()=>{void (async()=>{const {data,error}=await supabase.from('private_room_members').select('user_id').eq('room_id',room.id).eq('user_id',authUserId).maybeSingle();if(!error&&!data){closePrivateRoom()}})()},5000);
   };
   useEffect(()=>{
@@ -1057,7 +1090,29 @@ function FeedbackPanel({profile,onClose}:{profile:Profile;onClose:()=>void}){
   </div>
 }
 
-function SettingsPanel({profile,settings,onClose,onSave}:{profile:Profile;settings:any;onClose:()=>void;onSave:(p:Profile,s:any)=>void}){const [p,setP]=useState(profile);const [s,setS]=useState(settings);const [publicUid,setPublicUid]=useState<number|null>(null);useEffect(()=>{let live=true;void supabase.from('profiles').select('public_uid').maybeSingle().then(({data})=>{if(live&&data?.public_uid)setPublicUid(Number(data.public_uid))});return()=>{live=false}},[]); const nameValid=p.name.trim().length>=2 && p.name.trim().length<=32; useEffect(()=>{const t=THEMES.find(x=>x.id===p.themeId)||THEMES[0]; document.documentElement.style.setProperty('--bg',t.bg);document.documentElement.style.setProperty('--surface',t.surface);document.documentElement.style.setProperty('--primary',t.primary);document.documentElement.style.setProperty('--accent',t.accent);document.documentElement.style.setProperty('--font-size',`${TEXT_SIZES[s.textSize as TextSize]}px`);},[p.themeId,s.textSize]); return <div className="modal-backdrop"><div className="settings-panel"><div className="panel-head"><div><b><Settings size={17}/> SETTINGS</b><span>Personalize your chat experience</span></div><button onClick={onClose}><X/></button></div><div className="settings-uid-card"><span>YOUR UNIQUE USER ID</span><strong>{publicUid?`UID : ${publicUid}`:'UID : Assigning...'}</strong><small>Use this numeric ID to identify your account.</small></div><label><UserRound size={15}/> Name / Nickname</label><input className="settings-name-input" maxLength={32} value={p.name} onChange={e=>setP({...p,name:e.target.value})} placeholder="Enter a nickname..." autoComplete="nickname"/><label><Image size={15}/> Change Avatar</label><div className="avatar-grid compact">{AVATARS.map(a=><button className={`avatar ${p.avatarId===a.id?'selected':''}`} key={a.id} onClick={()=>setP({...p,avatarId:a.id})}><img src={a.src} alt={`Avatar ${a.id}`}/></button>)}</div><label><Palette size={15}/> Change Theme</label><div className="theme-grid compact-themes">{THEMES.map(t=><button className={`theme-tile ${p.themeId===t.id?'selected':''}`} key={t.id} style={{background:t.bg,borderColor:t.primary}} onClick={()=>setP({...p,themeId:t.id})}><span style={{background:t.primary}}></span><strong>{t.name}</strong></button>)}</div><label>Text Size</label><div className="segmented">{(['small','medium','large','xl'] as TextSize[]).map(k=><button className={s.textSize===k?'active':''} key={k} onClick={()=>setS({...s,textSize:k})}>{k==='xl'?'Extra Large':k[0].toUpperCase()+k.slice(1)}</button>)}</div><label><Bell size={15}/> Sound</label><div className="segmented two"><button className={s.sound?'active':''} onClick={()=>setS({...s,sound:true})}><Volume2 size={15}/> ON</button><button className={!s.sound?'active':''} onClick={()=>setS({...s,sound:false})}><MicOff size={15}/> OFF</button></div><label><Clock3 size={15}/> Clock Format</label><div className="segmented two"><button className={(s.timeFormat||'12h')==='12h'?'active':''} onClick={()=>setS({...s,timeFormat:'12h'})}>12-hour</button><button className={(s.timeFormat||'12h')==='24h'?'active':''} onClick={()=>setS({...s,timeFormat:'24h'})}>24-hour</button></div><button className="primary-btn" disabled={!nameValid} onClick={()=>onSave({...p,name:p.name.trim().replace(/\s+/g,' ')},{...s,timeFormat:s.timeFormat||'12h'})}>SAVE SETTINGS <Check size={17}/></button></div></div>}
+function SettingsPanel({profile,settings,onClose,onSave}:{profile:Profile;settings:any;onClose:()=>void;onSave:(p:Profile,s:any)=>void}){
+ const [p,setP]=useState(profile);
+ const [s,setS]=useState(settings);
+ const [publicUid,setPublicUid]=useState<number|null>(null);
+ useEffect(()=>{let live=true;void supabase.from('profiles').select('public_uid').maybeSingle().then(({data})=>{if(live&&data?.public_uid)setPublicUid(Number(data.public_uid))});return()=>{live=false}},[]);
+ const nameValid=p.name.trim().length>=2&&p.name.trim().length<=32;
+ const cleanName=(value:string)=>value.trim().replace(/\s+/g,' ');
+ const defaultTextSize=(value:any)=>value||'medium';
+ const defaultTimeFormat=(value:any)=>value||'12h';
+ const dirty=cleanName(p.name)!==cleanName(profile.name)||p.avatarId!==profile.avatarId||p.themeId!==profile.themeId||defaultTextSize(s.textSize)!==defaultTextSize(settings.textSize)||Boolean(s.sound)!==Boolean(settings.sound)||defaultTimeFormat(s.timeFormat)!==defaultTimeFormat(settings.timeFormat);
+ useEffect(()=>{const t=THEMES.find(x=>x.id===p.themeId)||THEMES[0],root=document.documentElement;root.style.setProperty('--bg',t.bg);root.style.setProperty('--surface',t.surface);root.style.setProperty('--primary',t.primary);root.style.setProperty('--accent',t.accent);root.style.setProperty('--font-size',String(TEXT_SIZES[s.textSize as TextSize]||TEXT_SIZES.medium)+'px');root.dataset.theme=t.id},[p.themeId,s.textSize]);
+ const closeWithoutSaving=()=>{const t=THEMES.find(x=>x.id===profile.themeId)||THEMES[0],root=document.documentElement;root.style.setProperty('--bg',t.bg);root.style.setProperty('--surface',t.surface);root.style.setProperty('--primary',t.primary);root.style.setProperty('--accent',t.accent);root.style.setProperty('--font-size',String(TEXT_SIZES[settings.textSize as TextSize]||TEXT_SIZES.medium)+'px');root.dataset.theme=t.id;onClose()};
+ return <div className="modal-backdrop"><div className="settings-panel"><div className="panel-head settings-panel-head"><div><b><Settings size={17}/> SETTINGS</b><span>Personalize your chat experience</span></div><button type="button" onClick={closeWithoutSaving} aria-label="Close settings" title="Close settings"><X/></button></div>
+  <div className="settings-uid-card"><span>YOUR UNIQUE USER ID</span><strong>{publicUid?'UID : '+publicUid:'UID : Assigning...'}</strong><small>Use this numeric ID to identify your account.</small></div>
+  <label><UserRound size={15}/> Name / Nickname</label><input className="settings-name-input" maxLength={32} value={p.name} onChange={e=>setP({...p,name:e.target.value})} placeholder="Enter a nickname..." autoComplete="nickname"/>
+  <label><Image size={15}/> Change Avatar</label><div className="avatar-grid compact">{AVATARS.map(a=><button type="button" className={'avatar '+(p.avatarId===a.id?'selected':'')} key={a.id} onClick={()=>setP({...p,avatarId:a.id})}><img src={a.src} alt={'Avatar '+a.id}/></button>)}</div>
+  <label><Palette size={15}/> Change Theme</label><div className="theme-grid compact-themes">{THEMES.map(t=><button type="button" className={'theme-tile '+(p.themeId===t.id?'selected':'')} key={t.id} style={{background:t.bg,borderColor:t.primary}} onClick={()=>setP({...p,themeId:t.id})}><span style={{background:t.primary}}></span><strong>{t.name}</strong></button>)}</div>
+  <label>Text Size</label><div className="segmented">{(['small','medium','large','xl'] as TextSize[]).map(k=><button type="button" className={s.textSize===k?'active':''} key={k} onClick={()=>setS({...s,textSize:k})}>{k==='xl'?'Extra Large':k[0].toUpperCase()+k.slice(1)}</button>)}</div>
+  <label><Bell size={15}/> Sound</label><div className="segmented two"><button type="button" className={s.sound?'active':''} onClick={()=>setS({...s,sound:true})}><Volume2 size={15}/> ON</button><button type="button" className={!s.sound?'active':''} onClick={()=>setS({...s,sound:false})}><MicOff size={15}/> OFF</button></div>
+  <label><Clock3 size={15}/> Clock Format</label><div className="segmented two"><button type="button" className={defaultTimeFormat(s.timeFormat)==='12h'?'active':''} onClick={()=>setS({...s,timeFormat:'12h'})}>12-hour</button><button type="button" className={defaultTimeFormat(s.timeFormat)==='24h'?'active':''} onClick={()=>setS({...s,timeFormat:'24h'})}>24-hour</button></div>
+  <div className="settings-actions"><button type="button" className="private-modal-cancel clear-cancel-btn" onClick={closeWithoutSaving}>CANCEL</button><button type="button" className="primary-btn" disabled={!dirty||!nameValid} onClick={()=>onSave({...p,name:cleanName(p.name)},{...s,timeFormat:defaultTimeFormat(s.timeFormat)})}>SAVE SETTINGS <Check size={17}/></button></div>
+ </div></div>;
+}
 
 
 
