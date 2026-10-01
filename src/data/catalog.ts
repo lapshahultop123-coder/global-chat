@@ -1,14 +1,15 @@
 import avatarStyleData from './avatar-styles.json';
+import avatarPickerStyleSlugData from './avatar-picker-style-slugs.json';
+import extraAvatarData from './avatar-extra.json';
 export const AVATAR_STYLES = avatarStyleData;
 export const AVATAR_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 let nextAvatarId = 0;
-export const AVATARS = AVATAR_STYLES.flatMap(style => Array.from({length:style.count},(_,variant)=> {
+const originalAvatars = AVATAR_STYLES.flatMap(style => Array.from({length:style.count},(_,variant)=> {
   const id = ++nextAvatarId;
   return {id,src:`/avatars/avatar-${id}.svg`,style:style.name,slug:style.slug,variant,letter:style.slug==='initials'?AVATAR_LETTERS[variant]:undefined};
 }));
-export const AVATAR_PICKER_STYLE_SLUGS = new Set([
-  'initials','adventurer-neutral','blobs','bottts','bottts-neutral','fun-emoji','glyphs','icons','identicon','initial-face','landscape','marbles','moods','patchwork','pixel-art','pixelbot','planets','rings','shadows','shape-grid','slice','stripes','thumbs','waves'
-]);
+export const AVATARS = [...originalAvatars,...extraAvatarData.map(avatar=>({...avatar,letter:undefined as string|undefined}))];
+export const AVATAR_PICKER_STYLE_SLUGS = new Set(avatarPickerStyleSlugData);
 export const AVATAR_PICKER_STYLES = AVATAR_STYLES.filter(style => AVATAR_PICKER_STYLE_SLUGS.has(style.slug));
 export const AVATAR_PICKER_AVATARS = AVATARS.filter(avatar => AVATAR_PICKER_STYLE_SLUGS.has(avatar.slug));
 
