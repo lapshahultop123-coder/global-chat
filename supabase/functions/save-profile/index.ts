@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     const p = await req.json();
     const c = iso31661.find(x => x.state === 'assigned' && x.alpha2 === p.country);
     const s = iso31662.find(x => x.code === p.subdivision && x.code.startsWith(`${p.country}-`));
-    if (!c || !s || !Number.isInteger(p.avatarId) || p.avatarId < 1 || p.avatarId > 100 || !themes.includes(p.themeId) || typeof p.name !== 'string' || p.name.trim().length < 2 || p.name.trim().length > 32 || p.agreed !== true) return json({ error: 'Invalid profile.' }, 400);
+    if (!c || !s || !Number.isInteger(p.avatarId) || p.avatarId < 1 || p.avatarId > 260 || !themes.includes(p.themeId) || typeof p.name !== 'string' || p.name.trim().length < 2 || p.name.trim().length > 32 || p.agreed !== true) return json({ error: 'Invalid profile.' }, 400);
     const { error: up } = await admin.from('profiles').upsert({ user_id: user.id, name: p.name.trim(), country: p.country, subdivision: p.subdivision, avatar_id: p.avatarId, theme_id: p.themeId, agreed: true, updated_at: new Date().toISOString() });
     if (up) return json({ error: 'Could not save profile.' }, 500);
     return json({ ok: true });
