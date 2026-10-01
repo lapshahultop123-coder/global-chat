@@ -1,8 +1,10 @@
-export const AVATAR_STYLES = ['Aurora','Ocean','Orbit','Glass','Neon','Pixel','Waves','Bloom','Rings','Prism'] as const;
+import avatarStyleData from './avatar-styles.json';
+export const AVATAR_STYLES = avatarStyleData;
 export const AVATAR_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-export const AVATARS = AVATAR_STYLES.flatMap((style, styleIndex) => AVATAR_LETTERS.map((letter, letterIndex) => {
-  const id = styleIndex * 26 + letterIndex + 1;
-  return { id, src: `/avatars/avatar-${id}.svg`, style, letter };
+let nextAvatarId = 0;
+export const AVATARS = AVATAR_STYLES.flatMap(style => Array.from({length:style.count},(_,variant)=> {
+  const id = ++nextAvatarId;
+  return {id,src:`/avatars/avatar-${id}.svg`,style:style.name,slug:style.slug,variant,letter:style.slug==='initials'?AVATAR_LETTERS[variant]:undefined};
 }));
 
 export const THEMES = [

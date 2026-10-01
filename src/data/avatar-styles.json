@@ -1,0 +1,307 @@
+[
+  {
+    "name": "Initials",
+    "slug": "initials",
+    "count": 26
+  },
+  {
+    "name": "Adventurer",
+    "slug": "adventurer",
+    "count": 8
+  },
+  {
+    "name": "Adventurer Neutral",
+    "slug": "adventurer-neutral",
+    "count": 8
+  },
+  {
+    "name": "Avataaars",
+    "slug": "avataaars",
+    "count": 8
+  },
+  {
+    "name": "Avataaars Neutral",
+    "slug": "avataaars-neutral",
+    "count": 8
+  },
+  {
+    "name": "Big Ears",
+    "slug": "big-ears",
+    "count": 8
+  },
+  {
+    "name": "Big Ears Neutral",
+    "slug": "big-ears-neutral",
+    "count": 8
+  },
+  {
+    "name": "Big Smile",
+    "slug": "big-smile",
+    "count": 8
+  },
+  {
+    "name": "Blobs",
+    "slug": "blobs",
+    "count": 8
+  },
+  {
+    "name": "Bottts",
+    "slug": "bottts",
+    "count": 8
+  },
+  {
+    "name": "Bottts Neutral",
+    "slug": "bottts-neutral",
+    "count": 8
+  },
+  {
+    "name": "Cameo",
+    "slug": "cameo",
+    "count": 8
+  },
+  {
+    "name": "Clay",
+    "slug": "clay",
+    "count": 8
+  },
+  {
+    "name": "Constellation",
+    "slug": "constellation",
+    "count": 8
+  },
+  {
+    "name": "Critters",
+    "slug": "critters",
+    "count": 8
+  },
+  {
+    "name": "Croodles",
+    "slug": "croodles",
+    "count": 8
+  },
+  {
+    "name": "Croodles Neutral",
+    "slug": "croodles-neutral",
+    "count": 8
+  },
+  {
+    "name": "Cutouts",
+    "slug": "cutouts",
+    "count": 8
+  },
+  {
+    "name": "Disco",
+    "slug": "disco",
+    "count": 8
+  },
+  {
+    "name": "Dylan",
+    "slug": "dylan",
+    "count": 8
+  },
+  {
+    "name": "Fun Emoji",
+    "slug": "fun-emoji",
+    "count": 8
+  },
+  {
+    "name": "Gaze",
+    "slug": "gaze",
+    "count": 8
+  },
+  {
+    "name": "Glass",
+    "slug": "glass",
+    "count": 8
+  },
+  {
+    "name": "Glyphs",
+    "slug": "glyphs",
+    "count": 8
+  },
+  {
+    "name": "Icons",
+    "slug": "icons",
+    "count": 8
+  },
+  {
+    "name": "Identicon",
+    "slug": "identicon",
+    "count": 8
+  },
+  {
+    "name": "Initial Face",
+    "slug": "initial-face",
+    "count": 8
+  },
+  {
+    "name": "Landscape",
+    "slug": "landscape",
+    "count": 8
+  },
+  {
+    "name": "Line Face",
+    "slug": "line-face",
+    "count": 8
+  },
+  {
+    "name": "Loops",
+    "slug": "loops",
+    "count": 8
+  },
+  {
+    "name": "Lorelei",
+    "slug": "lorelei",
+    "count": 8
+  },
+  {
+    "name": "Lorelei Neutral",
+    "slug": "lorelei-neutral",
+    "count": 8
+  },
+  {
+    "name": "Marbles",
+    "slug": "marbles",
+    "count": 8
+  },
+  {
+    "name": "Micah",
+    "slug": "micah",
+    "count": 8
+  },
+  {
+    "name": "Miniavs",
+    "slug": "miniavs",
+    "count": 8
+  },
+  {
+    "name": "Moods",
+    "slug": "moods",
+    "count": 8
+  },
+  {
+    "name": "Notionists",
+    "slug": "notionists",
+    "count": 8
+  },
+  {
+    "name": "Notionists Neutral",
+    "slug": "notionists-neutral",
+    "count": 8
+  },
+  {
+    "name": "Open Peeps",
+    "slug": "open-peeps",
+    "count": 8
+  },
+  {
+    "name": "Patchwork",
+    "slug": "patchwork",
+    "count": 8
+  },
+  {
+    "name": "Personas",
+    "slug": "personas",
+    "count": 8
+  },
+  {
+    "name": "Pixel Art",
+    "slug": "pixel-art",
+    "count": 8
+  },
+  {
+    "name": "Pixel Art Neutral",
+    "slug": "pixel-art-neutral",
+    "count": 8
+  },
+  {
+    "name": "Pixelbot",
+    "slug": "pixelbot",
+    "count": 8
+  },
+  {
+    "name": "Planets",
+    "slug": "planets",
+    "count": 8
+  },
+  {
+    "name": "Rings",
+    "slug": "rings",
+    "count": 8
+  },
+  {
+    "name": "Shadows",
+    "slug": "shadows",
+    "count": 8
+  },
+  {
+    "name": "Shape Grid",
+    "slug": "shape-grid",
+    "count": 8
+  },
+  {
+    "name": "Shapes",
+    "slug": "shapes",
+    "count": 8
+  },
+  {
+    "name": "Slice",
+    "slug": "slice",
+    "count": 8
+  },
+  {
+    "name": "Sprouts",
+    "slug": "sprouts",
+    "count": 8
+  },
+  {
+    "name": "Squircles",
+    "slug": "squircles",
+    "count": 8
+  },
+  {
+    "name": "Stack",
+    "slug": "stack",
+    "count": 8
+  },
+  {
+    "name": "Stripes",
+    "slug": "stripes",
+    "count": 8
+  },
+  {
+    "name": "Thumbs",
+    "slug": "thumbs",
+    "count": 8
+  },
+  {
+    "name": "Toon Head",
+    "slug": "toon-head",
+    "count": 8
+  },
+  {
+    "name": "Triangles",
+    "slug": "triangles",
+    "count": 8
+  },
+  {
+    "name": "Voxel Art",
+    "slug": "voxel-art",
+    "count": 8
+  },
+  {
+    "name": "Voxel Bot",
+    "slug": "voxel-bot",
+    "count": 8
+  },
+  {
+    "name": "Waves",
+    "slug": "waves",
+    "count": 8
+  },
+  {
+    "name": "Weave",
+    "slug": "weave",
+    "count": 8
+  }
+]

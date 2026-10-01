@@ -29,7 +29,7 @@ begin
     raise exception 'invalid_profile';
   end if;
 
-  if p_avatar_id < 1 or p_avatar_id > 260 then
+  if p_avatar_id < 1 or p_avatar_id > 506 then
     raise exception 'invalid_avatar';
   end if;
 

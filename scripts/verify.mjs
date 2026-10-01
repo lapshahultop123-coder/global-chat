@@ -9,16 +9,15 @@ const migrations=fs.readdirSync(path.join(root,'supabase/migrations')).map(f=>fs
 const pkg=JSON.parse(read('package.json'));
 const checks=[];
 const privateLockVideoPattern=/private-chat-lock-bubbles\.webm/;
-const avatarMatches=[...catalog.matchAll(/\{ id: (\d+), src: '([^']+)' \}/g)];
-const avatarIds=avatarMatches.map(m=>Number(m[1])), avatarSrcs=avatarMatches.map(m=>m[2]);
+const avatarStyles=JSON.parse(read('src/data/avatar-styles.json'));
+const avatarCount=avatarStyles.reduce((sum,style)=>sum+style.count,0);
 const themeBlock=catalog.slice(catalog.indexOf('export const THEMES = ['),catalog.indexOf('export const EMOJIS'));
 const themeIds=[...themeBlock.matchAll(/\['([^']+)','([^']+)'/g)].map(m=>m[1]);
 const reactions=['\u{1F44D}','\u{2764}\u{FE0F}','\u{1F602}','\u{1F62E}','\u{1F622}','\u{1F621}','\u{1F389}','\u{1F64F}'];
 const releaseAudit=process.env.RELEASE_AUDIT==='1';
 const ok=(name,test)=>checks.push([name,!!test]);
-ok('260 avatars across 10 single-letter styles',/AVATAR_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'/.test(catalog)&&((catalog.match(/export const AVATAR_STYLES = \[([^\]]+)\]/)?.[1]?.match(/'/g)||[]).length===20));
-ok('avatar IDs 1..260 unique',/styleIndex \* 26 \+ letterIndex \+ 1/.test(catalog)&&/ABCDEFGHIJKLMNOPQRSTUVWXYZ/.test(catalog));
-ok('260 unique avatar SVG assets',Array.from({length:260},(_,i)=>fs.existsSync(path.join(root,'public','avatars',`avatar-${i+1}.svg`))).every(Boolean)&&new Set(Array.from({length:260},(_,i)=>fs.readFileSync(path.join(root,'public','avatars',`avatar-${i+1}.svg`),'utf8'))).size===260);
+ok('61 avatar styles and 506 avatars; A-Z only in Initials',avatarStyles.length===61&&avatarCount===506&&avatarStyles[0].slug==='initials'&&avatarStyles[0].count===26&&avatarStyles.slice(1).every(style=>style.count===8));
+ok('506 unique avatar SVG assets',Array.from({length:506},(_,i)=>fs.existsSync(path.join(root,'public','avatars',`avatar-${i+1}.svg`))).every(Boolean)&&new Set(Array.from({length:506},(_,i)=>fs.readFileSync(path.join(root,'public','avatars',`avatar-${i+1}.svg`),'utf8'))).size===506);
 
 ok('25 themes',themeIds.length===25&&new Set(themeIds).size===25);
 ok('exactly 8 reactions',reactions.length===8);
@@ -32,7 +31,7 @@ ok('server-side 3-in-10 rate limit',/interval '10 seconds'/.test(schema)&&/recen
 ok('atomic per-user rate-limit lock',/pg_advisory_xact_lock/.test(schema));
 ok('5-minute individual expiry',/interval '5 minutes'/.test(schema)&&/expires_at/.test(schema));
 ok('expired rows physically sweepable',/delete from public\.messages where expires_at <= now\(\)/.test(schema));
-ok('260 avatar server validation',/avatar_id integer not null check \(avatar_id between 1 and 260\)/.test(schema)&&/avatarId<=260/.test(send)&&/avatarId > 260/.test(profile));
+ok('506 avatar server validation',/avatar_id integer not null check \(avatar_id between 1 and 506\)/.test(schema)&&/avatarId<=506/.test(send)&&/avatarId > 506/.test(profile));
 ok('fixed theme server validation',/themes\.includes\(p\.themeId\)/.test(profile));
 ok('country/subdivision server validation',/iso31661/.test(send)&&/iso31662/.test(send)&&/code\.startsWith\(`\$\{p\.country\}-`\)/.test(send));
 ok('exact reaction DB constraint',reactions.every(x=>schema.includes(x))||reactions.every((_,i)=>schema.includes(["U&'\\+1F44D'","U&'\\+2764\\+FE0F'","U&'\\+1F602'","U&'\\+1F62E'","U&'\\+1F622'","U&'\\+1F621'","U&'\\+1F389'","U&'\\+1F64F'"][i])));

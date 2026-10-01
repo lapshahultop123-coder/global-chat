@@ -17,6 +17,8 @@
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "@dicebear/core": "^10.6.0",
+    "@dicebear/styles": "^10.6.0",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
