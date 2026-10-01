@@ -3316,3 +3316,9 @@ html[data-theme="mono"] .send-btn svg{
 .account-access-card .account-login-btn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.12);box-shadow:0 14px 30px color-mix(in srgb,var(--primary) 42%,transparent)}
 .account-access-card .account-login-btn:disabled{opacity:.82;filter:saturate(.86);cursor:not-allowed}
 .account-access-card .account-login-btn:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 65%,white);outline-offset:3px}
+.brand .profile-login-back{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;margin-left:auto;padding:0 15px;border:1px solid color-mix(in srgb,var(--primary) 52%,rgba(255,255,255,.2));border-radius:13px;background:color-mix(in srgb,var(--surface) 82%,transparent);color:#e8efff;font-size:.76rem;font-weight:800;letter-spacing:.025em;white-space:nowrap;transition:background .16s ease,border-color .16s ease,transform .16s ease}
+.brand .profile-login-back:hover:not(:disabled){background:color-mix(in srgb,var(--primary) 18%,var(--surface));border-color:var(--primary);transform:translateY(-1px)}
+.brand .profile-login-back:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 65%,white);outline-offset:3px}
+.brand .profile-login-back:disabled{opacity:.65;cursor:wait}
+.profile-login-back-error{margin:-8px 4px 16px;color:#fca5a5;font-size:.84rem}
+@media(max-width:520px){.setup-shell>.brand{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;column-gap:12px}.setup-shell>.brand .profile-login-back{grid-column:2;justify-self:start;min-height:40px;margin:8px 0 0}}

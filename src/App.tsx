@@ -1,6 +1,6 @@
 import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { iso31661, iso31662 } from 'iso-3166';
-import { AlertTriangle, ArrowDown, Ban, Bell, BookOpen, Bug, Check, ChevronDown, Clock3, Copy, Eye, EyeOff, Globe2, Image, KeyRound, LockKeyhole, LogOut, MessageCircle, Mic, MicOff, MoreVertical, Palette, Pause, Pencil, Play, Plus, Reply as ReplyIcon, RefreshCw, Search, Send, Settings, Smile, Square, Trash2, UserRound, Users, Volume2, Wifi, WifiOff, X } from 'lucide-react';
+import { AlertTriangle, ArrowDown, ArrowLeft, Ban, Bell, BookOpen, Bug, Check, ChevronDown, Clock3, Copy, Eye, EyeOff, Globe2, Image, KeyRound, LockKeyhole, LogOut, MessageCircle, Mic, MicOff, MoreVertical, Palette, Pause, Pencil, Play, Plus, Reply as ReplyIcon, RefreshCw, Search, Send, Settings, Smile, Square, Trash2, UserRound, Users, Volume2, Wifi, WifiOff, X } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { AVATARS, EMOJIS, REACTIONS, THEMES, TEXT_SIZES, type TextSize } from './data/catalog';
 import ActionDialog from './ActionDialog';
@@ -38,7 +38,7 @@ export default function App(){
   const logOut=async()=>{const {error}=await supabase.auth.signOut();if(error)throw error;clearAccountDeviceData();setProfile(null);setSettings(defaultSettings());setHasSession(false)};
   if(!authReady) return <div className="boot"><img className="logo-orbit logo-image" src="/global-chat-logo.svg" alt="GLOBAL CHAT" /><h1>GLOBAL CHAT</h1><p>{bootError||'Connecting securely...'}</p>{bootError&&<button className="primary-btn boot-retry" onClick={()=>location.reload()}>TRY AGAIN</button>}</div>;
   if(!hasSession)return <AccountAccess onRecover={recoverSavedAccount} onContinueAsGuest={startGuestAccount}/>;
-  return profile ? <Chat profile={profile} settings={settings} onSettings={setSettings} onProfile={saveProfile} onLogout={logOut}/> : <ProfileSetup onEnter={saveProfile}/>;
+  return profile ? <Chat profile={profile} settings={settings} onSettings={setSettings} onProfile={saveProfile} onLogout={logOut}/> : <ProfileSetup onEnter={saveProfile} onBackToLogin={logOut}/>;
 }
 
 function defaultSettings(){return {textSize:'medium' as TextSize,sound:true,timeFormat:'12h' as TimeFormat}}
@@ -52,9 +52,9 @@ function AccountAccess({onRecover,onContinueAsGuest}:{onRecover:(uid:string,pin:
  return <div className="account-access-page"><section className="account-access-card"><div className="account-access-brand"><img src="/global-chat-logo.svg" alt=""/><div><h1>Welcome back</h1><p>Log in with your UID and 5-digit password to access your account and chats.</p></div></div><form onSubmit={recover}><label htmlFor="restore-uid">10-digit UID</label><input id="restore-uid" inputMode="numeric" autoComplete="username" maxLength={10} value={publicUid} onChange={e=>setPublicUid(e.target.value.replace(/\D/g,'').slice(0,10))} placeholder="Enter your UID"/><label htmlFor="restore-pin">5-digit password</label><div className="restore-pin-wrap"><input id="restore-pin" inputMode="numeric" autoComplete="current-password" maxLength={5} type={showPin?'text':'password'} value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,'').slice(0,5))} placeholder="Enter your password"/><button type="button" onClick={()=>setShowPin(v=>!v)} aria-label={showPin?'Hide password':'Show password'} title={showPin?'Hide password':'Show password'}>{showPin?<EyeOff size={17}/>:<Eye size={17}/>}</button></div>{error&&<div className="account-access-error" role="alert">{error}</div>}<button className="primary-btn account-login-btn" type="submit" disabled={busy||publicUid.length!==10||pin.length!==5}>{busy?'LOGGING IN...':'LOG IN'}</button></form><div className="account-access-divider"><span>OR</span></div><button className="account-guest-btn" type="button" disabled={busy} onClick={()=>void guest()}>CONTINUE AS NEW USER</button><small>Keep your UID and password somewhere safe. Recovery is limited to protect your account.</small></section></div>
 }
 
-function ProfileSetup({onEnter}:{onEnter:(p:Profile)=>void}){
+function ProfileSetup({onEnter,onBackToLogin}:{onEnter:(p:Profile)=>void;onBackToLogin:()=>Promise<void>}){
   const [name,setName]=useState(''); const [country,setCountry]=useState(''); const [subdivision,setSubdivision]=useState(''); const [avatarId,setAvatarId]=useState(1); const [themeId,setThemeId]=useState('midnight'); const [agreed,setAgreed]=useState(false); const [countryQuery,setCountryQuery]=useState(''); const [subQuery,setSubQuery]=useState(''); const [countryOpen,setCountryOpen]=useState(false); const [subOpen,setSubOpen]=useState(false);
-  const [saveErrorOpen,setSaveErrorOpen]=useState(false);
+  const [saveErrorOpen,setSaveErrorOpen]=useState(false);const [backBusy,setBackBusy]=useState(false);const [backError,setBackError]=useState('');
   useEffect(()=>{const t=THEMES.find(x=>x.id===themeId)||THEMES[0]; document.documentElement.style.setProperty('--bg',t.bg);document.documentElement.style.setProperty('--surface',t.surface);document.documentElement.style.setProperty('--primary',t.primary);document.documentElement.style.setProperty('--accent',t.accent);document.documentElement.dataset.theme=t.id;},[themeId]);
   const countries=useMemo(()=>iso31661.filter(c=>c.state==='assigned').sort((a,b)=>a.name.localeCompare(b.name)),[]);
   const subdivisions=useMemo(()=>iso31662.filter(s=>s.code.startsWith(country+'-')).sort((a,b)=>a.name.localeCompare(b.name)),[country]);
@@ -63,8 +63,9 @@ function ProfileSetup({onEnter}:{onEnter:(p:Profile)=>void}){
   const selectedCountry=countries.find(c=>c.alpha2===country); const selectedSub=subdivisions.find(s=>s.code===subdivision);
   const valid=name.trim().length>=2 && name.trim().length<=32 && !!selectedCountry && !!selectedSub && agreed;
   const enter=async()=>{if(!valid)return; const p={name:name.trim().replace(/\s+/g,' '),country,subdivision,avatarId,themeId,agreed}; try { const {error}=await supabase.functions.invoke('save-profile',{body:p}); if(error) throw error; onEnter(p); } catch { setSaveErrorOpen(true); }};
+  const backToLogin=async()=>{setBackBusy(true);setBackError('');try{await onBackToLogin()}catch{setBackError('Could not return to the log in page. Check your connection and try again.');setBackBusy(false)}};
   return <div className="setup-page"><div className="setup-shell">
-    <div className="brand"><img className="brand-mark brand-image" src="/global-chat-logo.svg" alt="GLOBAL CHAT" /><div><h1>GLOBAL CHAT</h1><p>Create Your Profile</p></div></div>
+    <div className="brand"><img className="brand-mark brand-image" src="/global-chat-logo.svg" alt="GLOBAL CHAT" /><div><h1>GLOBAL CHAT</h1><p>Create Your Profile</p></div><button type="button" className="profile-login-back" onClick={()=>void backToLogin()} disabled={backBusy}><ArrowLeft size={17}/>{backBusy?'PLEASE WAIT...':'BACK TO LOG IN PAGE'}</button></div>{backError&&<div className="profile-login-back-error" role="alert">{backError}</div>}
     <div className="setup-grid">
       <section className="card profile-card">
         <label>Name / Nickname</label><input maxLength={32} value={name} onChange={e=>setName(e.target.value)} placeholder="Enter a nickname..." autoComplete="nickname"/>
