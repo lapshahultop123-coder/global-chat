@@ -6,6 +6,11 @@ export const AVATARS = AVATAR_STYLES.flatMap(style => Array.from({length:style.c
   const id = ++nextAvatarId;
   return {id,src:`/avatars/avatar-${id}.svg`,style:style.name,slug:style.slug,variant,letter:style.slug==='initials'?AVATAR_LETTERS[variant]:undefined};
 }));
+export const AVATAR_PICKER_STYLE_SLUGS = new Set([
+  'initials','adventurer-neutral','blobs','bottts','bottts-neutral','fun-emoji','glyphs','icons','identicon','initial-face','landscape','marbles','moods','patchwork','pixel-art','pixelbot','planets','rings','shadows','shape-grid','slice','stripes','thumbs','waves'
+]);
+export const AVATAR_PICKER_STYLES = AVATAR_STYLES.filter(style => AVATAR_PICKER_STYLE_SLUGS.has(style.slug));
+export const AVATAR_PICKER_AVATARS = AVATARS.filter(avatar => AVATAR_PICKER_STYLE_SLUGS.has(avatar.slug));
 
 export const THEMES = [
   ['midnight','Midnight Neon','#080b16','#10172b','#7c3aed','#22d3ee'],
