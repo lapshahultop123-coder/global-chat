@@ -823,20 +823,11 @@ html[data-theme="mono"] .send-btn svg{
   }
 }
 
-.empty-earth-video{
-  width:154px;
-  height:154px;
-  display:block;
-  margin:0 auto 10px;
-  object-fit:cover;
-  object-position:center;
-  border-radius:50%;
-  mix-blend-mode:lighten;
-  background:transparent!important;
-  border:0!important;
-  outline:0!important;
-  box-shadow:0 0 35px rgba(124,58,237,.18);
-}
+.empty-earth-globe{width:180px;height:180px;display:block;margin:0 auto 10px;filter:drop-shadow(0 0 20px color-mix(in srgb,var(--primary) 32%,transparent))}
+.empty-earth-globe svg{display:block;width:100%;height:100%;overflow:visible}
+.earth-map-layer{animation:earth-map-turn 36s linear infinite;transform-box:fill-box;transform-origin:center;will-change:transform}
+@keyframes earth-map-turn{from{transform:translateX(0)}to{transform:translateX(-180px)}}
+@media(prefers-reduced-motion:reduce){.earth-map-layer{animation:none;will-change:auto}}
 
 /* PRIVATE CHAT EMPTY STATE — cropped transparent lock/chat animation; no shield artwork */
 .private-empty-state{
@@ -1448,16 +1439,6 @@ html[data-theme="mono"] .send-btn svg{
 .message-list,
 .private-message-list{
   contain: layout;
-}
-.empty-earth-video{
-  display:block;
-  width:180px;
-  height:180px;
-  margin:0 auto 10px;
-  object-fit:cover;
-  border-radius:50%;
-  background:#020617;
-  opacity:.98;
 }
 .voice-player audio{display:none}
 .voice-seek{touch-action:pan-x;}

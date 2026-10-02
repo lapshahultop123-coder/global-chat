@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = f => fs.readFileSync(path.join(root,f),'utf8');
-const app=read('src/App.tsx'), css=read('src/styles.css'), catalog=read('src/data/catalog.ts'), validation=read('src/lib/validation.ts'), schema=read('supabase/schema.sql');
+const app=read('src/App.tsx'), css=read('src/styles.css'), earth=read('src/EarthGlobe.tsx'), catalog=read('src/data/catalog.ts'), validation=read('src/lib/validation.ts'), schema=read('supabase/schema.sql');
 const send=read('supabase/functions/send-message/index.ts'), reaction=read('supabase/functions/toggle-reaction/index.ts'), profile=read('supabase/functions/save-profile/index.ts');
 const accountRecovery=read('supabase/functions/account-recovery/index.ts');
 const migrations=fs.readdirSync(path.join(root,'supabase/migrations')).map(f=>fs.readFileSync(path.join(root,'supabase/migrations',f),'utf8')).join('\n');
@@ -122,7 +122,7 @@ ok('public and private voice uploads render optimistically',/optimistic-public-v
 ok('no release .env',!releaseAudit||!fs.existsSync(path.join(root,'.env')));
 const reactionLoader=app.slice(app.indexOf('const loadReactions'),app.indexOf('useEffect(()=>{void loadReactions',app.indexOf('const loadReactions')));
 ok('private reaction loader avoids per-reaction auth calls',!reactionLoader.includes('supabase.auth.getUser'));
-ok('public empty state shows Earth animation',/className=\"empty-earth-video\"/.test(app)&&/src=\\?\"\/earth-animation\.mp4/.test(app)&&fs.existsSync(path.join(root,'public/earth-animation.mp4')));
+ok('public empty state uses a smooth CSS Earth and respects reduced-motion settings',app.includes("import EarthGlobe from './EarthGlobe'")&&app.includes('<EarthGlobe/>')&&earth.includes('earth-map-layer')&&css.includes('@keyframes earth-map-turn')&&css.includes('prefers-reduced-motion:reduce){.earth-map-layer{animation:none')&&!app.includes('earth-animation.mp4'));
 
 
 ok('private room waits for auth before presence',/if\(authUserId&&privateRoom\?\.id\)void enterPrivateRoom\(privateRoom\)/.test(app));
