@@ -676,6 +676,7 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
   const [current,setCurrent]=useState(0);
   const [duration,setDuration]=useState(Math.max(0,(v.duration_ms||0)/1000));
   const [rate,setRate]=useState(1);
+  const [playError,setPlayError]=useState('');
   const playerRef=useRef<HTMLDivElement|null>(null);
   const audioRef=useRef<HTMLAudioElement|null>(null);
   const loadingRef=useRef<Promise<HTMLAudioElement>|null>(null);
@@ -686,16 +687,24 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
     if(loadingRef.current)return loadingRef.current;
     const request=(async()=>{
     let url=typeof v.audio_url==='string'?v.audio_url:'';
-    if(bucket!=='voice-messages'&&v.storage_path){const remaining=v.expires_at?Math.ceil((new Date(v.expires_at).getTime()-Date.now())/1000):3600;if(remaining<=0)throw new Error('This voice message has expired.');const {data,error}=await supabase.storage.from(bucket).createSignedUrl(v.storage_path,Math.max(1,Math.min(3600,remaining)));if(error)throw error;if(data?.signedUrl)url=data.signedUrl}
+    if(bucket!=='voice-messages'){
+      if(!v.storage_path)throw new Error('Private voice file path is missing.');
+      const remaining=v.expires_at?Math.ceil((new Date(v.expires_at).getTime()-Date.now())/1000):3600;
+      if(remaining<=0)throw new Error('This voice message has expired.');
+      const {data,error}=await supabase.storage.from(bucket).createSignedUrl(v.storage_path,Math.max(1,Math.min(3600,remaining)));
+      if(error)throw new Error('Could not access this private voice message. Check room access and retry.');
+      if(!data?.signedUrl)throw new Error('Could not create a secure playback link. Please retry.');
+      url=data.signedUrl;
+    }
     else if(!url&&v.storage_path){const {data,error}=await supabase.storage.from(bucket).createSignedUrl(v.storage_path,3600);if(error)throw error;if(data?.signedUrl)url=data.signedUrl}
     if(!url)throw new Error('Voice audio is unavailable.');
     const a=new Audio();a.preload='auto';a.playbackRate=rate;
     a.onloadedmetadata=()=>setDuration(Number.isFinite(a.duration)&&a.duration>0?a.duration:duration);
     a.ontimeupdate=()=>setCurrent(a.currentTime);
     a.onwaiting=()=>setBuffering(true);
-    a.onplaying=()=>{setBuffering(false);setPlaying(true)};
+    a.onplaying=()=>{setBuffering(false);setPlaying(true);setPlayError('')};
     a.onended=()=>{setPlaying(false);setBuffering(false);setCurrent(0)};
-    a.onerror=()=>{if(audioRef.current===a)audioRef.current=null;setPlaying(false);setBuffering(false)};
+    a.onerror=()=>{if(audioRef.current===a)audioRef.current=null;setPlaying(false);setBuffering(false);setPlayError('Audio could not load. Tap play to retry.')};
     a.src=url;a.load();audioRef.current=a;return a;
     })();
     loadingRef.current=request;
@@ -714,8 +723,8 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
     const existing=audioRef.current;
     if(existing&&!existing.paused){existing.pause();setPlaying(false);setBuffering(false);return}
     if(startingRef.current)return;
-    startingRef.current=true;setBuffering(true);
-    try{const a=await load();a.playbackRate=rate;if(Number.isFinite(a.duration)&&a.currentTime>=a.duration)a.currentTime=0;await a.play();setPlaying(true);setBuffering(false)}catch{setPlaying(false);setBuffering(false)}finally{startingRef.current=false}
+    startingRef.current=true;setBuffering(true);setPlayError('');
+    try{const a=await load();a.playbackRate=rate;if(Number.isFinite(a.duration)&&a.currentTime>=a.duration)a.currentTime=0;await a.play();setPlaying(true);setBuffering(false)}catch(error){setPlaying(false);setBuffering(false);setPlayError(error instanceof Error?error.message:'Playback failed. Tap play to retry.')}finally{startingRef.current=false}
   };
   const seek=(e:React.ChangeEvent<HTMLInputElement>)=>{const value=Number(e.target.value);if(audioRef.current)audioRef.current.currentTime=value;setCurrent(value)};
   const cycle=()=>{const next=rate===1?1.5:rate===1.5?2:1;setRate(next);if(audioRef.current)audioRef.current.playbackRate=next};
@@ -727,6 +736,7 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
       <div className="voice-wave voice-wave-player" aria-hidden="true">{Array.from({length:28},(_,i)=>{const height=6+Math.round((Math.sin(i*1.73)+1)*5+(Math.cos(i*.47)+1)*2);const played=progress>=(i+1)/28;return <i key={i} style={{height:`${height}px`,animationDelay:`-${((i*7)%17)*.055}s`,animationDuration:`${.42+(i%5)*.12}s`,background:played?'var(--primary)':undefined}} className={playing?'active':'static'}/>})}</div>
       <input className="voice-seek" type="range" min="0" max={Math.max(duration,0.1)} step="0.01" value={Math.min(current,duration||0)} onChange={seek} aria-label="Voice playback position"/>
       <div className="voice-player-meta"><span>{fmt(current)}</span><span>{fmt(duration)}</span></div>
+      {playError&&<small className="voice-player-error" role="alert">{playError}</small>}
     </div>
     <button className="voice-speed-btn" onClick={cycle} title="Playback speed">{rate}x</button>
   </div>;

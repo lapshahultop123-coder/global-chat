@@ -81,6 +81,7 @@ ok('public/private typing indicators present',/Someone is typing/.test(app)&&/pr
 ok('public/private recording indicators present',/Someone is recording/.test(app)&&/private-recording/.test(app)&&/event:'recording'/.test(app));
 ok('private send/delete action sounds',/playPrivateAction\('\/sounds\/send\.wav'\)/.test(app));
 ok('private voice recording and upload flow',/MediaRecorder/.test(app)&&/private-voice-messages/.test(app)&&/send_private_voice/.test(app)&&/sendRecordedPrivateVoice/.test(app));
+ok('private voice playback always signs its storage path and shows retryable errors',app.includes("if(bucket!=='voice-messages')")&&app.includes("createSignedUrl(v.storage_path")&&app.includes('Audio could not load. Tap play to retry.')&&app.includes('voice-player-error'));
 ok('private voice local-delete filter survives refresh',/filter\(v=>!localDeleted\['v:'\+v\.id\]\)/.test(app));
 ok('header search/clear/settings menu',/header-more-menu/.test(app)&&/Search/.test(app)&&/Clear Chat/.test(app)&&/Settings/.test(app)&&/MoreVertical/.test(app));
 
