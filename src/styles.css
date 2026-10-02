@@ -826,7 +826,7 @@ html[data-theme="mono"] .send-btn svg{
 .empty-earth-globe{width:180px;height:180px;display:block;margin:0 auto 10px;filter:drop-shadow(0 0 20px color-mix(in srgb,var(--primary) 32%,transparent))}
 .empty-earth-globe svg{display:block;width:100%;height:100%;overflow:visible}
 .earth-map-layer{animation:earth-map-turn 36s linear infinite;transform-box:fill-box;transform-origin:center;will-change:transform}
-@keyframes earth-map-turn{from{transform:translateX(0)}to{transform:translateX(-180px)}}
+@keyframes earth-map-turn{from{transform:translateX(0)}to{transform:translateX(-360px)}}
 @media(prefers-reduced-motion:reduce){.earth-map-layer{animation:none;will-change:auto}}
 
 /* PRIVATE CHAT EMPTY STATE — cropped transparent lock/chat animation; no shield artwork */
