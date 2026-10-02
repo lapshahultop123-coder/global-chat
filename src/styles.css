@@ -3385,3 +3385,22 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .voice-player-error{position:absolute;z-index:30;right:0;top:calc(100% + 5px);display:block;width:max-content;max-width:min(320px,76vw);margin:0;padding:6px 9px;border:1px solid rgba(255,255,255,.13);border-radius:9px;background:var(--surface,#10172b);box-shadow:0 8px 24px rgba(0,0,0,.35);color:#fecaca;font-size:.72rem;line-height:1.35;white-space:normal;pointer-events:none}
 .voice-player-error[data-kind="ready"]{color:#bfdbfe;border-color:rgba(96,165,250,.32)}
 .voice-play-btn[aria-invalid="true"]{background:#9f1239;color:#fff!important}
+
+/* Shared swipeable emoji picker for public, private, and friend chats. */
+.emoji-picker.public-emoji-picker,
+.emoji-picker.private-emoji-picker,
+.emoji-picker.friend-emoji-picker{position:absolute;left:0;bottom:calc(100% + 8px);z-index:120;width:min(284px,calc(100vw - 28px));padding:8px;border:1px solid color-mix(in srgb,var(--primary,#7c3aed) 26%,rgba(255,255,255,.14));border-radius:14px;background:color-mix(in srgb,var(--surface,#10172b) 96%,#070b17);box-shadow:0 16px 42px rgba(0,0,0,.45)}
+.emoji-picker-strip{display:flex;align-items:center;gap:4px;min-width:0}
+.emoji-picker-track{display:flex;flex:1 1 auto;align-items:center;gap:4px;min-width:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-color:color-mix(in srgb,var(--primary,#7c3aed) 55%,#64748b) transparent;scrollbar-width:thin;scroll-behavior:smooth;touch-action:pan-x}
+.emoji-picker-track::-webkit-scrollbar{height:4px}
+.emoji-picker-track::-webkit-scrollbar-thumb{border-radius:999px;background:color-mix(in srgb,var(--primary,#7c3aed) 55%,#64748b)}
+.emoji-picker .emoji-picker-item{display:grid;flex:0 0 36px;place-items:center;width:36px;height:36px;aspect-ratio:auto;margin:0;padding:0;border:0;border-radius:9px;background:transparent;color:inherit;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:22px;line-height:1;white-space:nowrap;cursor:pointer}
+.emoji-picker .emoji-picker-item:hover,.emoji-picker .emoji-picker-item:focus-visible{background:color-mix(in srgb,var(--primary,#7c3aed) 18%,rgba(255,255,255,.08));outline:none}
+.emoji-picker .emoji-picker-arrow{display:grid;flex:0 0 28px;place-items:center;width:28px;height:36px;padding:0;border:0;border-radius:8px;background:transparent;color:color-mix(in srgb,var(--primary,#7c3aed) 65%,#dbeafe);cursor:pointer}
+.emoji-picker .emoji-picker-arrow:hover,.emoji-picker .emoji-picker-arrow:focus-visible{background:rgba(255,255,255,.08);outline:2px solid color-mix(in srgb,var(--primary,#7c3aed) 65%,transparent);outline-offset:1px}
+.emoji-picker-hint{display:block;margin:5px 2px 0;color:#94a3b8;font-size:10px;line-height:1.2;text-align:center}
+.friend-emoji-tools{position:relative;display:flex;flex:0 0 42px;align-items:center;justify-content:center;width:42px;height:42px}
+.friend-compose .friend-emoji-btn{display:grid;flex:0 0 42px;place-items:center;width:42px;height:42px;padding:0;border:1px solid color-mix(in srgb,var(--primary,#7c3aed) 28%,rgba(255,255,255,.14));border-radius:12px;background:color-mix(in srgb,var(--primary,#7c3aed) 9%,var(--surface,#10172b));color:#dbeafe}
+.friend-compose .friend-emoji-btn:hover{background:color-mix(in srgb,var(--primary,#7c3aed) 20%,var(--surface,#10172b))}
+.friend-compose input{flex:1 1 auto;min-width:0}
+@media(max-width:360px){.emoji-picker.public-emoji-picker,.emoji-picker.private-emoji-picker,.emoji-picker.friend-emoji-picker{width:min(250px,calc(100vw - 20px));padding:6px}.emoji-picker .emoji-picker-item{flex-basis:34px;width:34px;height:34px;font-size:21px}.emoji-picker .emoji-picker-arrow{flex-basis:25px;width:25px}.friend-emoji-tools,.friend-compose .friend-emoji-btn{flex-basis:38px;width:38px}.friend-emoji-tools{height:40px}.friend-compose .friend-emoji-btn{height:40px}}

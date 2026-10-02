@@ -2,9 +2,10 @@ import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState
 import { iso31661, iso31662 } from 'iso-3166';
 import { AlertTriangle, ArrowDown, ArrowLeft, Ban, Bell, BookOpen, Bug, Check, ChevronDown, Clock3, Copy, Eye, EyeOff, Globe2, Image, KeyRound, LockKeyhole, LogOut, MessageCircle, Mic, MicOff, MoreVertical, Palette, Pause, Pencil, Pin, Play, Plus, Reply as ReplyIcon, RefreshCw, Search, Send, Settings, Smile, Square, Trash2, UserRound, Users, Volume2, Wifi, WifiOff, X } from 'lucide-react';
 import { supabase } from './lib/supabase';
-import { AVATARS, AVATAR_PICKER_AVATARS, AVATAR_PICKER_STYLES, EMOJIS, REACTIONS, THEMES, TEXT_SIZES, type TextSize } from './data/catalog';
+import { AVATARS, AVATAR_PICKER_AVATARS, AVATAR_PICKER_STYLES, REACTIONS, THEMES, TEXT_SIZES, type TextSize } from './data/catalog';
 import ActionDialog from './ActionDialog';
 import EarthGlobe from './EarthGlobe';
+import EmojiPicker from './EmojiPicker';
 
 import { validateMessage } from './lib/validation';
 import { clearRemoteActivity, updateRemoteActivity } from './lib/realtimeActivity';
@@ -719,9 +720,8 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
             : <div className="composer">
                 <div className="tools"><button
                   className="icon-btn" onClick={()=>setEmojiOpen(v=>!v)} aria-label="Emoji"
-                  title="Emoji"><Smile size={19}/></button>{emojiOpen&&<div
-                  className="emoji-pop">{EMOJIS.map((e,i)=><button key={i} onClick={()=>{setText(v=>v+e)
-                  ;setEmojiOpen(false)}}>{e}</button>)}</div>}</div>
+                  title="Emoji" aria-expanded={emojiOpen}><Smile size={19}/></button>{emojiOpen&&<EmojiPicker
+                  className="public-emoji-picker" onSelect={emoji=>{updateTyping(text+emoji);setEmojiOpen(false)}}/>}</div>
                 <textarea value={text} maxLength={500} onChange={e=>updateTyping(e.target.value)}
                   onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}}
                   placeholder="Type a message..." rows={1}/>
@@ -1295,7 +1295,7 @@ function PrivateRoomView({profile,room,messages,setMessages,text,setText,sending
       </div>
       :
       <div className="composer private-composer">
-        <div className="tools private-tools"><button className="icon-btn" onClick={()=>setPrivateEmojiOpen(v=>!v)} aria-label="Emoji"><Smile size={19}/></button>{privateEmojiOpen&&<div className="private-emoji-pop">{EMOJIS.map(e=><button key={e} onClick={()=>{setText(text+e);setPrivateEmojiOpen(false)}}>{e}</button>)}</div>}</div>
+        <div className="tools private-tools"><button className="icon-btn" onClick={()=>setPrivateEmojiOpen(v=>!v)} aria-label="Emoji"><Smile size={19}/></button>{privateEmojiOpen&&<EmojiPicker className="private-emoji-picker" onSelect={emoji=>{const next=text+emoji;setText(next);onTyping(next);setPrivateEmojiOpen(false)}} />}</div>
         <textarea value={text} maxLength={500} onChange={e=>{const value=e.target.value;setText(value);onTyping(value)}} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();onSend()}}} placeholder="Type a private message..." rows={1}/>
         <button className="voice-btn" disabled={sending||voiceBusy||recording} onClick={()=>void startVoice()} aria-label="Record private voice message"><Mic size={18}/></button>
         <button className={`send-btn ${(sending||voiceBusy)?'is-sending':''}`} disabled={!text.trim()||sending||voiceBusy} onClick={onSend}><Send size={18}/></button>
@@ -1592,8 +1592,6 @@ if (typeof window !== 'undefined') {
 
 
 /* GLOBAL CHAT voice duration live-time fix v1 */
-
-
 
 
 

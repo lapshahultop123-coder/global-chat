@@ -56,7 +56,14 @@ export const THEMES = [
   ['twilight','Twilight','#10101c','#1d1d31','#4338ca','#6d28d9']
 ].map(([id,name,bg,surface,primary,accent]) => ({id,name,bg,surface,primary,accent}));
 
-export const EMOJIS = ['👍','❤️','😂','😮','😢','😡','🎉','🙏','👋','😊','🔥','⭐'];
+export const EMOJIS = [
+  '👍','❤️','😂','😮','😢','😡','🎉','🙏','👋','😊','🔥','⭐',
+  '😍','🥰','😎','🤔','😴','😭','🤗','🤩','🥳','😅',
+  '😇','🤫','🤯','🥺','🫠','🥹','😤','🤓','🧐','😋',
+  '💯','💕','💖','💗','💙','💜','💚','💛','🧡','🖤',
+  '👀','✨','💡','🎯','🏆','⚽','🎮','🎵','🎧','📸',
+  '🍕','🍔','🍟','🍩','🍰','☕','🐶','🐱','🐼','🌈'
+];
 export const REACTIONS = ['👍','❤️','😂','😮','😢','😡','🎉','🙏'];
 export const TEXT_SIZES = { small: 14, medium: 16, large: 18, xl: 20 } as const;
 export type TextSize = keyof typeof TEXT_SIZES;
