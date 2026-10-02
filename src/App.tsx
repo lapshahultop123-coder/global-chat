@@ -740,20 +740,31 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
   const [playError,setPlayError]=useState('');
   const playerRef=useRef<HTMLDivElement|null>(null);
   const audioRef=useRef<HTMLAudioElement|null>(null);
+  const objectUrlRef=useRef<string|null>(null);
   const loadingRef=useRef<Promise<HTMLAudioElement>|null>(null);
   const startingRef=useRef(false);
-  useEffect(()=>()=>{const audio=audioRef.current;if(audio){audio.pause();audio.onloadedmetadata=null;audio.ontimeupdate=null;audio.onwaiting=null;audio.onplaying=null;audio.onended=null;audio.onerror=null}audioRef.current=null},[]);
+  useEffect(()=>()=>{const audio=audioRef.current;if(audio){audio.pause();audio.onloadedmetadata=null;audio.ontimeupdate=null;audio.onwaiting=null;audio.onplaying=null;audio.onended=null;audio.onerror=null}audioRef.current=null;if(objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}},[]);
   const load=async()=>{
     if(audioRef.current)return audioRef.current;
     if(loadingRef.current)return loadingRef.current;
     const request=(async()=>{
     let url=typeof v.audio_url==='string'?v.audio_url:'';
-    if(bucket!=='voice-messages'){
+    if(bucket==='private-voice-messages'){
       if(!v.storage_path)throw new Error('Private voice file path is missing.');
       const remaining=v.expires_at?Math.ceil((new Date(v.expires_at).getTime()-Date.now())/1000):3600;
       if(remaining<=0)throw new Error('This voice message has expired.');
+      const {data,error}=await supabase.storage.from(bucket).download(v.storage_path);
+      if(error)throw new Error('Could not download this private voice message. Check room access and retry.');
+      if(!data)throw new Error('Private voice audio is unavailable. Please retry.');
+      url=URL.createObjectURL(data);
+      objectUrlRef.current=url;
+    }
+    else if(bucket!=='voice-messages'){
+      if(!v.storage_path)throw new Error('Voice file path is missing.');
+      const remaining=v.expires_at?Math.ceil((new Date(v.expires_at).getTime()-Date.now())/1000):3600;
+      if(remaining<=0)throw new Error('This voice message has expired.');
       const {data,error}=await supabase.storage.from(bucket).createSignedUrl(v.storage_path,Math.max(1,Math.min(3600,remaining)));
-      if(error)throw new Error('Could not access this private voice message. Check room access and retry.');
+      if(error)throw new Error('Could not access this voice message. Check room access and retry.');
       if(!data?.signedUrl)throw new Error('Could not create a secure playback link. Please retry.');
       url=data.signedUrl;
     }
@@ -765,7 +776,7 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
     a.onwaiting=()=>setBuffering(true);
     a.onplaying=()=>{setBuffering(false);setPlaying(true);setPlayError('')};
     a.onended=()=>{setPlaying(false);setBuffering(false);setCurrent(0)};
-    a.onerror=()=>{if(audioRef.current===a)audioRef.current=null;setPlaying(false);setBuffering(false);setPlayError('Audio could not load. Tap play to retry.')};
+    a.onerror=()=>{if(audioRef.current===a)audioRef.current=null;if(bucket==='private-voice-messages'&&objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}setPlaying(false);setBuffering(false);setPlayError('Audio could not load. Tap play to retry.')};
     a.src=url;a.load();audioRef.current=a;return a;
     })();
     loadingRef.current=request;
@@ -1431,9 +1442,6 @@ if (typeof window !== 'undefined') {
 
 
 /* GLOBAL CHAT voice duration live-time fix v1 */
-
-
-
 
 
 
