@@ -64,7 +64,8 @@ Deno.serve(async (req) => {
 
     if (insertError) {
       console.error('Feedback insert failed:', insertError.code, insertError.message);
-      return json({ error: 'Could not save the report. Please retry in a moment.' }, 500);
+      const dbCode = insertError.code || 'DB_INSERT_ERROR';
+      return json({ error: `Could not save the report (${dbCode}). Please retry in a moment.` }, 500);
     }
 
     return json({ ok: true, message: 'Report submitted successfully.' });
