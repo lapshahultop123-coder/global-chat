@@ -3335,6 +3335,7 @@ html[data-theme="mono"] .send-btn svg{
 .settings-password-editor>input::placeholder{font-size:.72rem;letter-spacing:0;color:#8291aa}
 .settings-password-editor>small{color:#92a2bd;font-size:.7rem;line-height:1.4}
 .settings-password-save{min-height:38px;border:1px solid color-mix(in srgb,var(--primary) 45%,transparent);border-radius:10px;background:color-mix(in srgb,var(--primary) 12%,transparent);color:#eaf2ff;font-size:.76rem;font-weight:750}
+.settings-uid-card>.settings-password-save{width:100%;margin-top:8px}
 .settings-password-save:hover:not(:disabled){background:color-mix(in srgb,var(--primary) 22%,transparent)}
 .settings-password-save:disabled{opacity:.48;cursor:not-allowed}
 @media(max-width:520px){.settings-credential-row.account-password-row{align-items:flex-start;flex-direction:column}.settings-account-password{width:100%}.settings-account-password input{flex:1;width:auto}}
