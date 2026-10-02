@@ -741,6 +741,7 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
   const playerRef=useRef<HTMLDivElement|null>(null);
   const audioRef=useRef<HTMLAudioElement|null>(null);
   const objectUrlRef=useRef<string|null>(null);
+  const signedFallbackTriedRef=useRef(false);
   const loadingRef=useRef<Promise<HTMLAudioElement>|null>(null);
   const startingRef=useRef(false);
   useEffect(()=>()=>{const audio=audioRef.current;if(audio){audio.pause();audio.onloadedmetadata=null;audio.ontimeupdate=null;audio.onwaiting=null;audio.onplaying=null;audio.onended=null;audio.onerror=null}audioRef.current=null;if(objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}},[]);
@@ -754,9 +755,12 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
       const remaining=v.expires_at?Math.ceil((new Date(v.expires_at).getTime()-Date.now())/1000):3600;
       if(remaining<=0)throw new Error('This voice message has expired.');
       const {data,error}=await supabase.storage.from(bucket).download(v.storage_path);
-      if(error)throw new Error('Could not download this private voice message. Check room access and retry.');
+      if(error){const status=(error as any).statusCode;throw new Error(`Private voice download failed${status?` (${status})`:''}: ${error.message||'Check room access and retry.'}`)}
       if(!data)throw new Error('Private voice audio is unavailable. Please retry.');
-      url=URL.createObjectURL(data);
+      const storedMime=(data.type||'').split(';')[0].trim().toLowerCase();
+      const fileMime=/\.(m4a|mp4)$/i.test(v.storage_path)||storedMime==='audio/mp4'||storedMime==='audio/x-m4a'?'audio/mp4':'audio/webm';
+      const playableBlob=storedMime===fileMime?data:new Blob([data],{type:fileMime});
+      url=URL.createObjectURL(playableBlob);
       objectUrlRef.current=url;
     }
     else if(bucket!=='voice-messages'){
@@ -776,7 +780,36 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
     a.onwaiting=()=>setBuffering(true);
     a.onplaying=()=>{setBuffering(false);setPlaying(true);setPlayError('')};
     a.onended=()=>{setPlaying(false);setBuffering(false);setCurrent(0)};
-    a.onerror=()=>{if(audioRef.current===a)audioRef.current=null;if(bucket==='private-voice-messages'&&objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}setPlaying(false);setBuffering(false);setPlayError('Audio could not load. Tap play to retry.')};
+    a.onerror=()=>{
+      if(bucket==='private-voice-messages'&&!signedFallbackTriedRef.current&&v.storage_path){
+        signedFallbackTriedRef.current=true;
+        setBuffering(true);
+        const remaining=v.expires_at?Math.ceil((new Date(v.expires_at).getTime()-Date.now())/1000):3600;
+        void supabase.storage.from(bucket).createSignedUrl(v.storage_path,Math.max(1,Math.min(3600,remaining))).then(({data,error})=>{
+          if(audioRef.current!==a)return;
+          if(!error&&data?.signedUrl){
+            if(objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}
+            a.src=data.signedUrl;a.load();setBuffering(false);return;
+          }
+          audioRef.current=null;
+          if(objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}
+          setPlaying(false);setBuffering(false);
+          setPlayError(error?.message?`Private voice playback failed: ${error.message}`:'Audio could not load. Tap play to retry.');
+        }).catch(error=>{
+          if(audioRef.current!==a)return;
+          audioRef.current=null;
+          if(objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}
+          setPlaying(false);setBuffering(false);
+          setPlayError(error instanceof Error?`Private voice playback failed: ${error.message}`:'Audio could not load. Tap play to retry.');
+        });
+        return;
+      }
+      if(audioRef.current===a)audioRef.current=null;
+      if(bucket==='private-voice-messages'&&objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}
+      setPlaying(false);setBuffering(false);
+      const code=a.error?.code;
+      setPlayError(code===4?'This audio format is not supported. Please update the app and retry.':code===2?'Audio download was interrupted. Tap play to retry.':'Audio could not load. Tap play to retry.');
+    };
     a.src=url;a.load();audioRef.current=a;return a;
     })();
     loadingRef.current=request;
@@ -999,8 +1032,9 @@ function PrivateRoomView({profile,room,messages,setMessages,text,setText,sending
     const optimistic={id:tempId,room_id:room.id,user_id:currentUserId,name:profile.name,country:profile.country,subdivision:profile.subdivision,avatar_id:profile.avatarId,audio_url:localUrl,storage_path:null,duration_ms:duration,created_at:new Date().toISOString(),expires_at:new Date(Date.now()+24*60*60*1000).toISOString(),reply_to_message_id:reply?.reply_to_voice_id?null:reply?.id||null,reply_to_voice_id:reply?.reply_to_voice_id||null,reply_to_preview:reply?.body||null,reply_to_name:reply?.name||null,pending:true};
     setVoices(prev=>[...prev,optimistic].sort((a,b)=>a.created_at.localeCompare(b.created_at)));
     try{
-      const userId=currentUserId;if(!userId)throw new Error('Authentication required');const ext=blob.type.includes('mp4')?'m4a':'webm';const path=room.id+'/' +userId+'/private-'+crypto.randomUUID()+'.'+ext;
-      const up=await supabase.storage.from('private-voice-messages').upload(path,blob,{contentType:blob.type||'audio/webm',upsert:false,cacheControl:'0'});
+      const userId=currentUserId;if(!userId)throw new Error('Authentication required');const rawMime=(blob.type||'audio/webm').split(';')[0].trim().toLowerCase();const mime=rawMime==='audio/mp4'||rawMime==='audio/x-m4a'?'audio/mp4':'audio/webm';const ext=mime==='audio/mp4'?'m4a':'webm';const path=room.id+'/' +userId+'/private-'+crypto.randomUUID()+'.'+ext;
+      const normalizedBlob=new Blob([blob],{type:mime});
+      const up=await supabase.storage.from('private-voice-messages').upload(path,normalizedBlob,{contentType:mime,upsert:false,cacheControl:'0'});
       if(up.error)throw up.error;
       const replyToMessageId=reply?.reply_to_voice_id?null:(reply?.id&&!String(reply.id).startsWith('voice-reply-')?reply.id:null);
       const replyToVoiceId=reply?.reply_to_voice_id||null;
@@ -1442,7 +1476,6 @@ if (typeof window !== 'undefined') {
 
 
 /* GLOBAL CHAT voice duration live-time fix v1 */
-
 
 
 
