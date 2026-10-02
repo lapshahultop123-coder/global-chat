@@ -11,6 +11,7 @@ const stylesDir = path.dirname(require.resolve('@dicebear/styles/initials.json')
 const outputDir = path.join(root, 'public', 'avatars');
 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const pickerVariantCount = 35;
+const addedPickerStyles = ['clay', 'constellation', 'gaze', 'voxel-art'];
 const pickerSlugs = JSON.parse(fs.readFileSync(path.join(root, 'src', 'data', 'avatar-picker-style-slugs.json'), 'utf8'));
 const definitions = fs.readdirSync(stylesDir)
   .filter(file => file.endsWith('.json'))
@@ -23,12 +24,13 @@ const definitions = fs.readdirSync(stylesDir)
   .sort((a, b) => a.slug === 'initials' ? -1 : b.slug === 'initials' ? 1 : a.name.localeCompare(b.name));
 
 if (definitions.length !== 61) throw new Error(`Expected 61 DiceBear styles, found ${definitions.length}.`);
-if (pickerSlugs.length !== 24 || !pickerSlugs.includes('initials')) throw new Error('Expected Initials plus the 23 selected avatar styles.');
+if (pickerSlugs.length !== 29 || !pickerSlugs.includes('initials')) throw new Error('Expected Initials plus the 28 selected avatar styles.');
 const definitionBySlug = new Map(definitions.map(item => [item.slug, item]));
 const selectedStyles = pickerSlugs.filter(slug => slug !== 'initials');
-if (selectedStyles.length !== 23 || selectedStyles.some(slug => !definitionBySlug.has(slug))) {
-  throw new Error('The selected avatar style list must contain 23 valid non-Initials styles.');
+if (selectedStyles.length !== 28 || ['critters', ...addedPickerStyles].some(slug => !selectedStyles.includes(slug)) || selectedStyles.some(slug => !definitionBySlug.has(slug))) {
+  throw new Error('The selected avatar style list must contain 28 valid non-Initials styles, including the newly selected styles.');
 }
+const previouslySelectedStyles = selectedStyles.filter(slug => slug !== 'critters' && !addedPickerStyles.includes(slug));
 
 fs.mkdirSync(outputDir, { recursive: true });
 
@@ -37,7 +39,11 @@ const seen = new Set();
 let id = 0;
 const writeUniqueAvatar = (style, seed, label) => {
   const svg = new Avatar(style, { seed, size: 128 }).toString();
-  const hash = createHash('sha256').update(svg).digest('hex');
+  const canonicalSvg = svg
+    .replace(/<metadata\b[^>]*>[\s\S]*?<\/metadata>/g, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/-[0-9a-f]{8}(?=["'])/g, '-HASH');
+  const hash = createHash('sha256').update(canonicalSvg).digest('hex');
   if (seen.has(hash)) return false;
   seen.add(hash);
   id++;
@@ -68,8 +74,8 @@ if (id !== 506) throw new Error(`Expected the stable legacy gallery to end at ID
 
 // Keep the existing variants 9–20 at their original IDs before appending 21–35.
 const extraAvatars = [];
-const appendPickerVariants = (firstVariant, endVariant) => {
-  for (const slug of selectedStyles) {
+const appendPickerVariants = (slugs, firstVariant, endVariant) => {
+  for (const slug of slugs) {
     const item = definitionBySlug.get(slug);
     const style = new Style(item.definition);
     for (let variant = firstVariant; variant < endVariant; variant++) {
@@ -89,11 +95,15 @@ const appendPickerVariants = (firstVariant, endVariant) => {
     }
   }
 };
-appendPickerVariants(8, 20);
+appendPickerVariants(previouslySelectedStyles, 8, 20);
 if (id !== 782) throw new Error(`Expected the original 20-choice gallery to end at ID 782, found ${id}.`);
-appendPickerVariants(20, pickerVariantCount);
+appendPickerVariants(previouslySelectedStyles, 20, pickerVariantCount);
+if (id !== 1127) throw new Error(`Expected the original 23 styles to retain IDs through 1127, found ${id}.`);
+appendPickerVariants(['critters'], 8, pickerVariantCount);
+if (id !== 1154) throw new Error(`Expected Critters variants to retain IDs through 1154, found ${id}.`);
+appendPickerVariants(addedPickerStyles, 8, pickerVariantCount);
 
-if (extraAvatars.length !== 621 || id !== 1127) throw new Error(`Expected 621 new variants and 1127 total assets; got ${extraAvatars.length} and ${id}.`);
+if (extraAvatars.length !== 756 || id !== 1262) throw new Error(`Expected 756 picker variants and 1262 total assets; got ${extraAvatars.length} and ${id}.`);
 
 fs.writeFileSync(path.join(root, 'src', 'data', 'avatar-styles.json'), `${JSON.stringify(styleCatalog, null, 2)}\n`, 'utf8');
 fs.writeFileSync(path.join(root, 'src', 'data', 'avatar-extra.json'), `${JSON.stringify(extraAvatars, null, 2)}\n`, 'utf8');
@@ -117,4 +127,4 @@ for (const file of fs.readdirSync(outputDir)) {
   const match = /^avatar-(\d+)\.svg$/.exec(file);
   if (match && Number(match[1]) > id) fs.unlinkSync(path.join(outputDir, file));
 }
-console.log(`Generated ${id} globally unique SVGs; ${extraAvatars.length} added across 23 styles, with 35 per style. Initials has A–Z only.`);
+console.log(`Generated ${id} globally unique SVGs; ${extraAvatars.length} added across 28 styles, with 35 per style. Initials has A–Z only.`);

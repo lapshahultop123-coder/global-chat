@@ -9,7 +9,7 @@ const bad = ['fuck','fucking','shit','bitch','bastard','asshole','dick','pussy',
 const normalize = (s: string) => s.normalize('NFKC').toLowerCase().replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/[^a-z0-9]+/g,'').replace(/(.)\1+/g,'$1');
 function englishOnly(s:string){ let i=0; while(i<s.length){ let matched=false; for(const emoji of allowedEmoji){ if(s.startsWith(emoji,i)){ i+=emoji.length; matched=true; break; } } if(matched) continue; const cp=s.codePointAt(i)!; const ch=String.fromCodePoint(cp); if(/[A-Za-z0-9\s\p{P}\p{S}]/u.test(ch)){ i+=ch.length; continue; } return false; } return true; }
 function offensive(s:string){ const n=normalize(s); return bad.some(w=>n.includes(w)); }
-function okProfile(p:any){ const c=iso31661.find(x=>x.state==='assigned'&&x.alpha2===p.country); const sub=iso31662.find(x=>x.code===p.subdivision && x.code.startsWith(`${p.country}-`)); return !!c&&!!sub&&Number.isInteger(p.avatarId)&&p.avatarId>=1&&p.avatarId<=1127&&typeof p.name==='string'&&p.name.trim().length>=2&&p.name.trim().length<=32&&p.agreed===true; }
+function okProfile(p:any){ const c=iso31661.find(x=>x.state==='assigned'&&x.alpha2===p.country); const sub=iso31662.find(x=>x.code===p.subdivision && x.code.startsWith(`${p.country}-`)); return !!c&&!!sub&&Number.isInteger(p.avatarId)&&p.avatarId>=1&&p.avatarId<=1262&&typeof p.name==='string'&&p.name.trim().length>=2&&p.name.trim().length<=32&&p.agreed===true; }
 Deno.serve(async(req)=>{
   if(req.method==='OPTIONS') return new Response('ok',{headers:corsHeaders});
   try {

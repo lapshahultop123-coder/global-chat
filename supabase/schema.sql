@@ -30,7 +30,7 @@ create table if not exists public.profiles (
   name not null check (char_length(name) between 2 and 32),
   country text not null,
   subdivision text not null,
-  avatar_id integer not null check (avatar_id between 1 and 1127),
+  avatar_id integer not null check (avatar_id between 1 and 1262),
   theme_id text not null,
   agreed boolean not null default false,
   updated_at timestamptz not null default now()
@@ -42,7 +42,7 @@ create table if not exists public.messages (
   name text not null,
   country text not null,
   subdivision text not null,
-  avatar_id integer not null check (avatar_id between 1 and 1127),
+  avatar_id integer not null check (avatar_id between 1 and 1262),
   body text not null check (char_length(body) between 1 and 500),
   created_at timestamptz not null default now(),
   expires_at timestamptz not null default (now() + interval '5 minutes')
@@ -99,7 +99,7 @@ begin
   if p_user_id is null or p_name is null or p_country is null or p_subdivision is null then
     raise exception 'invalid_profile';
   end if;
-  if p_avatar_id < 1 or p_avatar_id > 1127 then raise exception 'invalid_avatar'; end if;
+  if p_avatar_id < 1 or p_avatar_id > 1262 then raise exception 'invalid_avatar'; end if;
   if char_length(p_name) < 2 or char_length(p_name) > 32 then raise exception 'invalid_name'; end if;
   if char_length(p_body) < 1 or char_length(p_body) > 500 then raise exception 'message_length'; end if;
 
@@ -160,11 +160,11 @@ create policy "global_chat_presence_write" on realtime.messages for insert to au
 
 -- Stream only the tables the UI needs.
 do $$ begin
-  alter publication supabase_realtime add table public.messages;
-exception when duplicate_object then null; end $$;
-do $$ begin
-  alter publication supabase_realtime add table public.message_reactions;
-exception when duplicate_object then null; end $$;
+  if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='messages') then alter publication supabase_realtime add table public.messages; end if;
+  if to_regclass('public.voice_messages') is not null and not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='voice_messages') then alter publication supabase_realtime add table public.voice_messages; end if;
+  if not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='message_reactions') then alter publication supabase_realtime add table public.message_reactions; end if;
+  if to_regclass('public.voice_reactions') is not null and not exists(select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='voice_reactions') then alter publication supabase_realtime add table public.voice_reactions; end if;
+end $$;
 
 -- Expired messages are never visible through RLS. This sweep removes them physically.
 -- Enable pg_cron in Supabase Dashboard if it is not already enabled, then run this schedule.

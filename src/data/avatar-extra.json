@@ -4345,5 +4345,950 @@
     "style": "Waves",
     "slug": "waves",
     "variant": 34
+  },
+  {
+    "id": 1128,
+    "src": "/avatars/avatar-1128.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 8
+  },
+  {
+    "id": 1129,
+    "src": "/avatars/avatar-1129.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 9
+  },
+  {
+    "id": 1130,
+    "src": "/avatars/avatar-1130.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 10
+  },
+  {
+    "id": 1131,
+    "src": "/avatars/avatar-1131.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 11
+  },
+  {
+    "id": 1132,
+    "src": "/avatars/avatar-1132.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 12
+  },
+  {
+    "id": 1133,
+    "src": "/avatars/avatar-1133.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 13
+  },
+  {
+    "id": 1134,
+    "src": "/avatars/avatar-1134.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 14
+  },
+  {
+    "id": 1135,
+    "src": "/avatars/avatar-1135.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 15
+  },
+  {
+    "id": 1136,
+    "src": "/avatars/avatar-1136.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 16
+  },
+  {
+    "id": 1137,
+    "src": "/avatars/avatar-1137.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 17
+  },
+  {
+    "id": 1138,
+    "src": "/avatars/avatar-1138.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 18
+  },
+  {
+    "id": 1139,
+    "src": "/avatars/avatar-1139.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 19
+  },
+  {
+    "id": 1140,
+    "src": "/avatars/avatar-1140.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 20
+  },
+  {
+    "id": 1141,
+    "src": "/avatars/avatar-1141.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 21
+  },
+  {
+    "id": 1142,
+    "src": "/avatars/avatar-1142.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 22
+  },
+  {
+    "id": 1143,
+    "src": "/avatars/avatar-1143.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 23
+  },
+  {
+    "id": 1144,
+    "src": "/avatars/avatar-1144.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 24
+  },
+  {
+    "id": 1145,
+    "src": "/avatars/avatar-1145.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 25
+  },
+  {
+    "id": 1146,
+    "src": "/avatars/avatar-1146.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 26
+  },
+  {
+    "id": 1147,
+    "src": "/avatars/avatar-1147.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 27
+  },
+  {
+    "id": 1148,
+    "src": "/avatars/avatar-1148.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 28
+  },
+  {
+    "id": 1149,
+    "src": "/avatars/avatar-1149.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 29
+  },
+  {
+    "id": 1150,
+    "src": "/avatars/avatar-1150.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 30
+  },
+  {
+    "id": 1151,
+    "src": "/avatars/avatar-1151.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 31
+  },
+  {
+    "id": 1152,
+    "src": "/avatars/avatar-1152.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 32
+  },
+  {
+    "id": 1153,
+    "src": "/avatars/avatar-1153.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 33
+  },
+  {
+    "id": 1154,
+    "src": "/avatars/avatar-1154.svg",
+    "style": "Critters",
+    "slug": "critters",
+    "variant": 34
+  },
+  {
+    "id": 1155,
+    "src": "/avatars/avatar-1155.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 8
+  },
+  {
+    "id": 1156,
+    "src": "/avatars/avatar-1156.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 9
+  },
+  {
+    "id": 1157,
+    "src": "/avatars/avatar-1157.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 10
+  },
+  {
+    "id": 1158,
+    "src": "/avatars/avatar-1158.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 11
+  },
+  {
+    "id": 1159,
+    "src": "/avatars/avatar-1159.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 12
+  },
+  {
+    "id": 1160,
+    "src": "/avatars/avatar-1160.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 13
+  },
+  {
+    "id": 1161,
+    "src": "/avatars/avatar-1161.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 14
+  },
+  {
+    "id": 1162,
+    "src": "/avatars/avatar-1162.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 15
+  },
+  {
+    "id": 1163,
+    "src": "/avatars/avatar-1163.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 16
+  },
+  {
+    "id": 1164,
+    "src": "/avatars/avatar-1164.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 17
+  },
+  {
+    "id": 1165,
+    "src": "/avatars/avatar-1165.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 18
+  },
+  {
+    "id": 1166,
+    "src": "/avatars/avatar-1166.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 19
+  },
+  {
+    "id": 1167,
+    "src": "/avatars/avatar-1167.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 20
+  },
+  {
+    "id": 1168,
+    "src": "/avatars/avatar-1168.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 21
+  },
+  {
+    "id": 1169,
+    "src": "/avatars/avatar-1169.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 22
+  },
+  {
+    "id": 1170,
+    "src": "/avatars/avatar-1170.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 23
+  },
+  {
+    "id": 1171,
+    "src": "/avatars/avatar-1171.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 24
+  },
+  {
+    "id": 1172,
+    "src": "/avatars/avatar-1172.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 25
+  },
+  {
+    "id": 1173,
+    "src": "/avatars/avatar-1173.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 26
+  },
+  {
+    "id": 1174,
+    "src": "/avatars/avatar-1174.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 27
+  },
+  {
+    "id": 1175,
+    "src": "/avatars/avatar-1175.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 28
+  },
+  {
+    "id": 1176,
+    "src": "/avatars/avatar-1176.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 29
+  },
+  {
+    "id": 1177,
+    "src": "/avatars/avatar-1177.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 30
+  },
+  {
+    "id": 1178,
+    "src": "/avatars/avatar-1178.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 31
+  },
+  {
+    "id": 1179,
+    "src": "/avatars/avatar-1179.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 32
+  },
+  {
+    "id": 1180,
+    "src": "/avatars/avatar-1180.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 33
+  },
+  {
+    "id": 1181,
+    "src": "/avatars/avatar-1181.svg",
+    "style": "Clay",
+    "slug": "clay",
+    "variant": 34
+  },
+  {
+    "id": 1182,
+    "src": "/avatars/avatar-1182.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 8
+  },
+  {
+    "id": 1183,
+    "src": "/avatars/avatar-1183.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 9
+  },
+  {
+    "id": 1184,
+    "src": "/avatars/avatar-1184.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 10
+  },
+  {
+    "id": 1185,
+    "src": "/avatars/avatar-1185.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 11
+  },
+  {
+    "id": 1186,
+    "src": "/avatars/avatar-1186.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 12
+  },
+  {
+    "id": 1187,
+    "src": "/avatars/avatar-1187.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 13
+  },
+  {
+    "id": 1188,
+    "src": "/avatars/avatar-1188.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 14
+  },
+  {
+    "id": 1189,
+    "src": "/avatars/avatar-1189.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 15
+  },
+  {
+    "id": 1190,
+    "src": "/avatars/avatar-1190.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 16
+  },
+  {
+    "id": 1191,
+    "src": "/avatars/avatar-1191.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 17
+  },
+  {
+    "id": 1192,
+    "src": "/avatars/avatar-1192.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 18
+  },
+  {
+    "id": 1193,
+    "src": "/avatars/avatar-1193.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 19
+  },
+  {
+    "id": 1194,
+    "src": "/avatars/avatar-1194.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 20
+  },
+  {
+    "id": 1195,
+    "src": "/avatars/avatar-1195.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 21
+  },
+  {
+    "id": 1196,
+    "src": "/avatars/avatar-1196.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 22
+  },
+  {
+    "id": 1197,
+    "src": "/avatars/avatar-1197.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 23
+  },
+  {
+    "id": 1198,
+    "src": "/avatars/avatar-1198.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 24
+  },
+  {
+    "id": 1199,
+    "src": "/avatars/avatar-1199.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 25
+  },
+  {
+    "id": 1200,
+    "src": "/avatars/avatar-1200.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 26
+  },
+  {
+    "id": 1201,
+    "src": "/avatars/avatar-1201.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 27
+  },
+  {
+    "id": 1202,
+    "src": "/avatars/avatar-1202.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 28
+  },
+  {
+    "id": 1203,
+    "src": "/avatars/avatar-1203.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 29
+  },
+  {
+    "id": 1204,
+    "src": "/avatars/avatar-1204.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 30
+  },
+  {
+    "id": 1205,
+    "src": "/avatars/avatar-1205.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 31
+  },
+  {
+    "id": 1206,
+    "src": "/avatars/avatar-1206.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 32
+  },
+  {
+    "id": 1207,
+    "src": "/avatars/avatar-1207.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 33
+  },
+  {
+    "id": 1208,
+    "src": "/avatars/avatar-1208.svg",
+    "style": "Constellation",
+    "slug": "constellation",
+    "variant": 34
+  },
+  {
+    "id": 1209,
+    "src": "/avatars/avatar-1209.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 8
+  },
+  {
+    "id": 1210,
+    "src": "/avatars/avatar-1210.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 9
+  },
+  {
+    "id": 1211,
+    "src": "/avatars/avatar-1211.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 10
+  },
+  {
+    "id": 1212,
+    "src": "/avatars/avatar-1212.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 11
+  },
+  {
+    "id": 1213,
+    "src": "/avatars/avatar-1213.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 12
+  },
+  {
+    "id": 1214,
+    "src": "/avatars/avatar-1214.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 13
+  },
+  {
+    "id": 1215,
+    "src": "/avatars/avatar-1215.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 14
+  },
+  {
+    "id": 1216,
+    "src": "/avatars/avatar-1216.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 15
+  },
+  {
+    "id": 1217,
+    "src": "/avatars/avatar-1217.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 16
+  },
+  {
+    "id": 1218,
+    "src": "/avatars/avatar-1218.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 17
+  },
+  {
+    "id": 1219,
+    "src": "/avatars/avatar-1219.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 18
+  },
+  {
+    "id": 1220,
+    "src": "/avatars/avatar-1220.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 19
+  },
+  {
+    "id": 1221,
+    "src": "/avatars/avatar-1221.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 20
+  },
+  {
+    "id": 1222,
+    "src": "/avatars/avatar-1222.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 21
+  },
+  {
+    "id": 1223,
+    "src": "/avatars/avatar-1223.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 22
+  },
+  {
+    "id": 1224,
+    "src": "/avatars/avatar-1224.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 23
+  },
+  {
+    "id": 1225,
+    "src": "/avatars/avatar-1225.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 24
+  },
+  {
+    "id": 1226,
+    "src": "/avatars/avatar-1226.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 25
+  },
+  {
+    "id": 1227,
+    "src": "/avatars/avatar-1227.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 26
+  },
+  {
+    "id": 1228,
+    "src": "/avatars/avatar-1228.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 27
+  },
+  {
+    "id": 1229,
+    "src": "/avatars/avatar-1229.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 28
+  },
+  {
+    "id": 1230,
+    "src": "/avatars/avatar-1230.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 29
+  },
+  {
+    "id": 1231,
+    "src": "/avatars/avatar-1231.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 30
+  },
+  {
+    "id": 1232,
+    "src": "/avatars/avatar-1232.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 31
+  },
+  {
+    "id": 1233,
+    "src": "/avatars/avatar-1233.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 32
+  },
+  {
+    "id": 1234,
+    "src": "/avatars/avatar-1234.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 33
+  },
+  {
+    "id": 1235,
+    "src": "/avatars/avatar-1235.svg",
+    "style": "Gaze",
+    "slug": "gaze",
+    "variant": 34
+  },
+  {
+    "id": 1236,
+    "src": "/avatars/avatar-1236.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 8
+  },
+  {
+    "id": 1237,
+    "src": "/avatars/avatar-1237.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 9
+  },
+  {
+    "id": 1238,
+    "src": "/avatars/avatar-1238.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 10
+  },
+  {
+    "id": 1239,
+    "src": "/avatars/avatar-1239.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 11
+  },
+  {
+    "id": 1240,
+    "src": "/avatars/avatar-1240.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 12
+  },
+  {
+    "id": 1241,
+    "src": "/avatars/avatar-1241.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 13
+  },
+  {
+    "id": 1242,
+    "src": "/avatars/avatar-1242.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 14
+  },
+  {
+    "id": 1243,
+    "src": "/avatars/avatar-1243.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 15
+  },
+  {
+    "id": 1244,
+    "src": "/avatars/avatar-1244.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 16
+  },
+  {
+    "id": 1245,
+    "src": "/avatars/avatar-1245.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 17
+  },
+  {
+    "id": 1246,
+    "src": "/avatars/avatar-1246.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 18
+  },
+  {
+    "id": 1247,
+    "src": "/avatars/avatar-1247.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 19
+  },
+  {
+    "id": 1248,
+    "src": "/avatars/avatar-1248.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 20
+  },
+  {
+    "id": 1249,
+    "src": "/avatars/avatar-1249.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 21
+  },
+  {
+    "id": 1250,
+    "src": "/avatars/avatar-1250.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 22
+  },
+  {
+    "id": 1251,
+    "src": "/avatars/avatar-1251.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 23
+  },
+  {
+    "id": 1252,
+    "src": "/avatars/avatar-1252.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 24
+  },
+  {
+    "id": 1253,
+    "src": "/avatars/avatar-1253.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 25
+  },
+  {
+    "id": 1254,
+    "src": "/avatars/avatar-1254.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 26
+  },
+  {
+    "id": 1255,
+    "src": "/avatars/avatar-1255.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 27
+  },
+  {
+    "id": 1256,
+    "src": "/avatars/avatar-1256.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 28
+  },
+  {
+    "id": 1257,
+    "src": "/avatars/avatar-1257.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 29
+  },
+  {
+    "id": 1258,
+    "src": "/avatars/avatar-1258.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 30
+  },
+  {
+    "id": 1259,
+    "src": "/avatars/avatar-1259.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 31
+  },
+  {
+    "id": 1260,
+    "src": "/avatars/avatar-1260.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 32
+  },
+  {
+    "id": 1261,
+    "src": "/avatars/avatar-1261.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 33
+  },
+  {
+    "id": 1262,
+    "src": "/avatars/avatar-1262.svg",
+    "style": "Voxel Art",
+    "slug": "voxel-art",
+    "variant": 34
   }
 ]

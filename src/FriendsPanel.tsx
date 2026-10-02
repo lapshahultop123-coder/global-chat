@@ -150,16 +150,26 @@ export default function FriendsPanel({userId,profile,onClose,onUnreadChange,soun
     void markRead(selected.user_id);
    }catch(e:any){if(live){setError(e?.message||'Could not load messages.');if(firstFetch){firstFetch=false;setChatLoading(false)}}}
   };
+  let postgresChangesReady=false;
   const ch=supabase.channel(`friend-chat-${[userId,selected.user_id].sort().join('-')}`)
+   .on('system',{},(payload:any)=>{
+    if(payload?.extension!=='postgres_changes')return;
+    postgresChangesReady=payload.status==='ok';
+    if(!postgresChangesReady)void fetchMessages();
+   })
    .on('postgres_changes',{event:'INSERT',schema:'public',table:'friend_messages'},(payload:any)=>acceptIncoming(payload.new,'text'))
    .on('postgres_changes',{event:'DELETE',schema:'public',table:'friend_messages'},(payload:any)=>setMessages(prev=>prev.filter(m=>m.id!==payload.old.id)))
    .on('postgres_changes',{event:'INSERT',schema:'public',table:'friend_voice_messages'},(payload:any)=>acceptIncoming(payload.new,'voice'))
    .on('postgres_changes',{event:'DELETE',schema:'public',table:'friend_voice_messages'},(payload:any)=>setMessages(prev=>prev.filter(m=>m.id!==payload.old.id)))
    .on('broadcast',{event:'typing'},({payload}:any)=>setFriendTyping(payload?.userId===selected.user_id&&!!payload?.active))
-   .subscribe();
+   .subscribe((status:string,subscribeError:any)=>{
+    if(status==='SUBSCRIBED'){postgresChangesReady=true;void fetchMessages()}
+    else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){postgresChangesReady=false;if(subscribeError)console.warn('Friend chat realtime connection issue:',subscribeError)}
+   });
   chatChannel.current=ch;
   void fetchMessages();
-  return()=>{live=false;setChatLoading(false);chatChannel.current=null;void supabase.removeChannel(ch)};
+  const fallback=window.setInterval(()=>{if(!postgresChangesReady)void fetchMessages()},5000);
+  return()=>{live=false;window.clearInterval(fallback);setChatLoading(false);chatChannel.current=null;void supabase.removeChannel(ch)};
  },[selected?.user_id,userId,warmVoiceUrl]);
  useEffect(()=>{const el=listRef.current;if(!el||!stickToBottom.current)return;const behavior=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';const frame=window.requestAnimationFrame(()=>el.scrollTo({top:el.scrollHeight,behavior}));return()=>window.cancelAnimationFrame(frame)},[messages]);
  const sendRequest=async(id:string)=>{setBusy(true);setError('');const {error}=await supabase.rpc('send_friend_request',{p_recipient_id:id});if(error)setError(error.message);else await load();setBusy(false)};

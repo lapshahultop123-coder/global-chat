@@ -213,6 +213,7 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
     let mounted=true;
     let channel:any;
     let refreshTimer:number|undefined;
+    let postgresChangesReady=false;
     const removeExpired=()=>setMessages(prev=>{
       const now=Date.now();
       const next=prev.filter(m=>new Date(m.expires_at).getTime()>now);
@@ -221,7 +222,7 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
     const refreshNow=async()=>{await refresh();removeExpired()};
     const onVisibility=()=>{if(document.visibilityState==='visible')void refreshNow()};
     const onOnline=()=>{if(!mounted)return;setConnectionState('reconnecting');setConnected(false);void supabase.realtime.connect();void refreshNow()};
-    const onOffline=()=>{if(!mounted)return;setConnected(false);setConnectionState('offline')};
+    const onOffline=()=>{if(!mounted)return;postgresChangesReady=false;setConnected(false);setConnectionState('offline')};
     const presenceUsers=()=>{
       if(!channel)return;
       const state=channel.presenceState() as Record<string,any[]>;
@@ -242,6 +243,17 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
       channel=supabase.channel('global-chat',{config:{presence:{key:selfId},broadcast:{self:false,ack:true}}});
       channelRef.current=channel;
       channel
+        .on('system',{},(payload:any)=>{
+          if(payload?.extension!=='postgres_changes')return;
+          const wasReady=postgresChangesReady;
+          postgresChangesReady=payload.status==='ok';
+          if(!postgresChangesReady){
+            console.warn('Global chat database change subscription is unavailable:',payload.message||payload.status);
+            void refreshNow();
+          }else if(!wasReady){
+            void refreshNow();
+          }
+        })
         .on('presence',{event:'sync'},presenceUsers)
         .on('presence',{event:'join'},presenceUsers)
         .on('presence',{event:'leave'},presenceUsers)
@@ -290,18 +302,22 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
         .on('postgres_changes',{event:'DELETE',schema:'public',table:'voice_messages'},(payload:any)=>{delete voiceRenderKeysRef.current[payload.old.id];setVoiceMessages(prev=>prev.filter(v=>v.id!==payload.old.id));if(playingVoiceId===payload.old.id){voiceAudioRef.current?.pause();setPlayingVoiceId(null)}})
         .on('postgres_changes',{event:'*',schema:'public',table:'message_reactions'},()=>refreshReactions(messageIdsRef.current,selfId))
         .on('postgres_changes',{event:'*',schema:'public',table:'voice_reactions'},()=>refreshVoiceReactions(voiceMessages.map(v=>v.id),selfId))
-        .subscribe(async (status:any)=>{
+        .subscribe(async (status:any,subscribeError:any)=>{
           if(status==='SUBSCRIBED'){
             setConnected(true);
             setConnectionState('connected');
+            postgresChangesReady=true;
             await channel.track({online_at:new Date().toISOString(),typing:false});
             presenceUsers();
-          }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+            void refreshNow();
+          }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+            postgresChangesReady=false;
+            if(subscribeError)console.warn('Global chat realtime connection issue:',subscribeError);
             setConnected(false);
             setConnectionState('reconnecting');
           }
         });
-      refreshTimer=window.setInterval(()=>void refreshNow(),15000);
+      refreshTimer=window.setInterval(()=>{if(!postgresChangesReady)void refreshNow()},5000);
       window.addEventListener('online',onOnline);
       window.addEventListener('offline',onOffline);
       document.addEventListener('visibilitychange',onVisibility);
@@ -413,7 +429,13 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
     try{localStorage.setItem(PRIVATE_CHAT_LOCAL_KEY,JSON.stringify(room))}catch{}
     if(privateChannelRef.current)void supabase.removeChannel(privateChannelRef.current);
     if(privatePollRef.current)window.clearInterval(privatePollRef.current);
+    let privateChangesReady=false;
     const ch:any=supabase.channel('private-room-'+room.id,{config:{presence:{key:authUserId},broadcast:{self:false,ack:true}}})
+      .on('system',{},(payload:any)=>{
+        if(payload?.extension!=='postgres_changes')return;
+        privateChangesReady=payload.status==='ok';
+        if(!privateChangesReady)void loadPrivateMessages(room.id);
+      })
       .on('presence',{event:'sync'},()=>{
         const state=ch.presenceState() as Record<string,any[]>;
         setPrivateOnline(Object.keys(state).length);
@@ -444,6 +466,7 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
     privateChannelRef.current=ch;
     ch.subscribe(async (status:any)=>{
       if(status==='SUBSCRIBED'){
+        privateChangesReady=true;
         try{
           await ch.track({
             userId:authUserId,
@@ -452,15 +475,17 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
           });
           const state=ch.presenceState() as Record<string,any[]>;
           setPrivateOnline(Object.keys(state).length);
+          void loadPrivateMessages(room.id);
         }catch{
           setPrivateOnline(0);
         }
       }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+        privateChangesReady=false;
         setPrivateOnline(0);
       }
     });
     void loadPrivateMessages(room.id);
-    privatePollRef.current=window.setInterval(()=>{void (async()=>{const {data,error}=await supabase.from('private_room_members').select('user_id').eq('room_id',room.id).eq('user_id',authUserId).maybeSingle();if(!error&&!data){closePrivateRoom()}})()},5000);
+    privatePollRef.current=window.setInterval(()=>{if(!privateChangesReady)void loadPrivateMessages(room.id);void (async()=>{const {data,error}=await supabase.from('private_room_members').select('user_id').eq('room_id',room.id).eq('user_id',authUserId).maybeSingle();if(!error&&!data){closePrivateRoom()}})()},5000);
   };
   useEffect(()=>{
     if(authUserId&&privateRoom?.id)void enterPrivateRoom(privateRoom);
@@ -742,13 +767,22 @@ function PrivateRoomView({profile,room,messages,setMessages,text,setText,sending
 
   useEffect(()=>{
     void loadVoices();
+    let privateVoiceChangesReady=false;
     const ch=supabase.channel('private-media-'+room.id)
+      .on('system',{},(payload:any)=>{
+        if(payload?.extension!=='postgres_changes')return;
+        privateVoiceChangesReady=payload.status==='ok';
+        if(!privateVoiceChangesReady)void loadVoices();
+      })
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'private_voice_messages',filter:'room_id=eq.'+room.id},
         payload=>{if(localDeleted['v:'+payload.new.id])return;const v=payload.new as any;setVoices(prev=>prev.some(x=>x.id===v.id)?prev:[...prev,v].sort((a,b)=>a.created_at.localeCompare(b.created_at)))})
       .on('postgres_changes',{event:'DELETE',schema:'public',table:'private_voice_messages',filter:'room_id=eq.'+room.id},
         payload=>setVoices(prev=>prev.filter(v=>v.id!==payload.old.id)))
-      .subscribe();
-    const poll=window.setInterval(()=>void loadVoices(),8000);
+      .subscribe((status:string,subscribeError:any)=>{
+        if(status==='SUBSCRIBED'){privateVoiceChangesReady=true;void loadVoices()}
+        else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){privateVoiceChangesReady=false;if(subscribeError)console.warn('Private voice realtime connection issue:',subscribeError)}
+      });
+    const poll=window.setInterval(()=>{if(!privateVoiceChangesReady)void loadVoices()},5000);
     return()=>{void supabase.removeChannel(ch);window.clearInterval(poll);audioRef.current?.pause();if(timerRef.current)window.clearInterval(timerRef.current)};
   },[room.id,localDeleted]);
 

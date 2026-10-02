@@ -20,10 +20,13 @@ const reactions=['\u{1F44D}','\u{2764}\u{FE0F}','\u{1F602}','\u{1F62E}','\u{1F62
 const releaseAudit=process.env.RELEASE_AUDIT==='1';
 const ok=(name,test)=>checks.push([name,!!test]);
 ok('61 stable legacy styles and 506 original avatar IDs; A-Z only in Initials',avatarStyles.length===61&&avatarCount===506&&avatarStyles[0].slug==='initials'&&avatarStyles[0].count===26&&avatarStyles.slice(1).every(style=>style.count===8));
-ok('1127 unique SVG assets, including every generated variant',Array.from({length:1127},(_,i)=>fs.existsSync(path.join(root,'public','avatars',`avatar-${i+1}.svg`))).every(Boolean)&&new Set(Array.from({length:1127},(_,i)=>fs.readFileSync(path.join(root,'public','avatars',`avatar-${i+1}.svg`),'utf8'))).size===1127);
-ok('831 picker choices: only 23 selected styles plus A-Z, 35 unique outputs per non-Initials style',avatarPickerSlugs.length===24&&new Set(avatarPickerSlugs).size===24&&avatarPickerSlugs.includes('initials')&&avatarPickerSlugs.filter(slug=>slug!=='initials').length===23&&avatarExtras.length===621&&26+(avatarPickerSlugs.length-1)*35===831&&avatarPickerSlugs.filter(slug=>slug!=='initials').every(slug=>extraCounts[slug]===27)&&avatarPickerSlugs.filter(slug=>slug!=='initials').every(slug=>avatarStyles.find(style=>style.slug===slug)?.count===8)&&avatarPickerSlugs.filter(slug=>slug!=='initials').every(slug=>avatarExtras.filter(avatar=>avatar.slug===slug).every(avatar=>avatar.variant>=8&&avatar.variant<35)));
-ok('new avatar IDs are stable and sequential from 507 to 1127',avatarExtras.length===621&&avatarExtras.every((avatar,index)=>avatar.id===507+index&&avatar.src===`/avatars/avatar-${avatar.id}.svg`));
-ok('existing avatar choices 9-20 keep IDs 507-782; new choices append as IDs 783-1127',avatarExtras.filter(avatar=>avatar.id<=782).length===276&&avatarExtras.filter(avatar=>avatar.id<=782).every(avatar=>avatar.variant>=8&&avatar.variant<20)&&avatarExtras.filter(avatar=>avatar.id>=783).length===345&&avatarExtras.filter(avatar=>avatar.id>=783).every(avatar=>avatar.variant>=20&&avatar.variant<35));
+const avatarSvgs=Array.from({length:1262},(_,i)=>fs.existsSync(path.join(root,'public','avatars',`avatar-${i+1}.svg`))?fs.readFileSync(path.join(root,'public','avatars',`avatar-${i+1}.svg`),'utf8'):'');
+ok('1262 unique SVG assets, including every generated variant',avatarSvgs.every(Boolean)&&new Set(avatarSvgs).size===1262);
+const canonicalAvatarSvgs=avatarSvgs.map(svg=>svg.replace(/<metadata\b[^>]*>[\s\S]*?<\/metadata>/g,'').replace(/<!--[\s\S]*?-->/g,'').replace(/-[0-9a-f]{8}(?=["'])/g,'-HASH'));
+ok('all avatar artwork stays visually unique after removing DiceBear metadata and generated IDs',canonicalAvatarSvgs.every(Boolean)&&new Set(canonicalAvatarSvgs).size===1262);
+ok('1006 picker choices: only 28 selected styles plus A-Z, 35 unique outputs per non-Initials style',avatarPickerSlugs.length===29&&new Set(avatarPickerSlugs).size===29&&avatarPickerSlugs.includes('initials')&&['critters','clay','constellation','gaze','voxel-art'].every(slug=>avatarPickerSlugs.includes(slug))&&avatarPickerSlugs.filter(slug=>slug!=='initials').length===28&&avatarExtras.length===756&&26+(avatarPickerSlugs.length-1)*35===1006&&avatarPickerSlugs.filter(slug=>slug!=='initials').every(slug=>extraCounts[slug]===27)&&avatarPickerSlugs.filter(slug=>slug!=='initials').every(slug=>avatarStyles.find(style=>style.slug===slug)?.count===8)&&avatarPickerSlugs.filter(slug=>slug!=='initials').every(slug=>avatarExtras.filter(avatar=>avatar.slug===slug).every(avatar=>avatar.variant>=8&&avatar.variant<35)));
+ok('new avatar IDs are stable and sequential from 507 to 1262',avatarExtras.length===756&&avatarExtras.every((avatar,index)=>avatar.id===507+index&&avatar.src===`/avatars/avatar-${avatar.id}.svg`));
+ok('existing IDs through 1154 stay stable; new styles append as IDs 1155-1262',avatarExtras.filter(avatar=>avatar.id<=782).length===276&&avatarExtras.filter(avatar=>avatar.id<=782).every(avatar=>avatar.variant>=8&&avatar.variant<20)&&avatarExtras.filter(avatar=>avatar.id>=783&&avatar.id<=1127).length===345&&avatarExtras.filter(avatar=>avatar.id>=783&&avatar.id<=1127).every(avatar=>avatar.variant>=20&&avatar.variant<35)&&avatarExtras.filter(avatar=>avatar.slug==='critters').length===27&&avatarExtras.filter(avatar=>avatar.slug==='critters').every((avatar,index)=>avatar.id===1128+index&&avatar.variant===8+index)&&['clay','constellation','gaze','voxel-art'].every((slug,styleIndex)=>avatarExtras.filter(avatar=>avatar.slug===slug).length===27&&avatarExtras.filter(avatar=>avatar.slug===slug).every((avatar,index)=>avatar.id===1155+styleIndex*27+index&&avatar.variant===8+index)));
 
 ok('25 themes',themeIds.length===25&&new Set(themeIds).size===25);
 ok('exactly 8 reactions',reactions.length===8);
@@ -37,7 +40,10 @@ ok('server-side 3-in-10 rate limit',/interval '10 seconds'/.test(schema)&&/recen
 ok('atomic per-user rate-limit lock',/pg_advisory_xact_lock/.test(schema));
 ok('5-minute individual expiry',/interval '5 minutes'/.test(schema)&&/expires_at/.test(schema));
 ok('expired rows physically sweepable',/delete from public\.messages where expires_at <= now\(\)/.test(schema));
-ok('1127 avatar server and database validation',/avatar_id integer not null check \(avatar_id between 1 and 1127\)/.test(schema)&&/avatarId<=1127/.test(send)&&/avatarId > 1127/.test(profile)&&read('supabase/migrations/20261002100000_expand_avatar_choices_to_1127.sql').includes('avatar_id between 1 and 1127'));
+ok('1262 avatar server and database validation',/avatar_id integer not null check \(avatar_id between 1 and 1262\)/.test(schema)&&/avatarId<=1262/.test(send)&&/avatarId > 1262/.test(profile)&&read('supabase/migrations/20261002130000_expand_avatar_choices_to_1262.sql').includes('avatar_id between 1 and 1262'));
+ok('Realtime publication includes every table listened to by the global chat',/public\.messages[\s\S]*public\.voice_messages[\s\S]*public\.message_reactions[\s\S]*public\.voice_reactions/.test(schema)&&read('supabase/migrations/20261002110000_enable_public_chat_realtime.sql').includes("tablename='voice_reactions'"));
+ok('Realtime recovery refreshes on subscription and polls only while database changes are unhealthy',/\.on\('system',\s*\{\}/.test(app)&&/void refreshNow\(\)/.test(app)&&/if\(!postgresChangesReady\)void refreshNow\(\)/.test(app));
+ok('private and friend chats catch up after Realtime reconnect and use fallback only when degraded',/if\(!privateChangesReady\)void loadPrivateMessages/.test(app)&&/if\(!privateVoiceChangesReady\)void loadVoices/.test(app)&&/if\(!postgresChangesReady\)void fetchMessages\(\)/.test(read('src/FriendsPanel.tsx')));
 ok('fixed theme server validation',/themes\.includes\(p\.themeId\)/.test(profile));
 ok('country/subdivision server validation',/iso31661/.test(send)&&/iso31662/.test(send)&&/code\.startsWith\(`\$\{p\.country\}-`\)/.test(send));
 ok('exact reaction DB constraint',reactions.every(x=>schema.includes(x))||reactions.every((_,i)=>schema.includes(["U&'\\+1F44D'","U&'\\+2764\\+FE0F'","U&'\\+1F602'","U&'\\+1F62E'","U&'\\+1F622'","U&'\\+1F621'","U&'\\+1F389'","U&'\\+1F64F'"][i])));
@@ -45,7 +51,7 @@ ok('reaction server validation',reactions.every(x=>reaction.includes(x))&&/inclu
 ok('RLS enabled',/enable row level security/.test(schema));
 ok('direct message inserts blocked',/messages_no_direct_insert.*for insert.*with check \(false\)/s.test(schema));
 ok('private realtime presence policy',/realtime\.topic\(\) = 'global-chat'/.test(schema));
-ok('realtime publication',/add table public\.messages/.test(schema)&&/add table public\.message_reactions/.test(schema));
+ok('realtime publication',/add table public\.messages/.test(schema)&&/add table public\.message_reactions/.test(schema)&&/add table public\.voice_messages/.test(schema)&&/add table public\.voice_reactions/.test(schema));
 ok('realtime presence count',/presenceState\(\)/.test(app)&&/presence:\{key:selfId\}/.test(app));
 ok('realtime cleanup',/removeChannel\(channel\)/.test(app));
 ok('anonymous auth',/signInAnonymously/.test(app));
@@ -60,7 +66,7 @@ ok('no placeholder voice-options question mark',!/<span>\?<\/span>/.test(app));
 ok('private voice delete uses Storage API',/storage\.from\('private-voice-messages'\)\s*\.remove/.test(app));
 ok('private delete-for-everyone DB RPC',/rpc\('delete_private_voice'/.test(app)&&/rpc\('delete_private_message'/.test(app));
 ok('private delete-for-me persists locally',/global-chat-private-local-deleted-v1/.test(app)&&/localDeleted\['v:'/.test(app)&&/localDeleted\['m:'/.test(app));
-ok('private voice polling fallback is throttled',/setInterval\(\(\)=>void loadVoices\(\),8000\)/.test(app));
+ok('private voice polling is only used while Realtime is degraded',/if\(!privateVoiceChangesReady\)void loadVoices\(\)/.test(app)&&/setInterval\(\(\)=>\{if\(!privateVoiceChangesReady\)void loadVoices\(\)\},5000\)/.test(app));
 ok('private realtime presence count',/presenceState\(\)/.test(app)&&/setPrivateOnline\(Object\.keys\(state\)\.length\)/.test(app));
 ok('public sent messages use mine alignment',/current\?['"]mine['"]/.test(app)&&/message-row\.mine/.test(css));
 ok('public voice menu has MoreVertical icon',/MoreVertical/.test(app));
