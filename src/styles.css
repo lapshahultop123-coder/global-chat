@@ -3362,6 +3362,7 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .avatar-style-tabs button{flex:0 0 auto}
 @media(max-width:760px){.modal-backdrop{z-index:1100}.settings-panel-head{top:calc(0px - clamp(14px,3.5vw,22px));margin:calc(0px - clamp(14px,3.5vw,22px)) calc(0px - clamp(14px,3.5vw,22px)) 14px;padding:18px clamp(14px,3.5vw,22px) 14px}}
 @media(max-width:420px){.topbar{padding-inline:8px;gap:5px}.top-brand{gap:6px}.top-brand b{font-size:.82rem;letter-spacing:.05em}.top-brand span{font-size:.66rem;max-width:34vw}.top-actions{gap:4px}.top-actions>*{flex:0 0 auto}.settings-panel{padding:13px}.settings-panel-head{top:-13px;margin:-13px -13px 14px;padding:14px 13px 12px}.card{padding:clamp(12px,4vw,17px)}.private-modal-actions{grid-template-columns:minmax(0,1fr)!important}.private-modal-actions>*{width:100%}.feedback-actions{grid-template-columns:minmax(0,1fr)}.settings-actions{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:420px){.create-private-modal-actions .primary-btn{order:-1}}
 
 /* Keep text readable on theme-colored controls, including custom light-accent themes. */
 .primary-btn,
