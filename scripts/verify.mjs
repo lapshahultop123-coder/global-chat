@@ -53,6 +53,8 @@ ok('Realtime recovery refreshes on subscription and polls only while database ch
 ok('private and friend chats catch up after Realtime reconnect and use fallback only when degraded',/if\(!privateChangesReady\)void loadPrivateMessages/.test(app)&&/if\(!privateVoiceChangesReady\)void loadVoices/.test(app)&&/if\(!postgresChangesReady\)void fetchMessages\(\)/.test(read('src/FriendsPanel.tsx')));
 ok('fixed theme server validation',/themes\.includes\(p\.themeId\)/.test(profile));
 ok('country/subdivision server validation',/iso31661/.test(send)&&/iso31662/.test(send)&&/code\.startsWith\(`\$\{p\.country\}-`\)/.test(send));
+ok('Feedback submit reports backend errors and requires confirmed success',app.includes("edgeFunctionErrorMessage(error,'Could not submit the report")&&app.includes("if(!data?.ok) throw new Error(data?.error"));
+ok('Feedback backend validates the user and supports older report-table schemas',read('supabase/functions/submit-feedback/index.ts').includes('admin.auth.getUser(token)')&&read('supabase/functions/submit-feedback/index.ts').includes('compatibleRow')&&read('supabase/functions/submit-feedback/index.ts').includes('return json({ ok: true'));
 ok('exact reaction DB constraint',reactions.every(x=>schema.includes(x))||reactions.every((_,i)=>schema.includes(["U&'\\+1F44D'","U&'\\+2764\\+FE0F'","U&'\\+1F602'","U&'\\+1F62E'","U&'\\+1F622'","U&'\\+1F621'","U&'\\+1F389'","U&'\\+1F64F'"][i])));
 ok('reaction server validation',reactions.every(x=>reaction.includes(x))&&/includes\(reaction\)/.test(reaction));
 ok('RLS enabled',/enable row level security/.test(schema));

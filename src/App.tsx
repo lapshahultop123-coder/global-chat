@@ -1175,8 +1175,9 @@ function FeedbackPanel({profile,onClose}:{profile:Profile;onClose:()=>void}){
     setBusy(true);setError('');
     try{
       const payload={type,description:body,page:page.trim().slice(0,120),profile:{name:profile.name,country:profile.country,subdivision:profile.subdivision}};
-      const {error}=await supabase.functions.invoke('submit-feedback',{body:payload});
-      if(error) throw new Error(error.message||'Could not submit the report. Please try again.');
+      const {data,error}=await supabase.functions.invoke('submit-feedback',{body:payload});
+      if(error) throw new Error(await edgeFunctionErrorMessage(error,'Could not submit the report. Please try again.'));
+      if(!data?.ok) throw new Error(data?.error||'The report was not confirmed. Please try again.');
       setDone(true);
     }catch(e:any){setError(e?.message||'Could not submit the report. Please try again.');}
     finally{setBusy(false)}
