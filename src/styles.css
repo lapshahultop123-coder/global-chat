@@ -640,6 +640,10 @@ html[data-theme="mono"] .send-btn svg{
   box-shadow:0 24px 80px rgba(0,0,0,.45);
 }
 
+.your-private-chats-backdrop{z-index:2000}
+.your-private-chats-error{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;padding:10px 12px;border:1px solid rgba(248,113,113,.25);border-radius:12px;background:rgba(248,113,113,.08);color:#fecaca;font-size:.82rem}
+.your-private-chats-error button{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:7px 9px;background:rgba(255,255,255,.06);color:inherit;font-weight:700}
+
 .your-private-chats-head{
   display:flex;
   align-items:center;
@@ -751,6 +755,13 @@ html[data-theme="mono"] .send-btn svg{
   cursor:pointer;
 }
 
+.your-private-pin-btn,.your-private-rename-btn{
+  width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;padding:0;
+  border:1px solid rgba(255,255,255,.13);border-radius:9px;background:rgba(255,255,255,.045);color:#b8c5df;cursor:pointer
+}
+.your-private-pin-btn.is-pinned{border-color:color-mix(in srgb,var(--primary) 65%,transparent);background:color-mix(in srgb,var(--primary) 18%,transparent);color:var(--accent,#67e8f9)}
+.your-private-rename-btn:hover,.your-private-pin-btn:hover{background:rgba(255,255,255,.11)}
+
 .your-private-delete-btn{
   width:36px;
   height:36px;
@@ -797,11 +808,19 @@ html[data-theme="mono"] .send-btn svg{
   }
 
   .your-private-chat-item{
-    align-items:flex-start;
+    align-items:flex-start;flex-wrap:wrap;
+  }
+
+  .your-private-chat-info{
+    flex:1 1 100%;
   }
 
   .your-private-chat-info span{
-    max-width:180px;
+    max-width:none;overflow-wrap:anywhere;
+  }
+
+  .your-private-chat-actions{
+    width:100%;justify-content:flex-end;
   }
 }
 

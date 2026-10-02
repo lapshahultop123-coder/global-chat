@@ -149,7 +149,7 @@ Deno.serve(async (request) => {
         p_public_uid: Number(publicUid),
       });
       if (limitError || allowed !== true) {
-        return json({ error: 'Too many attempts. Try again after 24 hours, or reset the code from a signed-in device.' }, 429);
+        return json({ error: 'Too many failed attempts. Please wait 5 minutes before trying again.' }, 429);
       }
 
       const { data: credential, error: credentialError } = await admin

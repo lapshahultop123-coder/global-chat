@@ -149,6 +149,16 @@ ok('Account password remains HMAC-hashed; duplicate chosen passwords are allowed
 ok('Friends directory shows name and location',friendsSource.includes('locationOf(p)')&&uidBaseMigration.includes('get_friend_directory'));
 ok('Friends source mojibake scan clean',!/[ðŸ]|[â]€|Â·|ï¸|�/.test(friendsSource)&&!/[ðŸ]|[â]€|Â·|ï¸|�/.test(friendCalls));
 
+const loginLockSql=read('supabase/migrations/20261002150000_change_recovery_lock_to_five_minutes.sql');
+const expirySql=read('supabase/migrations/20261002160000_private_and_friend_messages_expire_after_24h.sql');
+const cleanupFunction=read('supabase/functions/cleanup-voice-messages/index.ts');
+ok('UID login permits six checks then enforces a five-minute cooldown',loginLockSql.includes('attempt_count between 0 and 6')&&loginLockSql.includes("interval '5 minutes'")&&loginLockSql.includes('v_attempt_count = 6')&&accountRecovery.includes('Please wait 5 minutes'));
+ok('Private and friend text/voice messages expire after 24 hours', ['private_messages','private_voice_messages','friend_messages','friend_voice_messages'].every(table=>expirySql.includes(`public.${table}`))&&expirySql.includes("interval '24 hours'")&&app.includes('24*60*60*1000')&&friendsSource.includes('24*60*60*1000'));
+ok('Expiry cleanup removes expired text rows and voice files for all chat types', ['messages','voice_messages','private_messages','private_voice_messages','friend_messages','friend_voice_messages'].every(table=>cleanupFunction.includes(`'${table}'`))&&cleanupFunction.includes("removeExpiredVoice('private-voice-messages'")&&cleanupFunction.includes("removeExpiredVoice('friend-voice-messages'"));
+ok('Private chat list supports pinning and cache-first loading',app.includes('onTogglePin')&&app.includes('PRIVATE_CHAT_PINNED_KEY')&&app.includes('privateChatsLoadedRef'));
+ok('Private room code is labelled as private code',app.includes('Private Code')&&app.includes('Private code:'));
+ok('Private chats modal stacks above the fixed top bar',read('src/styles.css').includes('.your-private-chats-backdrop{z-index:2000}'));
+
 let failed=0; for(const [name,passed] of checks){console.log(`${passed?'PASS':'FAIL'}  ${name}`);if(!passed)failed++;}
 if(failed)process.exit(1); console.log(`\n${checks.length} static checks passed.`);
 
