@@ -3331,6 +3331,8 @@ html[data-theme="mono"] .send-btn svg{
 .settings-account-password button:disabled{opacity:.4;cursor:not-allowed}
 .settings-password-editor{display:grid;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.09)}
 .settings-password-editor>label{margin:0;color:#d2def0;font-size:.81rem}
+.settings-password-editor .settings-account-password{width:100%;min-height:42px}
+.settings-password-editor .settings-account-password input{flex:1;width:auto;height:36px}
 .settings-password-editor>input{width:100%;height:39px;padding:0 10px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(0,0,0,.14);color:#eff6ff;letter-spacing:.16em;text-align:center;outline:none}
 .settings-password-editor>input::placeholder{font-size:.72rem;letter-spacing:0;color:#8291aa}
 .settings-password-editor>small{color:#92a2bd;font-size:.7rem;line-height:1.4}
