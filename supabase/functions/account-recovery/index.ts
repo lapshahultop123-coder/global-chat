@@ -84,7 +84,7 @@ Deno.serve(async (request) => {
     const payload = await request.json();
     const action = payload?.action;
 
-    if (action === 'status' || action === 'create') {
+    if (action === 'status' || action === 'create' || action === 'set-password') {
       const user = await authenticatedUser(request);
       if (!user) return json({ error: 'Session expired. Please sign in again.' }, 401);
 
@@ -105,6 +105,9 @@ Deno.serve(async (request) => {
         return json({ configured: Boolean(data), publicUid: String(profile.public_uid) });
       }
 
+      const pin = action === 'create' ? randomCode() : String(payload?.pin ?? '').trim();
+      if (!/^\d{5}$/.test(pin)) return json({ error: 'Choose a 5-digit numeric password.' }, 400);
+
       const publicUid = String(profile.public_uid);
       const email = await recoveryEmail(publicUid, user.id);
       const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {
@@ -117,39 +120,22 @@ Deno.serve(async (request) => {
         return json({ error: 'Could not set up account recovery. Please try again.' }, 500);
       }
 
-      let pin = '';
-      let saved = false;
-      for (let attempt = 0; attempt < 20 && !saved; attempt++) {
-        const candidatePin = randomCode();
-        const codeHash = await hmac(`recovery-code:${candidatePin}`);
-        const { data: collision, error: collisionError } = await admin
-          .from('account_recovery_credentials')
-          .select('user_id')
-          .eq('code_hash', codeHash)
-          .maybeSingle();
-        if (collisionError) {
-          console.error('Recovery code availability check failed:', collisionError.message);
-          return json({ error: 'Could not create a recovery password. Please try again.' }, 500);
-        }
-        if (collision && collision.user_id !== user.id) continue;
-        const { error: saveError } = await admin.from('account_recovery_credentials').upsert({
-          user_id: user.id,
-          public_uid: profile.public_uid,
-          code_hash: codeHash,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id' });
-        if (!saveError) {
-          pin = candidatePin;
-          saved = true;
-        } else if (saveError.code !== '23505') {
-          console.error('Recovery code storage failed:', saveError.message);
-          return json({ error: 'Could not save the recovery password. Please try again.' }, 500);
-        }
+      const codeHash = await hmac(`recovery-code:${pin}`);
+      const { error: saveError } = await admin.from('account_recovery_credentials').upsert({
+        user_id: user.id,
+        public_uid: profile.public_uid,
+        code_hash: codeHash,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+      if (saveError) {
+        console.error('Account password storage failed:', saveError.message);
+        return json({ error: 'Could not save your password. Please try again.' }, 500);
       }
-      if (!saved) return json({ error: 'No unused 5-digit passwords are available for a new account right now.' }, 409);
 
       await admin.from('account_recovery_attempts').delete().eq('public_uid', profile.public_uid);
-      return json({ publicUid, pin });
+      return action === 'create'
+        ? json({ publicUid, pin })
+        : json({ publicUid, configured: true });
     }
 
     if (action === 'recover') {

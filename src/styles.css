@@ -3314,6 +3314,31 @@ html[data-theme="mono"] .send-btn svg{
 @media(max-width:520px){.account-access-card{padding:21px 17px;border-radius:20px}.settings-account-actions{grid-template-columns:1fr}.settings-account-actions h3,.settings-account-actions small{grid-column:auto}.settings-credential-row.recovery-password-row{align-items:flex-start;flex-direction:column}.settings-recovery-input{width:100%}.settings-recovery-input input{flex:1;width:auto}.settings-confirm-dialog{padding:17px}.settings-confirm-actions{flex-wrap:wrap}.settings-confirm-actions button{flex:1}}
 .account-access-card .account-login-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:16px;padding:14px 18px;border:1px solid color-mix(in srgb,var(--primary) 75%,#fff);border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff!important;font-size:.94rem;font-weight:850;letter-spacing:.055em;box-shadow:0 10px 26px color-mix(in srgb,var(--primary) 34%,transparent);transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
 .account-access-card .account-login-btn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.12);box-shadow:0 14px 30px color-mix(in srgb,var(--primary) 42%,transparent)}
+
+/* User-selected account password */
+.account-password-hint{display:block;margin-top:4px;color:#94a3b8;font-size:.73rem;font-weight:450;line-height:1.4}
+.setup-password-wrap{display:flex;align-items:center;gap:4px;padding:3px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.045)}
+.profile-card .setup-password-wrap input{flex:1;min-width:0;border:0;background:transparent;box-shadow:none!important}
+.setup-password-wrap button,.settings-account-password button{width:38px;height:38px;flex:none;display:grid;place-items:center;border:0;border-radius:10px;background:transparent;color:#b6c5dd}
+.setup-password-wrap button:hover,.settings-account-password button:hover{background:rgba(255,255,255,.08);color:#fff}
+.profile-card input.setup-password-confirm{margin-top:8px}
+.account-password-error{display:block;margin-top:6px;color:#fca5a5;font-size:.78rem}
+.settings-credential-row.account-password-row{align-items:center;margin:10px 0 5px}
+.settings-credential-row.account-password-row>label{flex:none;margin:0;color:#d2def0;font-size:.83rem}
+.settings-account-password{display:flex;align-items:center;gap:2px;min-width:0;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:rgba(0,0,0,.14);padding:2px}
+.settings-account-password input{width:115px;min-width:0;height:36px;padding:0 8px;border:1px solid transparent;border-radius:8px;background:transparent;color:#eff6ff;text-align:center;letter-spacing:.18em;outline:none}
+.settings-account-password input::placeholder{font-size:.67rem;letter-spacing:0;color:#8291aa}
+.settings-account-password button{width:32px;height:32px}
+.settings-account-password button:disabled{opacity:.4;cursor:not-allowed}
+.settings-password-editor{display:grid;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.09)}
+.settings-password-editor>label{margin:0;color:#d2def0;font-size:.81rem}
+.settings-password-editor>input{width:100%;height:39px;padding:0 10px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(0,0,0,.14);color:#eff6ff;letter-spacing:.16em;text-align:center;outline:none}
+.settings-password-editor>input::placeholder{font-size:.72rem;letter-spacing:0;color:#8291aa}
+.settings-password-editor>small{color:#92a2bd;font-size:.7rem;line-height:1.4}
+.settings-password-save{min-height:38px;border:1px solid color-mix(in srgb,var(--primary) 45%,transparent);border-radius:10px;background:color-mix(in srgb,var(--primary) 12%,transparent);color:#eaf2ff;font-size:.76rem;font-weight:750}
+.settings-password-save:hover:not(:disabled){background:color-mix(in srgb,var(--primary) 22%,transparent)}
+.settings-password-save:disabled{opacity:.48;cursor:not-allowed}
+@media(max-width:520px){.settings-credential-row.account-password-row{align-items:flex-start;flex-direction:column}.settings-account-password{width:100%}.settings-account-password input{flex:1;width:auto}}
 .account-access-card .account-login-btn:disabled{opacity:.82;filter:saturate(.86);cursor:not-allowed}
 .account-access-card .account-login-btn:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 65%,white);outline-offset:3px}
 .brand .profile-login-back{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;margin-left:auto;padding:0 15px;border:1px solid color-mix(in srgb,var(--primary) 52%,rgba(255,255,255,.2));border-radius:13px;background:color-mix(in srgb,var(--surface) 82%,transparent);color:#e8efff;font-size:.76rem;font-weight:800;letter-spacing:.025em;white-space:nowrap;transition:background .16s ease,border-color .16s ease,transform .16s ease}

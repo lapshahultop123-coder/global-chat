@@ -5,7 +5,7 @@ const SUPABASE_SECRET_KEYS = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')!);
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, SUPABASE_SECRET_KEYS['default'], { auth: { persistSession: false, autoRefreshToken: false } });
 const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-const themes = ['midnight','ocean','sunset','forest','galaxy','arctic','pink','carbon','aurora','gold','crimson','mint','royal','lavender','coffee','coral','slate','emerald','violet','sky','sand','rose','teal','indigo','mono'];
+const themes = ['midnight','ocean','sunset','forest','galaxy','arctic','pink','carbon','aurora','gold','crimson','mint','royal','lavender','coffee','coral','slate','emerald','violet','sky','sand','rose','teal','indigo','mono','deep-space','sapphire','cobalt','glacier','jade','moss','plum','amethyst','berry','ruby','copper','amber','olive','steel','twilight'];
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });

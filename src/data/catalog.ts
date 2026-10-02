@@ -30,7 +30,7 @@ export const THEMES = [
   ['lavender','Lavender Mist','#100b1a','#20152f','#a78bfa','#ddd6fe'],
   ['coffee','Coffee House','#130d09','#241711','#a16207','#fbbf24'],
   ['coral','Coral Reef','#170b0b','#2b1512','#f97316','#fb7185'],
-  ['slate','Slate',' #090d12'.trim(),'#151c24','#64748b','#cbd5e1'],
+  ['slate','Slate','#090d12','#151c24','#64748b','#cbd5e1'],
   ['emerald','Emerald','#06120e','#0d2419','#059669','#34d399'],
   ['violet','Violet Pulse','#100719','#21102e','#7c3aed','#e879f9'],
   ['sky','Skyline','#07121c','#10283a','#0ea5e9','#bae6fd'],
@@ -38,7 +38,22 @@ export const THEMES = [
   ['rose','Rose Quartz','#170b11','#2a121d','#e11d48','#fda4af'],
   ['teal','Deep Teal','#061214','#0c2427','#0d9488','#67e8f9'],
   ['indigo','Indigo Glass','#080b18','#121936','#4f46e5','#818cf8'],
-  ['mono','Monochrome','#0c0c0c','#1b1b1b','#d4d4d4','#fafafa']
+  ['mono','Monochrome','#0c0c0c','#1b1b1b','#d4d4d4','#fafafa'],
+  ['deep-space','Deep Space','#070916','#111a2d','#4c1d95','#075985'],
+  ['sapphire','Sapphire','#07111d','#0d2238','#1d4ed8','#0b5f86'],
+  ['cobalt','Cobalt','#080d20','#111d3d','#1e40af','#3730a3'],
+  ['glacier','Glacier','#07161b','#102b32','#0e7490','#115e59'],
+  ['jade','Jade','#07150f','#10251a','#047857','#15803d'],
+  ['moss','Moss','#0c150b','#192318','#4d7c0f','#365314'],
+  ['plum','Plum','#150a1d','#261233','#7e22ce','#86198f'],
+  ['amethyst','Amethyst','#13091b','#241230','#6b21a8','#5b21b6'],
+  ['berry','Berry','#180914','#2b1422','#9d174d','#881337'],
+  ['ruby','Ruby','#1a090d','#2f141b','#b91c1c','#9f1239'],
+  ['copper','Copper','#1a100a','#2c1d13','#9a3412','#7c2d12'],
+  ['amber','Amber','#191407','#2a210e','#92400e','#854d0e'],
+  ['olive','Olive','#131509','#242710','#556b2f','#3f6212'],
+  ['steel','Steel','#0b1016','#18212b','#475569','#334155'],
+  ['twilight','Twilight','#10101c','#1d1d31','#4338ca','#6d28d9']
 ].map(([id,name,bg,surface,primary,accent]) => ({id,name,bg,surface,primary,accent}));
 
 export const EMOJIS = ['👍','❤️','😂','😮','😢','😡','🎉','🙏','👋','😊','🔥','⭐'];

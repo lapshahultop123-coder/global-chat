@@ -5,6 +5,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = f => fs.readFileSync(path.join(root,f),'utf8');
 const app=read('src/App.tsx'), css=read('src/styles.css'), catalog=read('src/data/catalog.ts'), validation=read('src/lib/validation.ts'), schema=read('supabase/schema.sql');
 const send=read('supabase/functions/send-message/index.ts'), reaction=read('supabase/functions/toggle-reaction/index.ts'), profile=read('supabase/functions/save-profile/index.ts');
+const accountRecovery=read('supabase/functions/account-recovery/index.ts');
 const migrations=fs.readdirSync(path.join(root,'supabase/migrations')).map(f=>fs.readFileSync(path.join(root,'supabase/migrations',f),'utf8')).join('\n');
 const pkg=JSON.parse(read('package.json'));
 const checks=[];
@@ -15,7 +16,10 @@ const avatarPickerSlugs=JSON.parse(read('src/data/avatar-picker-style-slugs.json
 const avatarExtras=JSON.parse(read('src/data/avatar-extra.json'));
 const extraCounts=Object.fromEntries(avatarPickerSlugs.filter(slug=>slug!=='initials').map(slug=>[slug,avatarExtras.filter(avatar=>avatar.slug===slug).length]));
 const themeBlock=catalog.slice(catalog.indexOf('export const THEMES = ['),catalog.indexOf('export const EMOJIS'));
-const themeIds=[...themeBlock.matchAll(/\['([^']+)','([^']+)'/g)].map(m=>m[1]);
+const themeEntries=[...themeBlock.matchAll(/\['([^']+)','([^']+)','(#[0-9a-f]{6})','(#[0-9a-f]{6})','(#[0-9a-f]{6})','(#[0-9a-f]{6})'/gi)];
+const themeIds=themeEntries.map(entry=>entry[1]);
+const relativeLuminance=hex=>hex.slice(1).match(/../g).map(channel=>parseInt(channel,16)/255).map(channel=>channel<=.04045?channel/12.92:((channel+.055)/1.055)**2.4).reduce((sum,channel,index)=>sum+channel*[.2126,.7152,.0722][index],0);
+const contrastWithWhite=hex=>1.05/(relativeLuminance(hex)+.05);
 const reactions=['\u{1F44D}','\u{2764}\u{FE0F}','\u{1F602}','\u{1F62E}','\u{1F622}','\u{1F621}','\u{1F389}','\u{1F64F}'];
 const releaseAudit=process.env.RELEASE_AUDIT==='1';
 const ok=(name,test)=>checks.push([name,!!test]);
@@ -28,7 +32,8 @@ ok('1006 picker choices: only 28 selected styles plus A-Z, 35 unique outputs per
 ok('new avatar IDs are stable and sequential from 507 to 1262',avatarExtras.length===756&&avatarExtras.every((avatar,index)=>avatar.id===507+index&&avatar.src===`/avatars/avatar-${avatar.id}.svg`));
 ok('existing IDs through 1154 stay stable; new styles append as IDs 1155-1262',avatarExtras.filter(avatar=>avatar.id<=782).length===276&&avatarExtras.filter(avatar=>avatar.id<=782).every(avatar=>avatar.variant>=8&&avatar.variant<20)&&avatarExtras.filter(avatar=>avatar.id>=783&&avatar.id<=1127).length===345&&avatarExtras.filter(avatar=>avatar.id>=783&&avatar.id<=1127).every(avatar=>avatar.variant>=20&&avatar.variant<35)&&avatarExtras.filter(avatar=>avatar.slug==='critters').length===27&&avatarExtras.filter(avatar=>avatar.slug==='critters').every((avatar,index)=>avatar.id===1128+index&&avatar.variant===8+index)&&['clay','constellation','gaze','voxel-art'].every((slug,styleIndex)=>avatarExtras.filter(avatar=>avatar.slug===slug).length===27&&avatarExtras.filter(avatar=>avatar.slug===slug).every((avatar,index)=>avatar.id===1155+styleIndex*27+index&&avatar.variant===8+index)));
 
-ok('25 themes',themeIds.length===25&&new Set(themeIds).size===25);
+ok('40 unique themes; 15 new themes have distinct accents and WCAG AA button-text contrast',themeEntries.length===40&&new Set(themeIds).size===40&&new Set(themeEntries.map(entry=>entry.slice(3,7).join(':'))).size===40&&new Set(themeEntries.slice(25).flatMap(entry=>[entry[5],entry[6]])).size===30&&themeEntries.slice(25).every(entry=>contrastWithWhite(entry[5])>=4.5&&contrastWithWhite(entry[6])>=4.5));
+ok('all 40 themes are accepted by server-side profile validation',themeIds.length===40&&themeIds.every(id=>profile.includes(`'${id}'`))&&/themes\.includes\(p\.themeId\)/.test(profile));
 ok('exactly 8 reactions',reactions.length===8);
 ok('500-char client validation',/\[\.\.\.value\]\.length > 500/.test(validation));
 ok('English-only client validation',/isEnglishOnly/.test(validation));
@@ -135,7 +140,12 @@ ok('Friends voice call uses WebRTC and incoming-call controls',friendCalls.inclu
 ok('Friends voice calls validate accepted friendship and blocks',friendCalls.includes('check_friend_call_target')&&uidBaseMigration.includes('check_friend_call_target'));
 ok('Friends call manager remains mounted while browsing Friends',friendsSource.includes('<FriendsCallCenter')&&friendsSource.indexOf('<FriendsCallCenter')<friendsSource.indexOf('{selected?<'));
 ok('Numeric public UID is random, unique and assigned by database',uidMigration.includes('generate_public_uid')&&uidMigration.includes('gen_random_bytes')&&uidBaseMigration.includes('profiles_public_uid_unique'));
-ok('Settings displays numeric public UID',app.includes('YOUR UNIQUE USER ID')&&/UID : \{publicUid\|\|/.test(app));
+ok('Settings displays numeric public UID beside copy control',app.includes('YOUR UNIQUE USER ID')&&/UID : \{publicUid\|\|/.test(app)&&app.includes('aria-label="Copy UID"'));
+ok('New profiles require a user-selected 5-digit password and confirmation',/const valid=[^;]*\^\\d\{5\}\$/.test(app)&&app.includes('Confirm 5-digit password')&&app.includes("action:'set-password',pin:password"));
+ok('UID login accepts the chosen password and session remembers it only for this tab',app.includes('Log in with your UID and 5-digit password')&&app.includes('sessionStorage.setItem(ACCOUNT_PASSWORD_KEY,pin)')&&app.includes('onAccountPasswordChange={onAccountPasswordChange}'));
+ok('Settings shows Your Password with hide/show and copy controls, without recovery-password UI',app.includes('Your Password')&&app.includes('aria-label="Copy password"')&&app.includes("showPassword?'Hide password':'Show password'")&&!app.includes('Recovery password')&&!app.includes('CREATE 5-DIGIT PASSWORD'));
+ok('Existing sessions can replace an unavailable local password using a confirmed 5-digit code',app.includes("action:'set-password',pin:newPassword")&&app.includes('Confirm new 5-digit password')&&app.includes('SAVE NEW PASSWORD'));
+ok('Account password remains HMAC-hashed; duplicate chosen passwords are allowed',accountRecovery.includes("hmac(`recovery-code:${pin}`)")&&/code_hash:\s*codeHash/.test(accountRecovery)&&read('supabase/migrations/20261002140000_allow_reused_account_passwords.sql').includes('drop constraint if exists account_recovery_credentials_code_hash_key'));
 ok('Friends directory shows name and location',friendsSource.includes('locationOf(p)')&&uidBaseMigration.includes('get_friend_directory'));
 ok('Friends source mojibake scan clean',!/[ðŸ]|[â]€|Â·|ï¸|�/.test(friendsSource)&&!/[ðŸ]|[â]€|Â·|ï¸|�/.test(friendCalls));
 
