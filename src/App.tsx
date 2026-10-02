@@ -741,7 +741,8 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
   const playerRef=useRef<HTMLDivElement|null>(null);
   const audioRef=useRef<HTMLAudioElement|null>(null);
   const objectUrlRef=useRef<string|null>(null);
-  const signedFallbackTriedRef=useRef(false);
+  const privateFallbackTriedRef=useRef(false);
+  const privateSourceRef=useRef<'signed'|'blob'|null>(null);
   const loadingRef=useRef<Promise<HTMLAudioElement>|null>(null);
   const startingRef=useRef(false);
   useEffect(()=>()=>{const audio=audioRef.current;if(audio){audio.pause();audio.onloadedmetadata=null;audio.ontimeupdate=null;audio.onwaiting=null;audio.onplaying=null;audio.onended=null;audio.onerror=null}audioRef.current=null;if(objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}},[]);
@@ -754,14 +755,26 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
       if(!v.storage_path)throw new Error('Private voice file path is missing.');
       const remaining=v.expires_at?Math.ceil((new Date(v.expires_at).getTime()-Date.now())/1000):3600;
       if(remaining<=0)throw new Error('This voice message has expired.');
-      const {data,error}=await supabase.storage.from(bucket).download(v.storage_path);
-      if(error){const status=(error as any).statusCode;throw new Error(`Private voice download failed${status?` (${status})`:''}: ${error.message||'Check room access and retry.'}`)}
-      if(!data)throw new Error('Private voice audio is unavailable. Please retry.');
-      const storedMime=(data.type||'').split(';')[0].trim().toLowerCase();
-      const fileMime=/\.(m4a|mp4)$/i.test(v.storage_path)||storedMime==='audio/mp4'||storedMime==='audio/x-m4a'?'audio/mp4':'audio/webm';
-      const playableBlob=storedMime===fileMime?data:new Blob([data],{type:fileMime});
-      url=URL.createObjectURL(playableBlob);
-      objectUrlRef.current=url;
+      const lifetime=Math.max(1,Math.min(3600,remaining));
+      const signed=await supabase.storage.from(bucket).createSignedUrl(v.storage_path,lifetime);
+      if(!signed.error&&signed.data?.signedUrl){
+        url=signed.data.signedUrl;
+        privateSourceRef.current='signed';
+      }else{
+        const downloaded=await supabase.storage.from(bucket).download(v.storage_path);
+        if(downloaded.error){
+          const status=(downloaded.error as any).statusCode;
+          const signedIssue=signed.error?.message?`Signed URL: ${signed.error.message}. `:'';
+          throw new Error(`${signedIssue}Private voice download failed${status?` (${status})`:''}: ${downloaded.error.message||'Check room membership and Storage access.'} A 404 can mean the object is missing or hidden by Storage access rules.`);
+        }
+        if(!downloaded.data)throw new Error('Private voice audio is unavailable. Please retry.');
+        const storedMime=(downloaded.data.type||'').split(';')[0].trim().toLowerCase();
+        const fileMime=/\.(m4a|mp4)$/i.test(v.storage_path)||storedMime==='audio/mp4'||storedMime==='audio/x-m4a'?'audio/mp4':'audio/webm';
+        const playableBlob=storedMime===fileMime?downloaded.data:new Blob([downloaded.data],{type:fileMime});
+        url=URL.createObjectURL(playableBlob);
+        objectUrlRef.current=url;
+        privateSourceRef.current='blob';
+      }
     }
     else if(bucket!=='voice-messages'){
       if(!v.storage_path)throw new Error('Voice file path is missing.');
@@ -781,21 +794,40 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
     a.onplaying=()=>{setBuffering(false);setPlaying(true);setPlayError('')};
     a.onended=()=>{setPlaying(false);setBuffering(false);setCurrent(0)};
     a.onerror=()=>{
-      if(bucket==='private-voice-messages'&&!signedFallbackTriedRef.current&&v.storage_path){
-        signedFallbackTriedRef.current=true;
+      if(bucket==='private-voice-messages'&&!privateFallbackTriedRef.current&&v.storage_path){
+        privateFallbackTriedRef.current=true;
         setBuffering(true);
         const remaining=v.expires_at?Math.ceil((new Date(v.expires_at).getTime()-Date.now())/1000):3600;
-        void supabase.storage.from(bucket).createSignedUrl(v.storage_path,Math.max(1,Math.min(3600,remaining))).then(({data,error})=>{
-          if(audioRef.current!==a)return;
-          if(!error&&data?.signedUrl){
-            if(objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}
-            a.src=data.signedUrl;a.load();setBuffering(false);return;
+        void (async()=>{
+          let fallbackUrl='';
+          let fallbackError='';
+          if(privateSourceRef.current==='signed'){
+            const {data,error}=await supabase.storage.from(bucket).download(v.storage_path);
+            if(error)fallbackError=`Storage download failed${(error as any).statusCode?` (${(error as any).statusCode})`:''}: ${error.message}`;
+            else if(data){
+              const storedMime=(data.type||'').split(';')[0].trim().toLowerCase();
+              const fileMime=/\.(m4a|mp4)$/i.test(v.storage_path)||storedMime==='audio/mp4'||storedMime==='audio/x-m4a'?'audio/mp4':'audio/webm';
+              const playableBlob=storedMime===fileMime?data:new Blob([data],{type:fileMime});
+              fallbackUrl=URL.createObjectURL(playableBlob);
+              objectUrlRef.current=fallbackUrl;
+              privateSourceRef.current='blob';
+            }else fallbackError='Storage returned no audio data.';
+          }else{
+            const {data,error}=await supabase.storage.from(bucket).createSignedUrl(v.storage_path,Math.max(1,Math.min(3600,remaining)));
+            if(error)fallbackError=`Signed URL failed: ${error.message}`;
+            else if(data?.signedUrl){
+              fallbackUrl=data.signedUrl;
+              privateSourceRef.current='signed';
+              if(objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}
+            }else fallbackError='Storage did not return a signed playback URL.';
           }
+          if(audioRef.current!==a)return;
+          if(fallbackUrl){a.src=fallbackUrl;a.load();setBuffering(false);return}
           audioRef.current=null;
           if(objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}
           setPlaying(false);setBuffering(false);
-          setPlayError(error?.message?`Private voice playback failed: ${error.message}`:'Audio could not load. Tap play to retry.');
-        }).catch(error=>{
+          setPlayError(`Private voice playback failed. ${fallbackError||'Storage returned no playable audio.'} The object may be missing or blocked by Storage access rules.`);
+        })().catch(error=>{
           if(audioRef.current!==a)return;
           audioRef.current=null;
           if(objectUrlRef.current){URL.revokeObjectURL(objectUrlRef.current);objectUrlRef.current=null}
@@ -904,7 +936,8 @@ function PrivateRoomView({profile,room,messages,setMessages,text,setText,sending
   };
 
   const loadVoices=async()=>{
-    const {data}=await supabase.from('private_voice_messages').select('*').eq('room_id',room.id).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:true}).limit(100);
+    const {data,error}=await supabase.from('private_voice_messages').select('*').eq('room_id',room.id).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:true}).limit(100);
+    if(error){console.error('Private voice database query failed:',error);setPrivateError(`Could not load private voice messages: ${error.message}`);return;}
     if(data){const visible=(data as any[]).filter(v=>!localDeleted['v:'+v.id]);setVoices(visible);}
   };
 
@@ -1476,7 +1509,6 @@ if (typeof window !== 'undefined') {
 
 
 /* GLOBAL CHAT voice duration live-time fix v1 */
-
 
 
 
