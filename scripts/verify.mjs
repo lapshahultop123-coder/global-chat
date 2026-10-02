@@ -147,6 +147,7 @@ ok('Friend request cooldown serialized against concurrent sends',/pg_advisory_xa
 ok('Public message menu includes Add Friend without duplicate Reply',/Add Friend/.test(app)&&!/onClick=\{\(\)=>\{onReply\(\);setMenu\(false\)\}\}>\s*<ReplyIcon/.test(app));
 
 const friendsSource=read('src/FriendsPanel.tsx');
+const realtimeActivity=read('src/lib/realtimeActivity.ts');
 const friendFixSql=read('supabase/migrations/20260927150000_fix_friend_chat_rls_and_unblock.sql');
 ok('friend text send uses optimistic local bubble',/const optimistic:ChatItem/.test(friendsSource)&&/setMessages\(v=>\[\.\.\.v,optimistic\]\)/.test(friendsSource));
 ok('friend message UI has responsive public-chat-style rows',friendsSource.includes('friend-message-row')&&read('src/styles.css').includes('.friend-message-row'));
@@ -171,10 +172,11 @@ ok('Settings displays numeric public UID beside copy control',app.includes('YOUR
 ok('New profiles require a user-selected 5-digit password and confirmation',/const valid=[^;]*\^\\d\{5\}\$/.test(app)&&app.includes('Confirm 5-digit password')&&app.includes("action:'set-password',pin:password"));
 ok('UID login accepts the chosen password and Settings syncs it to the account',app.includes('Log in with your UID and 5-digit password')&&app.includes('sessionStorage.setItem(ACCOUNT_PASSWORD_KEY,pin)')&&app.includes("action:'remember-password'")&&app.includes('onAccountPasswordChange={onAccountPasswordChange}'));
 ok('Login page defines its own theme colors so the Log In button remains visible',css.includes('.account-access-page{--primary:#7c3aed;--accent:#22d3ee;--bg:#080b16;--surface:#10172b;')&&css.includes('.account-access-card .account-login-btn{')&&css.includes('background:linear-gradient(135deg,var(--primary),var(--accent))'));
-ok('Settings shows the account password with hide/show, copy, and an explicit change flow',app.includes('Your Password')&&app.includes('aria-label="Copy password"')&&app.includes("showPassword?'Hide password':'Show password'")&&app.includes('CHANGE YOUR PASSWORD')&&app.includes("action:'change-password'"));
+ok('Settings shows the account password with hide/show, copy, and an explicit change flow',app.includes('Your Password')&&app.includes('aria-label="Copy password"')&&app.includes("showPassword?'Hide password':'Show password'")&&app.includes('CHANGE YOUR PASSWORD')&&app.includes("action:'change-password-with-credentials'"));
 ok('Account password is HMAC-verified and stored reversibly only as AES-GCM ciphertext',accountRecovery.includes("hmac(`recovery-code:${pin}`)")&&accountRecovery.includes("name: 'AES-GCM'")&&accountRecovery.includes('password_ciphertext')&&accountRecovery.includes('ACCOUNT_PASSWORD_ENCRYPTION_KEY')&&read('supabase/migrations/20261002200000_persist_account_password.sql').includes('password_ciphertext text'));
 ok('Account PIN changes verify the existing PIN and stays active until changed',accountRecovery.includes("action === 'change-password'")&&accountRecovery.includes("payload?.currentPin")&&app.includes('Your password stays active until you change it.'));
 ok('Friends directory shows name and location',friendsSource.includes('locationOf(p)')&&uidBaseMigration.includes('get_friend_directory'));
+ok('Public, Private, and Friends typing/recording indicators heartbeat and expire cleanly',app.includes('publicTypingHeartbeatRef.current=window.setInterval')&&app.includes('privateTypingHeartbeatRef.current=window.setInterval')&&friendsSource.includes('typingHeartbeat.current=window.setInterval')&&app.includes('publicRecordingHeartbeatRef.current=window.setInterval')&&app.includes('privateRecordingHeartbeatRef.current=window.setInterval')&&friendsSource.includes('recordingHeartbeat.current=window.setInterval')&&friendsSource.includes("event:'recording'")&&friendsSource.includes('friendRecording&&')&&realtimeActivity.includes('window.setTimeout')&&realtimeActivity.includes('window.clearTimeout'));
 ok('Friends source mojibake scan clean',!/[ðŸ]|[â]€|Â·|ï¸|�/.test(friendsSource)&&!/[ðŸ]|[â]€|Â·|ï¸|�/.test(friendCalls));
 
 const loginLockSql=read('supabase/migrations/20261002150000_change_recovery_lock_to_five_minutes.sql');
