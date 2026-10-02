@@ -234,9 +234,8 @@ button,input,textarea{touch-action:manipulation}
 }
 
 /* GLOBAL CHAT — theme-aware contrast for light-accent themes */
-.primary-btn,
-.send-btn{
-  color:#fff !important;
+.primary-btn{
+  color:var(--theme-button-text,#fff) !important;
 }
 
 .primary-btn svg,
@@ -3379,3 +3378,25 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .avatar-style-tabs button{flex:0 0 auto}
 @media(max-width:760px){.modal-backdrop{z-index:1100}.settings-panel-head{top:calc(0px - clamp(14px,3.5vw,22px));margin:calc(0px - clamp(14px,3.5vw,22px)) calc(0px - clamp(14px,3.5vw,22px)) 14px;padding:18px clamp(14px,3.5vw,22px) 14px}}
 @media(max-width:420px){.topbar{padding-inline:8px;gap:5px}.top-brand{gap:6px}.top-brand b{font-size:.82rem;letter-spacing:.05em}.top-brand span{font-size:.66rem;max-width:34vw}.top-actions{gap:4px}.top-actions>*{flex:0 0 auto}.settings-panel{padding:13px}.settings-panel-head{top:-13px;margin:-13px -13px 14px;padding:14px 13px 12px}.card{padding:clamp(12px,4vw,17px)}.private-modal-actions{grid-template-columns:minmax(0,1fr)!important}.private-modal-actions>*{width:100%}.feedback-actions{grid-template-columns:minmax(0,1fr)}.settings-actions{grid-template-columns:minmax(0,1fr)}}
+
+/* Keep text readable on theme-colored controls, including custom light-accent themes. */
+.primary-btn,
+.private-modal-cancel,
+.private-modal-actions .private-modal-cancel,
+.private-recording-bar .voice-send,
+.public-record-main,
+.private-call-start,
+.private-call-accept,
+.friends-panel .friend-voice-primary,
+.friends-panel .friend-compose .friend-send-btn,
+.friends-panel .friend-chat-call-actions .friend-call-trigger:hover:not(:disabled),
+.friends-panel>.friend-call-trigger:hover:not(:disabled){background-image:var(--theme-button-gradient)!important;color:var(--theme-button-text,#fff)!important}
+.account-access-card .account-login-btn{background-image:linear-gradient(135deg,#5b21b6,#0e7490)!important;color:#fff!important}
+.voice-play-btn,
+.voice-send,
+.voice-finish,
+.public-voice-composer .voice-finish{background-image:var(--theme-primary-gradient)!important;color:var(--theme-primary-text,#fff)!important}
+.voice-player{position:relative}
+.voice-player-error{position:absolute;z-index:30;right:0;top:calc(100% + 5px);display:block;width:max-content;max-width:min(320px,76vw);margin:0;padding:6px 9px;border:1px solid rgba(255,255,255,.13);border-radius:9px;background:var(--surface,#10172b);box-shadow:0 8px 24px rgba(0,0,0,.35);color:#fecaca;font-size:.72rem;line-height:1.35;white-space:normal;pointer-events:none}
+.voice-player-error[data-kind="ready"]{color:#bfdbfe;border-color:rgba(96,165,250,.32)}
+.voice-play-btn[aria-invalid="true"]{background:#9f1239;color:#fff!important}

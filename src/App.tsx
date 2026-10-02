@@ -32,6 +32,50 @@ function avatarPickerStyleForId(id:number){const style=AVATARS.find(a=>a.id===id
 function readJSON<T>(key:string, fallback:T):T { try { const x=localStorage.getItem(key); return x ? JSON.parse(x) as T : fallback; } catch { return fallback; } }
 function readSessionValue(key:string):string { try { return sessionStorage.getItem(key)||''; } catch { return ''; } }
 async function edgeFunctionErrorMessage(error:unknown,fallback:string){const response=(error as {context?:Response}|null)?.context;if(response&&typeof response.clone==='function'){try{const body=await response.clone().json();if(typeof body?.error==='string')return body.error}catch{}}return fallback}
+function themeGradientSamples(stops:string[]){
+  const colors=stops.map(hex=>[1,3,5].map(index=>parseInt(hex.slice(index,index+2),16)));
+  return Array.from({length:21},(_,sample)=>{
+    const progress=sample/20*(colors.length-1),index=Math.min(colors.length-2,Math.floor(progress)),fraction=progress-index;
+    const color=colors.length===1?colors[0]:colors[index].map((channel,axis)=>channel+(colors[index+1][axis]-channel)*fraction);
+    return color.map(channel=>Math.round(channel).toString(16).padStart(2,'0')).join('');
+  });
+}
+function themeLuminance(hex:string){
+  const [r,g,b]=[0,2,4].map(index=>{const channel=parseInt(hex.slice(index,index+2),16)/255;return channel<=0.04045?channel/12.92:((channel+0.055)/1.055)**2.4});
+  return 0.2126*r+0.7152*g+0.0722*b;
+}
+function contrastForThemeText(luminance:number,white:boolean){return white?1.05/(luminance+0.05):(luminance+0.05)/0.05}
+function themeButtonText(stops:string[]){
+  const samples=themeGradientSamples(stops);
+  const whiteContrast=Math.min(...samples.map(color=>contrastForThemeText(themeLuminance(color),true)));
+  const blackContrast=Math.min(...samples.map(color=>contrastForThemeText(themeLuminance(color),false)));
+  return whiteContrast>=blackContrast?'#fff':'#101114';
+}
+function accessibleThemeGradient(stops:string[],foreground:string){
+  const white=foreground==='#fff',target=white?0:255,threshold=4.6;
+  const adjusted=themeGradientSamples(stops).map(color=>{
+    const channels=[0,2,4].map(index=>parseInt(color.slice(index,index+2),16));
+    const makeCandidate=(amount:number)=>channels.map(channel=>Math.round(channel+(target-channel)*amount).toString(16).padStart(2,'0')).join('');
+    if(contrastForThemeText(themeLuminance(color),white)>=threshold)return `#${color}`;
+    let low=0,high=1;
+    for(let attempt=0;attempt<20;attempt++){
+      const middle=(low+high)/2;
+      if(contrastForThemeText(themeLuminance(makeCandidate(middle)),white)>=threshold)high=middle;else low=middle;
+    }
+    return `#${makeCandidate(high)}`;
+  });
+  return `linear-gradient(135deg,${adjusted.map((color,index)=>`${color} ${index*5}%`).join(',')})`;
+}
+function applyTheme(theme:typeof THEMES[number],root:HTMLElement=document.documentElement){
+  root.style.setProperty('--bg',theme.bg);root.style.setProperty('--surface',theme.surface);root.style.setProperty('--primary',theme.primary);root.style.setProperty('--accent',theme.accent);
+  const buttonText=themeButtonText([theme.primary,theme.accent]);
+  root.style.setProperty('--theme-button-text',buttonText);
+  root.style.setProperty('--theme-button-gradient',accessibleThemeGradient([theme.primary,theme.accent],buttonText));
+  const primaryText=themeButtonText([theme.primary]);
+  root.style.setProperty('--theme-primary-text',primaryText);
+  root.style.setProperty('--theme-primary-gradient',accessibleThemeGradient([theme.primary],primaryText));
+  root.dataset.theme=theme.id;
+}
 function hasPrivateChatCache(){try{return localStorage.getItem(PRIVATE_CHAT_CACHE_KEY)!==null}catch{return false}}
 function readPrivateChatCache(){const cached=readJSON<any[]>(PRIVATE_CHAT_CACHE_KEY,[]);return Array.isArray(cached)?cached:[]}
 function sortPrivateChats(rooms:any[],pinnedIds:string[]){const pinned=new Set(pinnedIds);return [...rooms].sort((a,b)=>Number(pinned.has(b.id))-Number(pinned.has(a.id))||((new Date(b.created_at||0).getTime()||0)-(new Date(a.created_at||0).getTime()||0)))}
@@ -65,7 +109,7 @@ function AccountAccess({onRecover,onContinueAsGuest}:{onRecover:(uid:string,pin:
 function ProfileSetup({onEnter,onBackToLogin}:{onEnter:(p:Profile,pin:string)=>void;onBackToLogin:()=>Promise<void>}){
  const [name,setName]=useState(''); const [country,setCountry]=useState(''); const [subdivision,setSubdivision]=useState(''); const [avatarId,setAvatarId]=useState(1); const [avatarStyle,setAvatarStyle]=useState<string>(AVATAR_PICKER_STYLES[0].name); const [themeId,setThemeId]=useState('midnight'); const [agreed,setAgreed]=useState(false); const [countryQuery,setCountryQuery]=useState(''); const [subQuery,setSubQuery]=useState(''); const [countryOpen,setCountryOpen]=useState(false); const [subOpen,setSubOpen]=useState(false);
   const [password,setPassword]=useState('');const [confirmPassword,setConfirmPassword]=useState('');const [showPassword,setShowPassword]=useState(false);const [enterBusy,setEnterBusy]=useState(false);const [saveErrorOpen,setSaveErrorOpen]=useState(false);const [saveError,setSaveError]=useState('');const [backBusy,setBackBusy]=useState(false);const [backError,setBackError]=useState('');
-  useEffect(()=>{const t=THEMES.find(x=>x.id===themeId)||THEMES[0]; document.documentElement.style.setProperty('--bg',t.bg);document.documentElement.style.setProperty('--surface',t.surface);document.documentElement.style.setProperty('--primary',t.primary);document.documentElement.style.setProperty('--accent',t.accent);document.documentElement.dataset.theme=t.id;},[themeId]);
+  useEffect(()=>{const t=THEMES.find(x=>x.id===themeId)||THEMES[0];applyTheme(t)},[themeId]);
   const countries=useMemo(()=>iso31661.filter(c=>c.state==='assigned').sort((a,b)=>a.name.localeCompare(b.name)),[]);
   const subdivisions=useMemo(()=>iso31662.filter(s=>s.code.startsWith(country+'-')).sort((a,b)=>a.name.localeCompare(b.name)),[country]);
   const filteredCountries=useMemo(()=>countries.filter(c=>(c.name+' '+c.alpha2+' '+c.alpha3).toLowerCase().includes(countryQuery.toLowerCase())),[countries,countryQuery]);
@@ -105,6 +149,7 @@ function canLocalDelete(m:ChatMessage){return new Date(m.expires_at).getTime()-D
 
 function Chat({profile,settings,accountPassword,onAccountPasswordChange,onSettings,onProfile,onLogout}:{profile:Profile;settings:{textSize:TextSize;sound:boolean;timeFormat?:TimeFormat};accountPassword:string;onAccountPasswordChange:(pin:string)=>void;onSettings:(x:any)=>void;onProfile:(x:Profile)=>void;onLogout:()=>Promise<void>}){
   const [messages,setMessages]=useState<ChatMessage[]>([]); const [voiceMessages,setVoiceMessages]=useState<VoiceMessage[]>([]); const [voiceLocalDeleted,setVoiceLocalDeleted]=useState<Record<string,number>>(()=>readVoiceLocalDeleted()); const [recording,setRecording]=useState(false); const [recordingStream,setRecordingStream]=useState<MediaStream|null>(null); const [recordingSeconds,setRecordingSeconds]=useState(0); const [recordedVoiceBlob,setRecordedVoiceBlob]=useState<Blob|null>(null); const [recordedVoiceDuration,setRecordedVoiceDuration]=useState(0); const [micPermission,setMicPermission]=useState<'unknown'|'prompt'|'granted'|'denied'>('unknown'); const [micNotice,setMicNotice]=useState(false); const mediaRecorderRef=useRef<MediaRecorder|null>(null); const mediaChunksRef=useRef<Blob[]>([]); const recordingTimerRef=useRef<number|undefined>(undefined); const recordingStartedRef=useRef<number>(0); const [localDeleted,setLocalDeleted]=useState<Record<string,number>>(()=>readLocalDeleted()); const messagesRef=useRef<ChatMessage[]>([]); const messageIdsRef=useRef<string[]>([]); const [online,setOnline]=useState(0); const [reactionCounts,setReactionCounts]=useState<Record<string,Record<string,number>>>({}); const [myReactions,setMyReactions]=useState<Record<string,string[]>>({}); const [voiceReactionCounts,setVoiceReactionCounts]=useState<Record<string,Record<string,number>>>({}); const [voiceMyReactions,setVoiceMyReactions]=useState<Record<string,string[]>>({}); const [authUserId,setAuthUserId]=useState(''); const [text,setText]=useState(''); const [error,setError]=useState(''); const [settingsOpen,setSettingsOpen]=useState(false); const [clearConfirmOpen,setClearConfirmOpen]=useState(false); const [deleteConfirmMessage,setDeleteConfirmMessage]=useState<ChatMessage|null>(null); const [deletingForEveryone,setDeletingForEveryone]=useState(false); const [emojiOpen,setEmojiOpen]=useState(false); const [connected,setConnected]=useState(false); const [connectionState,setConnectionState]=useState<'connected'|'reconnecting'|'offline'>('connected'); const [sending,setSending]=useState(false); const [voiceSendingPending,setVoiceSendingPending]=useState(false); const [typingUsers,setTypingUsers]=useState<string[]>([]); const [recordingUsers,setRecordingUsers]=useState<string[]>([]); const publicTypingActiveRef=useRef(false); const [showJump,setShowJump]=useState(false); const [replyTarget,setReplyTarget]=useState<any|null>(null); const [searchOpen,setSearchOpen]=useState(false); const [feedbackOpen,setFeedbackOpen]=useState(false); const [mobileMenuOpen,setMobileMenuOpen]=useState(false); const [headerMenuOpen,setHeaderMenuOpen]=useState(false); const [friendsOpen,setFriendsOpen]=useState(false); const [friendsUnreadCount,setFriendsUnreadCount]=useState(0); const [searchQuery,setSearchQuery]=useState(''); const [newMessageCount,setNewMessageCount]=useState(0); const [highlightedMessageId,setHighlightedMessageId]=useState<string|null>(null); const [copiedId,setCopiedId]=useState<string|null>(null); const [playingVoiceId,setPlayingVoiceId]=useState<string|null>(null); const [playingVoiceElapsed,setPlayingVoiceElapsed]=useState(0); const voiceAudioRef=useRef<HTMLAudioElement|null>(null); const typingStopRef=useRef<number|undefined>(undefined); const replyMetaRef=useRef<Record<string,{replyToId:string;replyToPreview:string;replyToName:string}>>({}); const channelRef=useRef<any>(null); const listRef=useRef<HTMLDivElement>(null); const audioRef=useRef<{send:HTMLAudioElement;receive:HTMLAudioElement}|null>(null); const sessionRef=useRef<any>(null); const pendingRef=useRef<Record<string,{tempId:string;body:string;createdAt:string}>>({}); const sendLockRef=useRef(false);
+  const pendingVoiceDeleteIdsRef=useRef(new Set<string>());
   const [privateRoom,setPrivateRoom]=useState<any>(()=>{try{return JSON.parse(localStorage.getItem(PRIVATE_CHAT_LOCAL_KEY)||'null')}catch{return null}});
   const messageRenderKeysRef=useRef<Record<string,string>>({});
   const voiceRenderKeysRef=useRef<Record<string,string>>({});
@@ -202,7 +247,7 @@ function Chat({profile,settings,accountPassword,onAccountPasswordChange,onSettin
   const unblockPrivateMember=async(member:any)=>{if(!privateRoom)return;const {error}=await supabase.rpc('unblock_private_room_member',{p_room_id:privateRoom.id,p_user_id:member.user_id});if(error){setPrivateMembersError(error.message);return}await loadPrivateMembers(privateRoom.id)};
 
   const theme=THEMES.find(t=>t.id===profile.themeId) ?? THEMES[0];
-  useEffect(()=>{document.documentElement.style.setProperty('--bg',theme.bg);document.documentElement.style.setProperty('--surface',theme.surface);document.documentElement.style.setProperty('--primary',theme.primary);document.documentElement.style.setProperty('--accent',theme.accent);document.documentElement.style.setProperty('--font-size',`${TEXT_SIZES[settings.textSize]}px`);document.documentElement.dataset.theme=theme.id;},[theme,settings.textSize]);
+  useEffect(()=>{applyTheme(theme);document.documentElement.style.setProperty('--font-size',`${TEXT_SIZES[settings.textSize]}px`);},[theme,settings.textSize]);
   const isNearBottom=useCallback(()=>{const el=listRef.current;if(!el)return true;return el.scrollHeight-el.scrollTop-el.clientHeight<120},[]);
   const copyMessage=useCallback(async(m:ChatMessage)=>{try{await navigator.clipboard.writeText(m.body);setCopiedId(m.id);window.setTimeout(()=>setCopiedId(id=>id===m.id?null:id),1200)}catch{}},[]);
   const activeSearch=searchQuery.trim().toLowerCase();
@@ -229,7 +274,7 @@ function Chat({profile,settings,accountPassword,onAccountPasswordChange,onSettin
        });
      }
      if(!voiceResult.error&&voiceResult.data){
-       const server=(voiceResult.data as VoiceMessage[]).filter(v=>!voiceLocalDeleted[v.id]);
+        const server=(voiceResult.data as VoiceMessage[]).filter(v=>!voiceLocalDeleted[v.id]&&!pendingVoiceDeleteIdsRef.current.has(v.id));
        setVoiceMessages(prev=>{
          const merged=new Map(server.map(v=>[v.id,v]));
          prev.filter(v=>new Date(v.created_at).getTime()>=startedAt&&!voiceLocalDeleted[v.id]).forEach(v=>{if(!merged.has(v.id))merged.set(v.id,v)});
@@ -402,8 +447,23 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
   const sendRecordedVoice=async()=>{if(!recordedVoiceBlob||sending)return;const blob=recordedVoiceBlob;const duration=recordedVoiceDuration;const ok=await uploadVoice(blob,duration,replyTarget?.reply_to_voice_id?null:(replyTarget?.id&&!String(replyTarget.id).startsWith('voice-reply-')?replyTarget.id:null),replyTarget?.reply_to_voice_id||null);if(ok){setRecordedVoiceBlob(null);setRecordedVoiceDuration(0);setRecordingSeconds(0);setReplyTarget(null)}};
   const cancelRecording=()=>{broadcastPublicRecording(false);if(recordingTimerRef.current)window.clearInterval(recordingTimerRef.current);recordingTimerRef.current=undefined;const r=mediaRecorderRef.current;mediaRecorderRef.current=null;if(r){r.onstop=null;if(r.state!=='inactive')r.stop();r.stream.getTracks().forEach(t=>t.stop())}mediaChunksRef.current=[];setRecording(false);setRecordingStream(null);setRecordingSeconds(0);setRecordedVoiceBlob(null);setRecordedVoiceDuration(0);};
   const toggleVoicePlayback=async(v:VoiceMessage)=>{if(playingVoiceId===v.id){voiceAudioRef.current?.pause();setPlayingVoiceId(null);return}if(voiceAudioRef.current){voiceAudioRef.current.pause();voiceAudioRef.current=null}setPlayingVoiceElapsed(0);let audioUrl=v.audio_url;if(v.storage_path){const {data}=await supabase.storage.from('voice-messages').createSignedUrl(v.storage_path,3600);if(data?.signedUrl)audioUrl=data.signedUrl}const a=new Audio(audioUrl);voiceAudioRef.current=a;setPlayingVoiceId(v.id);a.ontimeupdate=()=>setPlayingVoiceElapsed(a.currentTime);a.onended=()=>{setPlayingVoiceElapsed(0);setPlayingVoiceId(null)};a.onerror=()=>{setPlayingVoiceElapsed(0);setPlayingVoiceId(null);setError('Could not play this voice message.')};void a.play().catch(()=>{setPlayingVoiceId(null);setError('Could not play this voice message.')})};
-  const deleteVoiceForMe=(v:VoiceMessage)=>{playAction('/sounds/send.wav');delete voiceRenderKeysRef.current[v.id];const next={...readVoiceLocalDeleted(),[v.id]:new Date(v.expires_at).getTime()};setVoiceLocalDeleted(next);persistVoiceLocalDeleted(next);setVoiceMessages(prev=>prev.filter(x=>x.id!==v.id))};
-  const deleteVoiceForEveryone=async(v:VoiceMessage)=>{playAction('/sounds/send.wav');if(v.user_id!==authUserId)return;const session=sessionRef.current;const {data,error}=await supabase.functions.invoke('delete-voice-for-everyone',{body:{voiceId:v.id,userId:authUserId},headers:session?{Authorization:`Bearer ${session.access_token}`}:{}});if(error||data?.error){setError(data?.error||'Could not delete this voice message.');return}delete voiceRenderKeysRef.current[v.id];setVoiceMessages(prev=>prev.filter(x=>x.id!==v.id));if(playingVoiceId===v.id){voiceAudioRef.current?.pause();setPlayingVoiceId(null)}};
+  const deleteVoiceForMe=(v:VoiceMessage)=>{playAction('/sounds/send.wav');delete voiceRenderKeysRef.current[v.id];const next={...readVoiceLocalDeleted(),[v.id]:new Date(v.expires_at).getTime()};setVoiceLocalDeleted(next);persistVoiceLocalDeleted(next);setVoiceMessages(prev=>prev.filter(x=>x.id!==v.id));if(playingVoiceId===v.id){voiceAudioRef.current?.pause();voiceAudioRef.current=null;setPlayingVoiceId(null)}};
+  const deleteVoiceForEveryone=async(v:VoiceMessage)=>{
+    playAction('/sounds/send.wav');
+    if(v.user_id!==authUserId||pendingVoiceDeleteIdsRef.current.has(v.id))return;
+    pendingVoiceDeleteIdsRef.current.add(v.id);
+    setVoiceMessages(prev=>prev.filter(x=>x.id!==v.id));
+    if(playingVoiceId===v.id){voiceAudioRef.current?.pause();voiceAudioRef.current=null;setPlayingVoiceId(null)}
+    try{
+      const session=sessionRef.current;
+      const {data,error}=await supabase.functions.invoke('delete-voice-for-everyone',{body:{voiceId:v.id,userId:authUserId},headers:session?{Authorization:`Bearer ${session.access_token}`}:{}});
+      if(error||data?.error)throw new Error(data?.error||'Could not delete this voice message.');
+      delete voiceRenderKeysRef.current[v.id];
+    }catch(error){
+      setVoiceMessages(prev=>prev.some(x=>x.id===v.id)?prev:[...prev,v].sort((a,b)=>a.created_at.localeCompare(b.created_at)));
+      setError(error instanceof Error?error.message:'Could not delete this voice message. Please try again.');
+    }finally{pendingVoiceDeleteIdsRef.current.delete(v.id)}
+  };
   useEffect(()=>()=>{voiceAudioRef.current?.pause();if(recordingTimerRef.current)window.clearInterval(recordingTimerRef.current);mediaRecorderRef.current?.stream.getTracks().forEach(t=>t.stop())},[]);
   const beginReply=(m:ChatMessage)=>{if(m.id.startsWith('optimistic-'))return;setReplyTarget(m);requestAnimationFrame(()=>document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus())};
   const beginVoiceReply=(v:VoiceMessage)=>{const target={...v,id:`voice-reply-${v.id}`,reply_to_voice_id:v.id,body:`Voice message • ${formatDuration(v.duration_ms)}`};setReplyTarget(target);requestAnimationFrame(()=>document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus())};
@@ -719,24 +779,38 @@ const VoicePlayer=memo(function VoicePlayer({v,bucket='voice-messages'}:{v:any;b
     observer.observe(node);
     return()=>observer.disconnect();
   },[v.id,bucket]);
-  const toggle=async()=>{
+  const startPlayback=(audio:HTMLAudioElement)=>{
+    audio.playbackRate=rate;
+    if(Number.isFinite(audio.duration)&&audio.currentTime>=audio.duration)audio.currentTime=0;
+    setBuffering(true);
+    const reportPlayError=(error:unknown)=>{
+      setPlaying(false);setBuffering(false);
+      setPlayError((error as {name?:string}|null)?.name==='NotAllowedError'?'Audio is ready. Tap play again to start.':'Playback was blocked. Tap play to retry.');
+    };
+    try{
+      void audio.play().then(()=>{setPlaying(true);setBuffering(false)}).catch(reportPlayError);
+    }catch(error){reportPlayError(error)}
+  };
+  const toggle=()=>{
     const existing=audioRef.current;
     if(existing&&!existing.paused){existing.pause();setPlaying(false);setBuffering(false);return}
     if(startingRef.current)return;
-    startingRef.current=true;setBuffering(true);setPlayError('');
-    try{const a=await load();a.playbackRate=rate;if(Number.isFinite(a.duration)&&a.currentTime>=a.duration)a.currentTime=0;await a.play();setPlaying(true);setBuffering(false)}catch(error){setPlaying(false);setBuffering(false);setPlayError(error instanceof Error?error.message:'Playback failed. Tap play to retry.')}finally{startingRef.current=false}
+    setPlayError('');
+    if(existing){startPlayback(existing);return}
+    startingRef.current=true;setBuffering(true);
+    void load().then(startPlayback).catch(error=>{setPlaying(false);setBuffering(false);setPlayError(error instanceof Error?error.message:'Playback failed. Tap play to retry.')}).finally(()=>{startingRef.current=false});
   };
   const seek=(e:React.ChangeEvent<HTMLInputElement>)=>{const value=Number(e.target.value);if(audioRef.current)audioRef.current.currentTime=value;setCurrent(value)};
   const cycle=()=>{const next=rate===1?1.5:rate===1.5?2:1;setRate(next);if(audioRef.current)audioRef.current.playbackRate=next};
   const fmt=(x:number)=>`${Math.floor(x/60)}:${String(Math.floor(x%60)).padStart(2,'0')}`;
   const progress=duration>0?Math.min(1,current/duration):0;
   return <div className="voice-player" ref={playerRef}>
-    <button className="voice-play-btn" onClick={()=>void toggle()} aria-label={buffering?'Loading voice':playing?'Pause voice':'Play voice'}>{buffering?<RefreshCw className="voice-play-loading" size={16}/>:playing?<Pause size={17}/>:<Play size={17}/>}</button>
+    <button className="voice-play-btn" onClick={toggle} aria-label={playError|| (buffering?'Preparing voice':playing?'Pause voice':'Play voice')} title={playError||undefined} aria-invalid={playError&&!playError.startsWith('Audio is ready')?true:undefined}>{buffering?<RefreshCw className="voice-play-loading" size={16}/>:playing?<Pause size={17}/>:<Play size={17}/>}</button>
     <div className="voice-player-main">
       <div className="voice-wave voice-wave-player" aria-hidden="true">{Array.from({length:28},(_,i)=>{const height=6+Math.round((Math.sin(i*1.73)+1)*5+(Math.cos(i*.47)+1)*2);const played=progress>=(i+1)/28;return <i key={i} style={{height:`${height}px`,animationDelay:`-${((i*7)%17)*.055}s`,animationDuration:`${.42+(i%5)*.12}s`,background:played?'var(--primary)':undefined}} className={playing?'active':'static'}/>})}</div>
       <input className="voice-seek" type="range" min="0" max={Math.max(duration,0.1)} step="0.01" value={Math.min(current,duration||0)} onChange={seek} aria-label="Voice playback position"/>
       <div className="voice-player-meta"><span>{fmt(current)}</span><span>{fmt(duration)}</span></div>
-      {playError&&<small className="voice-player-error" role="alert">{playError}</small>}
+      {playError&&<small className="voice-player-error" data-kind={playError.startsWith('Audio is ready')?'ready':'error'} role={playError.startsWith('Audio is ready')?'status':'alert'}>{playError}</small>}
     </div>
     <button className="voice-speed-btn" onClick={cycle} title="Playback speed">{rate}x</button>
   </div>;
@@ -1205,8 +1279,8 @@ function SettingsPanel({profile,settings,accountPassword,onAccountPasswordChange
  useEffect(()=>{let live=true;void Promise.all([supabase.from('profiles').select('public_uid').maybeSingle(),supabase.functions.invoke('account-recovery',{body:{action:'status'}})]).then(([profileResult,statusResult])=>{if(!live)return;if(profileResult.data?.public_uid)setPublicUid(Number(profileResult.data.public_uid));if(!statusResult.error)setPasswordConfigured(Boolean(statusResult.data?.configured))});return()=>{live=false}},[]);
  const nameValid=p.name.trim().length>=2&&p.name.trim().length<=32;const cleanName=(value:string)=>value.trim().replace(/\s+/g,' ');const defaultTextSize=(value:any)=>value||'medium';const defaultTimeFormat=(value:any)=>value||'12h';
  const dirty=cleanName(p.name)!==cleanName(profile.name)||p.avatarId!==profile.avatarId||p.themeId!==profile.themeId||defaultTextSize(s.textSize)!==defaultTextSize(settings.textSize)||Boolean(s.sound)!==Boolean(settings.sound)||defaultTimeFormat(s.timeFormat)!==defaultTimeFormat(settings.timeFormat);
- useEffect(()=>{const t=THEMES.find(x=>x.id===p.themeId)||THEMES[0],root=document.documentElement;root.style.setProperty('--bg',t.bg);root.style.setProperty('--surface',t.surface);root.style.setProperty('--primary',t.primary);root.style.setProperty('--accent',t.accent);root.style.setProperty('--font-size',String(TEXT_SIZES[s.textSize as TextSize]||TEXT_SIZES.medium)+'px');root.dataset.theme=t.id},[p.themeId,s.textSize]);
- const closeWithoutSaving=()=>{const t=THEMES.find(x=>x.id===profile.themeId)||THEMES[0],root=document.documentElement;root.style.setProperty('--bg',t.bg);root.style.setProperty('--surface',t.surface);root.style.setProperty('--primary',t.primary);root.style.setProperty('--accent',t.accent);root.style.setProperty('--font-size',String(TEXT_SIZES[settings.textSize as TextSize]||TEXT_SIZES.medium)+'px');root.dataset.theme=t.id;onClose()};
+ useEffect(()=>{const t=THEMES.find(x=>x.id===p.themeId)||THEMES[0];applyTheme(t);document.documentElement.style.setProperty('--font-size',String(TEXT_SIZES[s.textSize as TextSize]||TEXT_SIZES.medium)+'px')},[p.themeId,s.textSize]);
+ const closeWithoutSaving=()=>{const t=THEMES.find(x=>x.id===profile.themeId)||THEMES[0];applyTheme(t);document.documentElement.style.setProperty('--font-size',String(TEXT_SIZES[settings.textSize as TextSize]||TEXT_SIZES.medium)+'px');onClose()};
  const saveSettings=async()=>{if(savingSettings||!dirty||!nameValid)return;setSavingSettings(true);setSettingsSaveError('');try{await onSave({...p,name:cleanName(p.name)},{...s,timeFormat:defaultTimeFormat(s.timeFormat)})}catch(error){setSettingsSaveError(error instanceof Error?error.message:'Could not save settings. Please try again.')}finally{setSavingSettings(false)}};
  const saveNewPassword=async()=>{setCredentialError('');setCredentialMessage('');if(!/^\d{5}$/.test(newPassword)){setCredentialError('Enter exactly 5 digits.');return}if(newPassword!==confirmNewPassword){setCredentialError('Passwords do not match.');return}setPasswordBusy(true);try{const {data,error}=await supabase.functions.invoke('account-recovery',{body:{action:'set-password',pin:newPassword}});if(error||!data?.configured)throw new Error(data?.error||error?.message||'Could not save your password. Please try again.');onAccountPasswordChange(newPassword);setPasswordConfigured(true);setNewPassword('');setConfirmNewPassword('');setShowPassword(true);setCredentialMessage('Your password has been updated.')}catch(error){setCredentialError(error instanceof Error?error.message:'Could not save your password.')}finally{setPasswordBusy(false)}};
  const copyValue=async(value:string,label:string)=>{try{await navigator.clipboard.writeText(value);setCredentialMessage(`${label} copied.`);setCredentialError('')}catch{setCredentialError('Clipboard access was blocked. Select and copy it manually.')}};
@@ -1356,15 +1430,6 @@ if (typeof window !== 'undefined') {
 
 
 /* GLOBAL CHAT voice duration live-time fix v1 */
-
-
-
-
-
-
-
-
-
 
 
 

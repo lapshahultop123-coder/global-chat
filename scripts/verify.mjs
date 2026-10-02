@@ -20,6 +20,13 @@ const themeEntries=[...themeBlock.matchAll(/\['([^']+)','([^']+)','(#[0-9a-f]{6}
 const themeIds=themeEntries.map(entry=>entry[1]);
 const relativeLuminance=hex=>hex.slice(1).match(/../g).map(channel=>parseInt(channel,16)/255).map(channel=>channel<=.04045?channel/12.92:((channel+.055)/1.055)**2.4).reduce((sum,channel,index)=>sum+channel*[.2126,.7152,.0722][index],0);
 const contrastWithWhite=hex=>1.05/(relativeLuminance(hex)+.05);
+const themeContrast=(hex,white)=>white?contrastWithWhite(hex):(relativeLuminance(hex)+.05)/.05;
+const accessibleThemeGradientContrast=(start,end)=>{
+ const raw=Array.from({length:21},(_,sample)=>'#'+[1,3,5].map(index=>Math.round(parseInt(start.slice(index,index+2),16)+(parseInt(end.slice(index,index+2),16)-parseInt(start.slice(index,index+2),16))*sample/20).toString(16).padStart(2,'0')).join(''));
+ const whiteMinimum=Math.min(...raw.map(color=>themeContrast(color,true))),blackMinimum=Math.min(...raw.map(color=>themeContrast(color,false))),white=whiteMinimum>=blackMinimum,target=white?0:255;
+ const adjusted=raw.map(color=>{const makeCandidate=amount=>'#'+[1,3,5].map(index=>Math.round(parseInt(color.slice(index,index+2),16)+(target-parseInt(color.slice(index,index+2),16))*amount).toString(16).padStart(2,'0')).join('');if(themeContrast(color,white)>=4.6)return color;let low=0,high=1;for(let attempt=0;attempt<20;attempt++){const middle=(low+high)/2;if(themeContrast(makeCandidate(middle),white)>=4.6)high=middle;else low=middle}return makeCandidate(high)});
+ let minimum=Infinity;for(let segment=0;segment<20;segment++)for(const sample of [0,.25,.5,.75,1]){const color='#'+[1,3,5].map(index=>Math.round(parseInt(adjusted[segment].slice(index,index+2),16)+(parseInt(adjusted[segment+1].slice(index,index+2),16)-parseInt(adjusted[segment].slice(index,index+2),16))*sample).toString(16).padStart(2,'0')).join('');minimum=Math.min(minimum,themeContrast(color,white))}return minimum;
+};
 const reactions=['\u{1F44D}','\u{2764}\u{FE0F}','\u{1F602}','\u{1F62E}','\u{1F622}','\u{1F621}','\u{1F389}','\u{1F64F}'];
 const releaseAudit=process.env.RELEASE_AUDIT==='1';
 const ok=(name,test)=>checks.push([name,!!test]);
@@ -33,6 +40,8 @@ ok('new avatar IDs are stable and sequential from 507 to 1262',avatarExtras.leng
 ok('existing IDs through 1154 stay stable; new styles append as IDs 1155-1262',avatarExtras.filter(avatar=>avatar.id<=782).length===276&&avatarExtras.filter(avatar=>avatar.id<=782).every(avatar=>avatar.variant>=8&&avatar.variant<20)&&avatarExtras.filter(avatar=>avatar.id>=783&&avatar.id<=1127).length===345&&avatarExtras.filter(avatar=>avatar.id>=783&&avatar.id<=1127).every(avatar=>avatar.variant>=20&&avatar.variant<35)&&avatarExtras.filter(avatar=>avatar.slug==='critters').length===27&&avatarExtras.filter(avatar=>avatar.slug==='critters').every((avatar,index)=>avatar.id===1128+index&&avatar.variant===8+index)&&['clay','constellation','gaze','voxel-art'].every((slug,styleIndex)=>avatarExtras.filter(avatar=>avatar.slug===slug).length===27&&avatarExtras.filter(avatar=>avatar.slug===slug).every((avatar,index)=>avatar.id===1155+styleIndex*27+index&&avatar.variant===8+index)));
 
 ok('40 unique themes; 15 new themes have distinct accents and WCAG AA button-text contrast',themeEntries.length===40&&new Set(themeIds).size===40&&new Set(themeEntries.map(entry=>entry.slice(3,7).join(':'))).size===40&&new Set(themeEntries.slice(25).flatMap(entry=>[entry[5],entry[6]])).size===30&&themeEntries.slice(25).every(entry=>contrastWithWhite(entry[5])>=4.5&&contrastWithWhite(entry[6])>=4.5));
+ok('all 40 theme CTA gradients maintain AA text contrast after foreground correction',themeEntries.length===40&&themeEntries.every(entry=>accessibleThemeGradientContrast(entry[5],entry[6])>=4.5));
+ok('theme buttons calculate contrast-safe foregrounds and gradient backgrounds',app.includes('function themeButtonText(stops:string[])')&&app.includes('function accessibleThemeGradient(stops:string[],foreground:string)')&&app.includes("setProperty('--theme-button-text'")&&app.includes("setProperty('--theme-button-gradient'")&&app.includes("setProperty('--theme-primary-gradient'")&&app.includes("setProperty('--theme-primary-text'")&&css.includes('var(--theme-button-text,#fff)')&&css.includes('var(--theme-button-gradient)')&&css.includes('var(--theme-primary-gradient)')&&css.includes('var(--theme-primary-text,#fff)'));
 ok('all 40 themes are accepted by server-side profile validation',themeIds.length===40&&themeIds.every(id=>profile.includes(`'${id}'`))&&/themes\.includes\(p\.themeId\)/.test(profile));
 ok('exactly 8 reactions',reactions.length===8);
 ok('500-char client validation',/\[\.\.\.value\]\.length > 500/.test(validation));
@@ -84,6 +93,8 @@ ok('public/private recording indicators present',/Someone is recording/.test(app
 ok('private send/delete action sounds',/playPrivateAction\('\/sounds\/send\.wav'\)/.test(app));
 ok('private voice recording and upload flow',/MediaRecorder/.test(app)&&/private-voice-messages/.test(app)&&/send_private_voice/.test(app)&&/sendRecordedPrivateVoice/.test(app));
 ok('private voice playback always signs its storage path and shows retryable errors',app.includes("if(bucket!=='voice-messages')")&&app.includes("createSignedUrl(v.storage_path")&&app.includes('Audio could not load. Tap play to retry.')&&app.includes('voice-player-error'));
+ok('private voice playback prepares signed URLs before the next tap without changing bubble height',app.includes('startPlayback(existing)')&&app.includes('Audio is ready. Tap play again to start.')&&css.includes('.voice-player-error{position:absolute'));
+ok('public voice delete-for-everyone removes the row optimistically and restores it on failure',app.includes('pendingVoiceDeleteIdsRef.current.add(v.id)')&&app.includes('setVoiceMessages(prev=>prev.filter(x=>x.id!==v.id))')&&app.includes('Could not delete this voice message. Please try again.'));
 ok('private voice local-delete filter survives refresh',/filter\(v=>!localDeleted\['v:'\+v\.id\]\)/.test(app));
 ok('header search/clear/settings menu',/header-more-menu/.test(app)&&/Search/.test(app)&&/Clear Chat/.test(app)&&/Settings/.test(app)&&/MoreVertical/.test(app));
 
@@ -167,4 +178,3 @@ ok('Private chats modal stacks above the fixed top bar',read('src/styles.css').i
 
 let failed=0; for(const [name,passed] of checks){console.log(`${passed?'PASS':'FAIL'}  ${name}`);if(!passed)failed++;}
 if(failed)process.exit(1); console.log(`\n${checks.length} static checks passed.`);
-
