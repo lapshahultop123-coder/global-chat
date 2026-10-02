@@ -130,6 +130,50 @@ Deno.serve(async (request) => {
     const payload = await request.json();
     const action = payload?.action;
 
+    if (action === 'change-password-with-credentials') {
+      const publicUid = String(payload?.publicUid ?? '').trim();
+      const currentPin = String(payload?.currentPin ?? '').trim();
+      const newPin = String(payload?.newPin ?? '').trim();
+      if (!/^\d{10}$/.test(publicUid) || !/^\d{5}$/.test(currentPin) || !/^\d{5}$/.test(newPin)) {
+        return json({ error: 'Enter your 10-digit UID and both 5-digit passwords.' }, 400);
+      }
+
+      const { data: allowed, error: limitError } = await admin.rpc('claim_account_recovery_attempt', {
+        p_public_uid: Number(publicUid),
+      });
+      if (limitError || allowed !== true) {
+        return json({ error: 'Too many password checks. Please wait 5 minutes before trying again.' }, 429);
+      }
+
+      const { data: credential, error: credentialError } = await admin
+        .from('account_recovery_credentials')
+        .select('user_id, public_uid, code_hash')
+        .eq('public_uid', Number(publicUid))
+        .maybeSingle();
+      if (credentialError) return json({ error: 'Could not update the password. Please try again.' }, 500);
+      if (!credential) return json({ error: 'UID or current password is incorrect.' }, 401);
+
+      const currentHash = await hmac(`recovery-code:${currentPin}`);
+      if (!constantTimeEqual(currentHash, credential.code_hash)) {
+        return json({ error: 'UID or current password is incorrect.' }, 401);
+      }
+
+      const codeHash = await hmac(`recovery-code:${newPin}`);
+      const passwordCiphertext = await encryptPin(newPin, credential.user_id, publicUid);
+      const { error: updateError } = await admin.from('account_recovery_credentials').update({
+        code_hash: codeHash,
+        password_ciphertext: passwordCiphertext,
+        updated_at: new Date().toISOString(),
+      }).eq('user_id', credential.user_id);
+      if (updateError) {
+        console.error('Account password change failed:', updateError.message);
+        return json({ error: 'Could not update your password. Please try again.' }, 500);
+      }
+
+      await admin.from('account_recovery_attempts').delete().eq('public_uid', Number(publicUid));
+      return json({ publicUid, configured: true });
+    }
+
     if (action === 'status' || action === 'create' || action === 'set-password' || action === 'remember-password' || action === 'change-password') {
       const user = await authenticatedUser(request);
       if (!user) return json({ error: 'Session expired. Please sign in again.' }, 401);
