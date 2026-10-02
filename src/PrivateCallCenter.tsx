@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Phone, PhoneCall, PhoneOff, Mic, MicOff, Volume2, VolumeX, X, Users, ShieldOff, ShieldCheck, CheckSquare, Square } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { AVATARS } from './data/catalog';
+import { claimVoiceCall, ownsVoiceCall, releaseVoiceCall, requestVoiceCallStream } from './callAudio';
 
 const ICE_SERVERS: RTCConfiguration = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -41,6 +42,9 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
   const peersRef=useRef<Record<string,RTCPeerConnection>>({});
   const callRef=useRef<ActiveCall|null>(null);
   const mountedRef=useRef(true);
+  const callOwnerRef=useRef(Symbol('private-voice-call'));
+  const callStartingRef=useRef(false);
+  const localStreamRequestRef=useRef<Promise<MediaStream>|null>(null);
 
   const loadMembers=useCallback(async()=>{
     const {data,error}=await supabase.rpc('get_private_call_members',{p_room_id:roomId});
@@ -69,9 +73,11 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
   },[]);
 
   const cleanupCall=useCallback(async()=>{
+    releaseVoiceCall(callOwnerRef.current);
     clearPeers();
     localStreamRef.current?.getTracks().forEach(t=>t.stop());
     localStreamRef.current=null;
+    localStreamRequestRef.current=null;
     await leaveCallChannel();
     callRef.current=null;
     if(mountedRef.current){setActiveCall(null);setIncoming(null);setMuted(false);setSpeakerMuted(false);setCallStatus('idle');}
@@ -83,11 +89,19 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
   },[]);
 
   const ensureLocalStream=useCallback(async()=>{
-    if(localStreamRef.current)return localStreamRef.current;
-    if(!navigator.mediaDevices?.getUserMedia)throw new Error('Voice calls are not supported by this browser.');
-    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});
-    localStreamRef.current=stream;
-    return stream;
+    const existing=localStreamRef.current;
+    if(existing?.getAudioTracks().some(track=>track.readyState==='live'))return existing;
+    if(localStreamRequestRef.current)return localStreamRequestRef.current;
+    const owner=callOwnerRef.current;
+    const request=requestVoiceCallStream().then(stream=>{
+      if(!ownsVoiceCall(owner)){stream.getTracks().forEach(track=>track.stop());throw new Error('Call was cancelled before the microphone was ready.');}
+      localStreamRef.current=stream;
+      const micSettings=stream.getAudioTracks()[0]?.getSettings();
+      if(micSettings?.echoCancellation===false||micSettings?.noiseSuppression===false||micSettings?.autoGainControl===true)setError('Your browser could not apply all echo-control settings. Use headphones or lower speaker volume to prevent echo.');
+      return stream;
+    }).finally(()=>{if(localStreamRequestRef.current===request)localStreamRequestRef.current=null});
+    localStreamRequestRef.current=request;
+    return request;
   },[]);
 
   const ensurePeer=useCallback(async(remoteId:string)=>{
@@ -95,11 +109,14 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
     const pc=new RTCPeerConnection(ICE_SERVERS);
     peersRef.current[remoteId]=pc;
     const stream=await ensureLocalStream();
-    stream.getTracks().forEach(t=>pc.addTrack(t,stream));
+    const audioTrack=stream.getAudioTracks().find(track=>track.readyState==='live');
+    if(!audioTrack)throw new Error('The microphone track ended. Please retry the call.');
+    if(!pc.getSenders().some(sender=>sender.track?.id===audioTrack.id))pc.addTrack(audioTrack,stream);
     pc.onicecandidate=e=>{if(e.candidate)sendCallEvent('ice',{from:currentUserId,to:remoteId,candidate:e.candidate});};
     pc.ontrack=e=>{
-      const s=e.streams[0];
-      if(s)setRemoteStreams(prev=>({...prev,[remoteId]:s}));
+      if(e.track.kind!=='audio')return;
+      const s=e.streams[0]||new MediaStream([e.track]);
+      setRemoteStreams(prev=>prev[remoteId]===s?prev:{...prev,[remoteId]:s});
     };
     pc.onconnectionstatechange=()=>{
       if(pc.connectionState==='failed'||pc.connectionState==='closed'){
@@ -156,13 +173,16 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
 
   const startCall=async()=>{
     setError('');
+    if(callStartingRef.current||callRef.current)return;
     const targets=[...selected];
     if(!targets.length){setError('Select at least one member.');return;}
+    callStartingRef.current=true;
+    if(!claimVoiceCall(callOwnerRef.current)){callStartingRef.current=false;setError('End the other voice call before starting this one.');return;}
     try{
       const {data,error:checkError}=await supabase.rpc('check_private_call_targets',{p_room_id:roomId,p_target_ids:targets});
       if(checkError)throw checkError;
       const allowed=(data||[]).filter((x:any)=>x.allowed).map((x:any)=>x.user_id);
-      if(!allowed.length){setError('Those members cannot receive a call because of a call block.');return;}
+      if(!allowed.length){releaseVoiceCall(callOwnerRef.current);setError('Those members cannot receive a call because of a call block.');return;}
       await ensureLocalStream();
       const id=crypto.randomUUID();
       const call={id,callerId:currentUserId,callerName:currentUserName,participantIds:[currentUserId,...allowed],startedAt:Date.now()};
@@ -170,10 +190,14 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
       await joinCallChannel(call);
       if(roomChannelRef.current)void roomChannelRef.current.send({type:'broadcast',event:'call-invite',payload:{callId:id,callerId:currentUserId,callerName:currentUserName,participantIds:call.participantIds}});
     }catch(e:any){setError(e?.name==='NotAllowedError'?'Microphone permission was denied. Please allow microphone access.':e?.message||'Could not start the voice call.');await cleanupCall();}
+    finally{callStartingRef.current=false;}
   };
 
   const acceptCall=async()=>{
     const inc=incoming;if(!inc)return;
+    if(callStartingRef.current||callRef.current)return;
+    callStartingRef.current=true;
+    if(!claimVoiceCall(callOwnerRef.current)){callStartingRef.current=false;setError('End the other voice call before accepting this one.');return;}
     try{
       const {data,error:checkError}=await supabase.rpc('check_private_call_targets',{p_room_id:roomId,p_target_ids:[inc.callerId]});
       if(checkError)throw checkError;
@@ -183,7 +207,8 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
       callRef.current=call;setIncoming(null);setActiveCall(call);setCallStatus('connecting');
       await joinCallChannel(call);
       if(roomChannelRef.current)void roomChannelRef.current.send({type:'broadcast',event:'call-accepted',payload:{callId:inc.id,userId:currentUserId}});
-    }catch(e:any){setError(e?.message||'Could not join the voice call.');setIncoming(null);}
+    }catch(e:any){setError(e?.message||'Could not join the voice call.');setIncoming(null);await cleanupCall();}
+    finally{callStartingRef.current=false;}
   };
 
   const declineCall=()=>{if(incoming&&roomChannelRef.current)void roomChannelRef.current.send({type:'broadcast',event:'call-declined',payload:{callId:incoming.id,userId:currentUserId}});setIncoming(null);};
@@ -250,6 +275,7 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
 
     {incoming&&<div className="private-call-backdrop" role="alertdialog" aria-modal="true"><div className="private-incoming-call"><div className="private-incoming-icon"><PhoneCall size={28}/></div><span className="private-call-kicker">INCOMING VOICE CALL</span><h3>{incoming.callerName}</h3><p>{incoming.participantIds.length>2?`Group call · ${incoming.participantIds.length} invited`: 'Private one-to-one call'}</p><div className="private-incoming-actions"><button className="private-call-decline" onClick={declineCall}><PhoneOff size={17}/> DECLINE</button><button className="private-call-accept" onClick={()=>void acceptCall()}><Phone size={17}/> ACCEPT</button></div></div></div>}
 
-    {activeCall&&<div className="private-active-call"><div className="private-active-call-head"><div><span>VOICE CALL</span><strong>{callStatus==='connected'?'CONNECTED':callStatus==='calling'?'CALLING...':callStatus==='connecting'?'CONNECTING...':'CALLING...'}</strong></div></div><div className="private-active-participants">{activeParticipants.map(id=><div key={id} className="private-active-person"><div className="private-active-avatar">{id===currentUserId?<Mic size={17}/>:<Users size={17}/>}</div><span>{id===currentUserId?'You':remoteNames[id]||'Member'}</span>{id!==currentUserId&&remoteStreams[id]&&<audio autoPlay playsInline muted={speakerMuted} ref={el=>{if(el&&el.srcObject!==remoteStreams[id])el.srcObject=remoteStreams[id]}}/>}</div>)}</div><div className="private-active-controls"><button onClick={toggleMute} className={muted?'active':''} title={muted?'Turn microphone on':'Mute microphone'}>{muted?<MicOff size={18}/>:<Mic size={18}/>}<span>{muted?'MIC OFF':'MIC ON'}</span></button><button onClick={toggleSpeaker} className={speakerMuted?'active':''} title={speakerMuted?'Unmute call audio':'Mute call audio'}>{speakerMuted?<VolumeX size={18}/>:<Volume2 size={18}/>}<span>{speakerMuted?'SOUND OFF':'SOUND ON'}</span></button><button className="danger" onClick={()=>void endCall()}><PhoneOff size={18}/><span>END</span></button></div></div>}
+    {activeCall&&<div className="private-active-call"><div className="private-active-call-head"><div><span>VOICE CALL</span><strong>{callStatus==='connected'?'CONNECTED':callStatus==='calling'?'CALLING...':callStatus==='connecting'?'CONNECTING...':'CALLING...'}</strong></div></div><div className="private-active-participants">{activeParticipants.map(id=><div key={id} className="private-active-person"><div className="private-active-avatar">{id===currentUserId?<Mic size={17}/>:<Users size={17}/>}</div><span>{id===currentUserId?'You':remoteNames[id]||'Member'}</span>{id!==currentUserId&&remoteStreams[id]&&<audio autoPlay playsInline muted={speakerMuted} ref={el=>{if(el){el.volume=0.8;if(el.srcObject!==remoteStreams[id])el.srcObject=remoteStreams[id]}}}/>}</div>)}</div><div className="private-active-controls"><button onClick={toggleMute} className={muted?'active':''} title={muted?'Turn microphone on':'Mute microphone'}>{muted?<MicOff size={18}/>:<Mic size={18}/>}<span>{muted?'MIC OFF':'MIC ON'}</span></button><button onClick={toggleSpeaker} className={speakerMuted?'active':''} title={speakerMuted?'Unmute call audio':'Mute call audio'}>{speakerMuted?<VolumeX size={18}/>:<Volume2 size={18}/>}<span>{speakerMuted?'SOUND OFF':'SOUND ON'}</span></button><button className="danger" onClick={()=>void endCall()}><PhoneOff size={18}/><span>END</span></button></div></div>}
+    {activeCall&&error&&<div className="private-call-error" role="alert" style={{position:'fixed',right:18,bottom:150,zIndex:5101,width:'min(370px,calc(100vw - 36px))'}}>{error}</div>}
   </>;
 }
