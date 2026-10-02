@@ -7,6 +7,7 @@ import ActionDialog from './ActionDialog';
 import EarthGlobe from './EarthGlobe';
 
 import { validateMessage } from './lib/validation';
+import { clearRemoteActivity, updateRemoteActivity } from './lib/realtimeActivity';
 const PrivateCallCenter = lazy(() => import('./PrivateCallCenter'));
 const FriendsPanel = lazy(() => import('./FriendsPanel'));
 import './styles.css';
@@ -167,7 +168,7 @@ function localMessageKey(m:Pick<ChatMessage,'id'|'user_id'|'body'|'created_at'>)
 function canLocalDelete(m:ChatMessage){return new Date(m.expires_at).getTime()-Date.now()>0}
 
 function Chat({profile,settings,accountPassword,onAccountPasswordChange,onSettings,onProfile,onLogout}:{profile:Profile;settings:{textSize:TextSize;sound:boolean;timeFormat?:TimeFormat};accountPassword:string;onAccountPasswordChange:(pin:string)=>void;onSettings:(x:any)=>void;onProfile:(x:Profile)=>void;onLogout:()=>Promise<void>}){
-  const [messages,setMessages]=useState<ChatMessage[]>([]); const [voiceMessages,setVoiceMessages]=useState<VoiceMessage[]>([]); const [voiceLocalDeleted,setVoiceLocalDeleted]=useState<Record<string,number>>(()=>readVoiceLocalDeleted()); const [recording,setRecording]=useState(false); const [recordingStream,setRecordingStream]=useState<MediaStream|null>(null); const [recordingSeconds,setRecordingSeconds]=useState(0); const [recordedVoiceBlob,setRecordedVoiceBlob]=useState<Blob|null>(null); const [recordedVoiceDuration,setRecordedVoiceDuration]=useState(0); const [micPermission,setMicPermission]=useState<'unknown'|'prompt'|'granted'|'denied'>('unknown'); const [micNotice,setMicNotice]=useState(false); const mediaRecorderRef=useRef<MediaRecorder|null>(null); const mediaChunksRef=useRef<Blob[]>([]); const recordingTimerRef=useRef<number|undefined>(undefined); const recordingStartedRef=useRef<number>(0); const [localDeleted,setLocalDeleted]=useState<Record<string,number>>(()=>readLocalDeleted()); const messagesRef=useRef<ChatMessage[]>([]); const messageIdsRef=useRef<string[]>([]); const [online,setOnline]=useState(0); const [reactionCounts,setReactionCounts]=useState<Record<string,Record<string,number>>>({}); const [myReactions,setMyReactions]=useState<Record<string,string[]>>({}); const [voiceReactionCounts,setVoiceReactionCounts]=useState<Record<string,Record<string,number>>>({}); const [voiceMyReactions,setVoiceMyReactions]=useState<Record<string,string[]>>({}); const [authUserId,setAuthUserId]=useState(''); const [text,setText]=useState(''); const [error,setError]=useState(''); const [settingsOpen,setSettingsOpen]=useState(false); const [clearConfirmOpen,setClearConfirmOpen]=useState(false); const [deleteConfirmMessage,setDeleteConfirmMessage]=useState<ChatMessage|null>(null); const [deletingForEveryone,setDeletingForEveryone]=useState(false); const [emojiOpen,setEmojiOpen]=useState(false); const [connected,setConnected]=useState(false); const [connectionState,setConnectionState]=useState<'connected'|'reconnecting'|'offline'>('connected'); const [sending,setSending]=useState(false); const [voiceSendingPending,setVoiceSendingPending]=useState(false); const [typingUsers,setTypingUsers]=useState<string[]>([]); const [recordingUsers,setRecordingUsers]=useState<string[]>([]); const publicTypingActiveRef=useRef(false); const [showJump,setShowJump]=useState(false); const [replyTarget,setReplyTarget]=useState<any|null>(null); const [searchOpen,setSearchOpen]=useState(false); const [feedbackOpen,setFeedbackOpen]=useState(false); const [mobileMenuOpen,setMobileMenuOpen]=useState(false); const [headerMenuOpen,setHeaderMenuOpen]=useState(false); const [friendsOpen,setFriendsOpen]=useState(false); const [friendsUnreadCount,setFriendsUnreadCount]=useState(0); const [searchQuery,setSearchQuery]=useState(''); const [newMessageCount,setNewMessageCount]=useState(0); const [highlightedMessageId,setHighlightedMessageId]=useState<string|null>(null); const [copiedId,setCopiedId]=useState<string|null>(null); const [playingVoiceId,setPlayingVoiceId]=useState<string|null>(null); const [playingVoiceElapsed,setPlayingVoiceElapsed]=useState(0); const voiceAudioRef=useRef<HTMLAudioElement|null>(null); const typingStopRef=useRef<number|undefined>(undefined); const replyMetaRef=useRef<Record<string,{replyToId:string;replyToPreview:string;replyToName:string}>>({}); const channelRef=useRef<any>(null); const listRef=useRef<HTMLDivElement>(null); const audioRef=useRef<{send:HTMLAudioElement;receive:HTMLAudioElement}|null>(null); const sessionRef=useRef<any>(null); const pendingRef=useRef<Record<string,{tempId:string;body:string;createdAt:string}>>({}); const sendLockRef=useRef(false);
+  const [messages,setMessages]=useState<ChatMessage[]>([]); const [voiceMessages,setVoiceMessages]=useState<VoiceMessage[]>([]); const [voiceLocalDeleted,setVoiceLocalDeleted]=useState<Record<string,number>>(()=>readVoiceLocalDeleted()); const [recording,setRecording]=useState(false); const [recordingStream,setRecordingStream]=useState<MediaStream|null>(null); const [recordingSeconds,setRecordingSeconds]=useState(0); const [recordedVoiceBlob,setRecordedVoiceBlob]=useState<Blob|null>(null); const [recordedVoiceDuration,setRecordedVoiceDuration]=useState(0); const [micPermission,setMicPermission]=useState<'unknown'|'prompt'|'granted'|'denied'>('unknown'); const [micNotice,setMicNotice]=useState(false); const mediaRecorderRef=useRef<MediaRecorder|null>(null); const mediaChunksRef=useRef<Blob[]>([]); const recordingTimerRef=useRef<number|undefined>(undefined); const recordingStartedRef=useRef<number>(0); const [localDeleted,setLocalDeleted]=useState<Record<string,number>>(()=>readLocalDeleted()); const messagesRef=useRef<ChatMessage[]>([]); const messageIdsRef=useRef<string[]>([]); const [online,setOnline]=useState(0); const [reactionCounts,setReactionCounts]=useState<Record<string,Record<string,number>>>({}); const [myReactions,setMyReactions]=useState<Record<string,string[]>>({}); const [voiceReactionCounts,setVoiceReactionCounts]=useState<Record<string,Record<string,number>>>({}); const [voiceMyReactions,setVoiceMyReactions]=useState<Record<string,string[]>>({}); const [authUserId,setAuthUserId]=useState(''); const [text,setText]=useState(''); const [error,setError]=useState(''); const [settingsOpen,setSettingsOpen]=useState(false); const [clearConfirmOpen,setClearConfirmOpen]=useState(false); const [deleteConfirmMessage,setDeleteConfirmMessage]=useState<ChatMessage|null>(null); const [deletingForEveryone,setDeletingForEveryone]=useState(false); const [emojiOpen,setEmojiOpen]=useState(false); const [connected,setConnected]=useState(false); const [connectionState,setConnectionState]=useState<'connected'|'reconnecting'|'offline'>('connected'); const [sending,setSending]=useState(false); const [voiceSendingPending,setVoiceSendingPending]=useState(false); const [typingUsers,setTypingUsers]=useState<string[]>([]); const [recordingUsers,setRecordingUsers]=useState<string[]>([]); const publicTypingActiveRef=useRef(false); const publicTypingHeartbeatRef=useRef<number|undefined>(undefined); const publicRecordingHeartbeatRef=useRef<number|undefined>(undefined); const publicTypingUsersRef=useRef(new Set<string>()); const publicTypingTimersRef=useRef(new Map<string,number>()); const publicRecordingUsersRef=useRef(new Set<string>()); const publicRecordingTimersRef=useRef(new Map<string,number>()); const [showJump,setShowJump]=useState(false); const [replyTarget,setReplyTarget]=useState<any|null>(null); const [searchOpen,setSearchOpen]=useState(false); const [feedbackOpen,setFeedbackOpen]=useState(false); const [mobileMenuOpen,setMobileMenuOpen]=useState(false); const [headerMenuOpen,setHeaderMenuOpen]=useState(false); const [friendsOpen,setFriendsOpen]=useState(false); const [friendsUnreadCount,setFriendsUnreadCount]=useState(0); const [searchQuery,setSearchQuery]=useState(''); const [newMessageCount,setNewMessageCount]=useState(0); const [highlightedMessageId,setHighlightedMessageId]=useState<string|null>(null); const [copiedId,setCopiedId]=useState<string|null>(null); const [playingVoiceId,setPlayingVoiceId]=useState<string|null>(null); const [playingVoiceElapsed,setPlayingVoiceElapsed]=useState(0); const voiceAudioRef=useRef<HTMLAudioElement|null>(null); const typingStopRef=useRef<number|undefined>(undefined); const replyMetaRef=useRef<Record<string,{replyToId:string;replyToPreview:string;replyToName:string}>>({}); const channelRef=useRef<any>(null); const listRef=useRef<HTMLDivElement>(null); const audioRef=useRef<{send:HTMLAudioElement;receive:HTMLAudioElement}|null>(null); const sessionRef=useRef<any>(null); const pendingRef=useRef<Record<string,{tempId:string;body:string;createdAt:string}>>({}); const sendLockRef=useRef(false);
   const pendingVoiceDeleteIdsRef=useRef(new Set<string>());
   const [privateRoom,setPrivateRoom]=useState<any>(()=>{try{return JSON.parse(localStorage.getItem(PRIVATE_CHAT_LOCAL_KEY)||'null')}catch{return null}});
   const messageRenderKeysRef=useRef<Record<string,string>>({});
@@ -182,7 +183,7 @@ function Chat({profile,settings,accountPassword,onAccountPasswordChange,onSettin
   const setReplyTargetForPrivate=setReplyTarget;
   const replyTargetForPrivateRef=useRef<any>(null);
   useEffect(()=>{replyTargetForPrivateRef.current=replyTargetForPrivate},[replyTargetForPrivate]);
-  const privateChannelRef=useRef<any>(null); const privateRoomStartedRef=useRef<string|null>(null); const privatePollRef=useRef<number|undefined>(undefined); const [privateOnline,setPrivateOnline]=useState(0); const [privateTyping,setPrivateTyping]=useState(false); const [privateRecording,setPrivateRecording]=useState(false); const privateTypingStopRef=useRef<number|undefined>(undefined); const privateTypingActiveRef=useRef(false);
+  const privateChannelRef=useRef<any>(null); const privateRoomStartedRef=useRef<string|null>(null); const privatePollRef=useRef<number|undefined>(undefined); const [privateOnline,setPrivateOnline]=useState(0); const [privateTyping,setPrivateTyping]=useState(false); const [privateRecording,setPrivateRecording]=useState(false); const privateTypingStopRef=useRef<number|undefined>(undefined); const privateTypingActiveRef=useRef(false); const privateTypingHeartbeatRef=useRef<number|undefined>(undefined); const privateRecordingHeartbeatRef=useRef<number|undefined>(undefined); const privateTypingUsersRef=useRef(new Set<string>()); const privateTypingTimersRef=useRef(new Map<string,number>()); const privateRecordingUsersRef=useRef(new Set<string>()); const privateRecordingTimersRef=useRef(new Map<string,number>());
   const [yourPrivateChatsOpen,setYourPrivateChatsOpen]=useState(false);
   const [pinnedPrivateChatIds,setPinnedPrivateChatIds]=useState<string[]>(()=>readJSON<string[]>(PRIVATE_CHAT_PINNED_KEY,[]));
   const [yourPrivateChats,setYourPrivateChats]=useState<any[]>(()=>sortPrivateChats(readPrivateChatCache().filter((room:any)=>!readJSON<string[]>(PRIVATE_CHAT_HIDDEN_KEY,[]).includes(room.id)),readJSON<string[]>(PRIVATE_CHAT_PINNED_KEY,[])));
@@ -320,10 +321,6 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
     const presenceUsers=()=>{
       if(!channel)return;
       const state=channel.presenceState() as Record<string,any[]>;
-      const ids=Object.entries(state)
-        .filter(([id,metas])=>id!==(sessionRef.current?.user?.id||authUserId)&&Array.isArray(metas)&&metas.some(meta=>meta?.typing===true))
-        .map(([id])=>id);
-      if(mounted)setTypingUsers(ids);
       if(mounted)setOnline(Object.keys(state).length);
     };
     (async()=>{
@@ -354,14 +351,12 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
         .on('broadcast',{event:'typing',config:{self:false}},({payload}:any)=>{
           const id=payload?.userId;
           if(!id||id===selfId)return;
-          if(payload?.typing){setTypingUsers(prev=>prev.includes(id)?prev:[...prev,id]);window.setTimeout(()=>setTypingUsers(prev=>prev.filter(x=>x!==id)),1800)}
-          else setTypingUsers(prev=>prev.filter(x=>x!==id));
+          updateRemoteActivity(publicTypingUsersRef.current,publicTypingTimersRef.current,id,Boolean(payload?.typing),3200,setTypingUsers);
         })
         .on('broadcast',{event:'recording',config:{self:false}},({payload}:any)=>{
           const id=payload?.userId;
           if(!id||id===selfId)return;
-          if(payload?.recording){setRecordingUsers(prev=>prev.includes(id)?prev:[...prev,id]);window.setTimeout(()=>setRecordingUsers(prev=>prev.filter(x=>x!==id)),3500)}
-          else setRecordingUsers(prev=>prev.filter(x=>x!==id));
+          updateRemoteActivity(publicRecordingUsersRef.current,publicRecordingTimersRef.current,id,Boolean(payload?.recording),6500,setRecordingUsers);
         })
         .on('broadcast',{event:'message-meta'},({payload}:any)=>{
           const messageId=payload?.messageId;
@@ -423,6 +418,14 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
       window.removeEventListener('offline',onOffline);
       document.removeEventListener('visibilitychange',onVisibility);
       if(typingStopRef.current)window.clearTimeout(typingStopRef.current);
+      if(publicTypingHeartbeatRef.current)window.clearInterval(publicTypingHeartbeatRef.current);
+      const currentUserId=sessionRef.current?.user?.id;
+      if(publicTypingActiveRef.current&&currentUserId)void channel?.send({type:'broadcast',event:'typing',payload:{userId:currentUserId,typing:false}});
+      publicTypingHeartbeatRef.current=undefined;
+      publicTypingActiveRef.current=false;
+      typingStopRef.current=undefined;
+      clearRemoteActivity(publicTypingUsersRef.current,publicTypingTimersRef.current,setTypingUsers);
+      clearRemoteActivity(publicRecordingUsersRef.current,publicRecordingTimersRef.current,setRecordingUsers);
       if(channel){channel.untrack();supabase.removeChannel(channel)}
       channelRef.current=null;
     };
@@ -447,18 +450,34 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
       if(!publicTypingActiveRef.current){
         publicTypingActiveRef.current=true;
         void ch.send({type:'broadcast',event:'typing',payload:{userId:authUserId,typing:true}});
+        publicTypingHeartbeatRef.current=window.setInterval(()=>{
+          void channelRef.current?.send({type:'broadcast',event:'typing',payload:{userId:authUserId,typing:true}});
+        },1000);
       }
       typingStopRef.current=window.setTimeout(()=>{
         publicTypingActiveRef.current=false;
-        setTypingUsers(prev=>prev.filter(id=>id!==authUserId));
+        if(publicTypingHeartbeatRef.current)window.clearInterval(publicTypingHeartbeatRef.current);
+        publicTypingHeartbeatRef.current=undefined;
+        typingStopRef.current=undefined;
         void channelRef.current?.send({type:'broadcast',event:'typing',payload:{userId:authUserId,typing:false}});
-      },1400);
+      },1500);
     }else{
       publicTypingActiveRef.current=false;
+      if(publicTypingHeartbeatRef.current)window.clearInterval(publicTypingHeartbeatRef.current);
+      publicTypingHeartbeatRef.current=undefined;
+      if(typingStopRef.current)window.clearTimeout(typingStopRef.current);
+      typingStopRef.current=undefined;
       void ch.send({type:'broadcast',event:'typing',payload:{userId:authUserId,typing:false}});
     }
   };
-  const broadcastPublicRecording=(active:boolean)=>{if(authUserId&&channelRef.current)void channelRef.current.send({type:'broadcast',event:'recording',payload:{userId:authUserId,recording:active}})};
+  const broadcastPublicRecording=(active:boolean)=>{
+    if(publicRecordingHeartbeatRef.current)window.clearInterval(publicRecordingHeartbeatRef.current);
+    publicRecordingHeartbeatRef.current=undefined;
+    if(!authUserId)return;
+    const send=()=>void channelRef.current?.send({type:'broadcast',event:'recording',payload:{userId:authUserId,recording:active}});
+    send();
+    if(active)publicRecordingHeartbeatRef.current=window.setInterval(send,1500);
+  };
   const stopRecording=()=>{if(recordingTimerRef.current)window.clearInterval(recordingTimerRef.current);recordingTimerRef.current=undefined;const r=mediaRecorderRef.current;if(!r)return;mediaRecorderRef.current=null;broadcastPublicRecording(false);r.stop();setRecording(false);};
   const requestMic=async()=>{try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('Microphone recording is not supported in this browser.');const stream=await navigator.mediaDevices.getUserMedia({audio:true});setMicPermission('granted');setMicNotice(false);return stream}catch(e:any){setMicPermission('denied');setMicNotice(true);setError(e?.name==='NotAllowedError'?'Microphone permission was denied. Please allow microphone access in your browser site settings.':(e?.message||'Microphone access is unavailable.'));return null}};
   const startRecording=async()=>{if(recording||sending)return;if(!navigator.onLine){setError('You are offline. Please reconnect before recording.');return}const stream=await requestMic();if(!stream)return;try{const mime=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(x=>MediaRecorder.isTypeSupported(x))||'';const recorder=new MediaRecorder(stream,mime?{mimeType:mime,audioBitsPerSecond:24000}:undefined);mediaRecorderRef.current=recorder;mediaChunksRef.current=[];recordingStartedRef.current=Date.now();setRecordingSeconds(0);setRecordedVoiceBlob(null);setRecordedVoiceDuration(0);setError('');setRecording(true);setRecordingStream(stream);broadcastPublicRecording(true);recorder.ondataavailable=e=>{if(e.data.size)mediaChunksRef.current.push(e.data)};recorder.onstop=()=>{stream.getTracks().forEach(t=>t.stop());setRecordingStream(null);const elapsed=Math.min(60000,Date.now()-recordingStartedRef.current);const blob=new Blob(mediaChunksRef.current,{type:recorder.mimeType||'audio/webm'});mediaChunksRef.current=[];if(elapsed<500){setError('Voice message is too short.');setRecordingSeconds(0);return}if(blob.size>350*1024){setError('Voice message is too large. Please record a shorter message.');setRecordingSeconds(0);return}setRecordingSeconds(Math.floor(elapsed/1000));setRecordedVoiceBlob(blob);setRecordedVoiceDuration(elapsed)};recorder.start(250);recordingTimerRef.current=window.setInterval(()=>{const elapsed=Math.floor((Date.now()-recordingStartedRef.current)/1000);if(elapsed>=60){stopRecording();return}setRecordingSeconds(elapsed)},200)}catch{stream.getTracks().forEach(t=>t.stop());setRecording(false);setError('Could not start microphone recording. Please try again.')}};
@@ -483,7 +502,25 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
       setError(error instanceof Error?error.message:'Could not delete this voice message. Please try again.');
     }finally{pendingVoiceDeleteIdsRef.current.delete(v.id)}
   };
-  useEffect(()=>()=>{voiceAudioRef.current?.pause();if(recordingTimerRef.current)window.clearInterval(recordingTimerRef.current);mediaRecorderRef.current?.stream.getTracks().forEach(t=>t.stop())},[]);
+  useEffect(()=>()=>{
+    voiceAudioRef.current?.pause();
+    if(recordingTimerRef.current)window.clearInterval(recordingTimerRef.current);
+    const currentUserId=sessionRef.current?.user?.id;
+    if(publicTypingActiveRef.current&&currentUserId)void channelRef.current?.send({type:'broadcast',event:'typing',payload:{userId:currentUserId,typing:false}});
+    if(publicRecordingHeartbeatRef.current&&currentUserId)void channelRef.current?.send({type:'broadcast',event:'recording',payload:{userId:currentUserId,recording:false}});
+    if(publicTypingHeartbeatRef.current)window.clearInterval(publicTypingHeartbeatRef.current);
+    if(publicRecordingHeartbeatRef.current)window.clearInterval(publicRecordingHeartbeatRef.current);
+    if(privateTypingActiveRef.current&&currentUserId)void privateChannelRef.current?.send({type:'broadcast',event:'private-typing',payload:{userId:currentUserId,typing:false}});
+    if(privateRecordingHeartbeatRef.current&&currentUserId)void privateChannelRef.current?.send({type:'broadcast',event:'private-recording',payload:{userId:currentUserId,recording:false}});
+    if(privateTypingStopRef.current)window.clearTimeout(privateTypingStopRef.current);
+    if(privateTypingHeartbeatRef.current)window.clearInterval(privateTypingHeartbeatRef.current);
+    if(privateRecordingHeartbeatRef.current)window.clearInterval(privateRecordingHeartbeatRef.current);
+    clearRemoteActivity(privateTypingUsersRef.current,privateTypingTimersRef.current,()=>{});
+    clearRemoteActivity(privateRecordingUsersRef.current,privateRecordingTimersRef.current,()=>{});
+    if(privatePollRef.current)window.clearInterval(privatePollRef.current);
+    if(privateChannelRef.current)void supabase.removeChannel(privateChannelRef.current);
+    mediaRecorderRef.current?.stream.getTracks().forEach(t=>t.stop());
+  },[]);
   const beginReply=(m:ChatMessage)=>{if(m.id.startsWith('optimistic-'))return;setReplyTarget(m);requestAnimationFrame(()=>document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus())};
   const beginVoiceReply=(v:VoiceMessage)=>{const target={...v,id:`voice-reply-${v.id}`,reply_to_voice_id:v.id,body:`Voice message • ${formatDuration(v.duration_ms)}`};setReplyTarget(target);requestAnimationFrame(()=>document.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus())};
   const handlePrivateTyping=(value:string)=>{
@@ -494,25 +531,49 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
       if(!privateTypingActiveRef.current){
         privateTypingActiveRef.current=true;
         void ch.send({type:'broadcast',event:'private-typing',payload:{userId:authUserId,typing:true}});
+        privateTypingHeartbeatRef.current=window.setInterval(()=>{
+          void privateChannelRef.current?.send({type:'broadcast',event:'private-typing',payload:{userId:authUserId,typing:true}});
+        },1000);
       }
       privateTypingStopRef.current=window.setTimeout(()=>{
         privateTypingActiveRef.current=false;
+        if(privateTypingHeartbeatRef.current)window.clearInterval(privateTypingHeartbeatRef.current);
+        privateTypingHeartbeatRef.current=undefined;
+        privateTypingStopRef.current=undefined;
         void privateChannelRef.current?.send({type:'broadcast',event:'private-typing',payload:{userId:authUserId,typing:false}});
-      },1800);
+      },1500);
     }else{
       privateTypingActiveRef.current=false;
+      if(privateTypingHeartbeatRef.current)window.clearInterval(privateTypingHeartbeatRef.current);
+      privateTypingHeartbeatRef.current=undefined;
+      if(privateTypingStopRef.current)window.clearTimeout(privateTypingStopRef.current);
+      privateTypingStopRef.current=undefined;
       void ch.send({type:'broadcast',event:'private-typing',payload:{userId:authUserId,typing:false}});
     }
   };
-  const send=async()=>{if(sendLockRef.current)return;sendLockRef.current=true;setError('');const body=text.trim();const problem=validateMessage(text);if(problem){setError(problem);sendLockRef.current=false;return}const duplicate=messagesRef.current.some(m=>m.user_id===authUserId&&m.body===body&&Date.now()-new Date(m.created_at).getTime()<10000&&!m.id.startsWith('optimistic-'));if(duplicate){setError('Please do not send the same message again so quickly.');sendLockRef.current=false;return}const tempId=`optimistic-${crypto.randomUUID()}`;const createdAt=new Date().toISOString();const optimistic:ChatMessage={id:tempId,user_id:authUserId,name:profile.name,country:profile.country,subdivision:profile.subdivision,avatar_id:profile.avatarId,body,created_at:createdAt,expires_at:new Date(Date.now()+5*60*1000).toISOString(),reply_to_id:replyTarget?.reply_to_voice_id?null:replyTarget?.id||null,reply_to_voice_id:replyTarget?.reply_to_voice_id||null,reply_to_preview:replyTarget?.body||null,reply_to_name:replyTarget?.name||null};pendingRef.current[tempId]={tempId,body,createdAt};setText('');setEmojiOpen(false);const sentReply=replyTarget;setReplyTarget(null);setMessages(prev=>prev.some(m=>m.id===tempId)?prev:[...prev,optimistic]);play('send');setSending(true);try{let session=sessionRef.current;if(!session){const {data}=await supabase.auth.getSession();session=data.session;sessionRef.current=session}const {data,error}=await supabase.functions.invoke('send-message',{body:{text:body,profile,replyToId:sentReply&&!sentReply.reply_to_voice_id&&!sentReply.id.startsWith('optimistic-')?sentReply.id:null,replyToVoiceId:sentReply?.reply_to_voice_id||null},headers:session?{Authorization:`Bearer ${session.access_token}`}:{}});if(error||data?.error)throw new Error(data?.error||'Unable to send message.');const serverMessage={...(data?.message||data) as ChatMessage,reply_to_id:sentReply&&!sentReply.reply_to_voice_id&&!sentReply.id.startsWith('optimistic-')?sentReply.id:null,reply_to_voice_id:sentReply?.reply_to_voice_id||null,reply_to_preview:sentReply?.body||null,reply_to_name:sentReply?.name||null};if(serverMessage?.id)messageRenderKeysRef.current[serverMessage.id]=messageRenderKeysRef.current[tempId]||tempId;setMessages(prev=>{if(serverMessage?.id&&prev.some(m=>m.id===serverMessage.id))return prev;const exists=prev.some(m=>m.id===tempId);return exists&&serverMessage?.id?prev.map(m=>m.id===tempId?serverMessage:m):prev});delete pendingRef.current[tempId];if(sentReply&&!sentReply.id.startsWith('optimistic-')&&serverMessage?.id&&channelRef.current)void channelRef.current.send({type:'broadcast',event:'message-meta',payload:{messageId:serverMessage.id,replyToId:sentReply.id,replyToPreview:sentReply.body,replyToName:sentReply.name}})}catch(e:any){setMessages(prev=>prev.filter(m=>m.id!==tempId));delete pendingRef.current[tempId];setError(e.message||'Unable to send message. Please try again.')}finally{setSending(false);sendLockRef.current=false}};
+  const broadcastPrivateRecording=(active:boolean)=>{
+    if(privateRecordingHeartbeatRef.current)window.clearInterval(privateRecordingHeartbeatRef.current);
+    privateRecordingHeartbeatRef.current=undefined;
+    if(!authUserId)return;
+    const send=()=>void privateChannelRef.current?.send({type:'broadcast',event:'private-recording',payload:{userId:authUserId,recording:active}});
+    send();
+    if(active)privateRecordingHeartbeatRef.current=window.setInterval(send,1500);
+  };
+  const send=async()=>{if(sendLockRef.current)return;sendLockRef.current=true;setError('');const body=text.trim();const problem=validateMessage(text);if(problem){setError(problem);sendLockRef.current=false;return}const duplicate=messagesRef.current.some(m=>m.user_id===authUserId&&m.body===body&&Date.now()-new Date(m.created_at).getTime()<10000&&!m.id.startsWith('optimistic-'));if(duplicate){setError('Please do not send the same message again so quickly.');sendLockRef.current=false;return}const tempId=`optimistic-${crypto.randomUUID()}`;const createdAt=new Date().toISOString();const optimistic:ChatMessage={id:tempId,user_id:authUserId,name:profile.name,country:profile.country,subdivision:profile.subdivision,avatar_id:profile.avatarId,body,created_at:createdAt,expires_at:new Date(Date.now()+5*60*1000).toISOString(),reply_to_id:replyTarget?.reply_to_voice_id?null:replyTarget?.id||null,reply_to_voice_id:replyTarget?.reply_to_voice_id||null,reply_to_preview:replyTarget?.body||null,reply_to_name:replyTarget?.name||null};pendingRef.current[tempId]={tempId,body,createdAt};updateTyping('');setEmojiOpen(false);const sentReply=replyTarget;setReplyTarget(null);setMessages(prev=>prev.some(m=>m.id===tempId)?prev:[...prev,optimistic]);play('send');setSending(true);try{let session=sessionRef.current;if(!session){const {data}=await supabase.auth.getSession();session=data.session;sessionRef.current=session}const {data,error}=await supabase.functions.invoke('send-message',{body:{text:body,profile,replyToId:sentReply&&!sentReply.reply_to_voice_id&&!sentReply.id.startsWith('optimistic-')?sentReply.id:null,replyToVoiceId:sentReply?.reply_to_voice_id||null},headers:session?{Authorization:`Bearer ${session.access_token}`}:{}});if(error||data?.error)throw new Error(data?.error||'Unable to send message.');const serverMessage={...(data?.message||data) as ChatMessage,reply_to_id:sentReply&&!sentReply.reply_to_voice_id&&!sentReply.id.startsWith('optimistic-')?sentReply.id:null,reply_to_voice_id:sentReply?.reply_to_voice_id||null,reply_to_preview:sentReply?.body||null,reply_to_name:sentReply?.name||null};if(serverMessage?.id)messageRenderKeysRef.current[serverMessage.id]=messageRenderKeysRef.current[tempId]||tempId;setMessages(prev=>{if(serverMessage?.id&&prev.some(m=>m.id===serverMessage.id))return prev;const exists=prev.some(m=>m.id===tempId);return exists&&serverMessage?.id?prev.map(m=>m.id===tempId?serverMessage:m):prev});delete pendingRef.current[tempId];if(sentReply&&!sentReply.id.startsWith('optimistic-')&&serverMessage?.id&&channelRef.current)void channelRef.current.send({type:'broadcast',event:'message-meta',payload:{messageId:serverMessage.id,replyToId:sentReply.id,replyToPreview:sentReply.body,replyToName:sentReply.name}})}catch(e:any){setMessages(prev=>prev.filter(m=>m.id!==tempId));delete pendingRef.current[tempId];setError(e.message||'Unable to send message. Please try again.')}finally{setSending(false);sendLockRef.current=false}};
   const persistLocalDeleted=(next:Record<string,number>)=>{setLocalDeleted(next);try{localStorage.setItem(LOCAL_DELETED_KEY,JSON.stringify(next))}catch{}};
   const deleteLocally=(m:ChatMessage)=>{if(!canLocalDelete(m))return;const key=localMessageKey(m);const next={...readLocalDeleted(),[key]:new Date(m.expires_at).getTime()};persistLocalDeleted(next);delete messageRenderKeysRef.current[m.id];setMessages(prev=>prev.filter(x=>localMessageKey(x)!==key))};
   const deleteForEveryone=async(m:ChatMessage)=>{if(!canLocalDelete(m)||m.user_id!==authUserId)return;setDeletingForEveryone(true);setError('');try{const {data,error}=await supabase.rpc('delete_message_for_everyone',{p_message_id:m.id});if(error)throw error;if(data!==true)throw new Error('This message could not be deleted for everyone.');deleteLocally(m);setDeleteConfirmMessage(null)}catch{setError('Could not delete this message for everyone. Please try again.')}finally{setDeletingForEveryone(false)}};
   const closePrivateRoom=()=>{
+    if(privateTypingStopRef.current){window.clearTimeout(privateTypingStopRef.current);privateTypingStopRef.current=undefined}
+    if(privateTypingHeartbeatRef.current)window.clearInterval(privateTypingHeartbeatRef.current);
+    if(privateTypingActiveRef.current&&authUserId)void privateChannelRef.current?.send({type:'broadcast',event:'private-typing',payload:{userId:authUserId,typing:false}});
+    privateTypingHeartbeatRef.current=undefined;
+    privateTypingActiveRef.current=false;
+    broadcastPrivateRecording(false);
+    clearRemoteActivity(privateTypingUsersRef.current,privateTypingTimersRef.current,ids=>setPrivateTyping(ids.length>0));
+    clearRemoteActivity(privateRecordingUsersRef.current,privateRecordingTimersRef.current,ids=>setPrivateRecording(ids.length>0));
     if(privateChannelRef.current){void supabase.removeChannel(privateChannelRef.current);privateChannelRef.current=null}
     if(privatePollRef.current){window.clearInterval(privatePollRef.current);privatePollRef.current=undefined}
-    if(privateTypingStopRef.current){window.clearTimeout(privateTypingStopRef.current);privateTypingStopRef.current=undefined}
-    privateTypingActiveRef.current=false;
     privateRoomStartedRef.current=null;
     try{localStorage.removeItem(PRIVATE_CHAT_LOCAL_KEY)}catch{}
     setPrivateRoom(null);
@@ -529,6 +590,14 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
   };
   const enterPrivateRoom=async(room:any)=>{
     if(privateRoomStartedRef.current===room.id)return;
+    if(privateTypingStopRef.current){window.clearTimeout(privateTypingStopRef.current);privateTypingStopRef.current=undefined}
+    if(privateTypingHeartbeatRef.current)window.clearInterval(privateTypingHeartbeatRef.current);
+    if(privateTypingActiveRef.current&&authUserId)void privateChannelRef.current?.send({type:'broadcast',event:'private-typing',payload:{userId:authUserId,typing:false}});
+    privateTypingHeartbeatRef.current=undefined;
+    privateTypingActiveRef.current=false;
+    broadcastPrivateRecording(false);
+    clearRemoteActivity(privateTypingUsersRef.current,privateTypingTimersRef.current,ids=>setPrivateTyping(ids.length>0));
+    clearRemoteActivity(privateRecordingUsersRef.current,privateRecordingTimersRef.current,ids=>setPrivateRecording(ids.length>0));
     privateRoomStartedRef.current=room.id;
     if(privateRoom?.id!==room.id)setPrivateMessages([]);
     setPrivateRoom(room);
@@ -556,17 +625,14 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
       .on('presence',{event:'leave'},()=>{
         const state=ch.presenceState() as Record<string,any[]>;
         setPrivateOnline(Object.keys(state).length);
-      })       .on('broadcast' as any,{event:'private-typing',config:{self:false}},({payload}:any)=>{
-        if(payload?.userId!==authUserId){
-          setPrivateTyping(Boolean(payload?.typing));
-          if(payload?.typing)window.setTimeout(()=>setPrivateTyping(false),1800);
-        }
+      })
+      .on('broadcast' as any,{event:'private-typing',config:{self:false}},({payload}:any)=>{
+        const id=payload?.userId;
+        if(id&&id!==authUserId)updateRemoteActivity(privateTypingUsersRef.current,privateTypingTimersRef.current,id,Boolean(payload?.typing),3200,ids=>setPrivateTyping(ids.length>0));
       })
       .on('broadcast' as any,{event:'private-recording',config:{self:false}},({payload}:any)=>{
-        if(payload?.userId!==authUserId){
-          setPrivateRecording(Boolean(payload?.recording));
-          if(payload?.recording)window.setTimeout(()=>setPrivateRecording(false),3500);
-        }
+        const id=payload?.userId;
+        if(id&&id!==authUserId)updateRemoteActivity(privateRecordingUsersRef.current,privateRecordingTimersRef.current,id,Boolean(payload?.recording),6500,ids=>setPrivateRecording(ids.length>0));
       })
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'private_messages',filter:'room_id=eq.'+room.id},
         payload=>setPrivateMessages(prev=>{const incoming:any=payload.new;if(prev.some(m=>m.id===incoming.id))return prev;const optimistic=prev.find(m=>String(m.id).startsWith('optimistic-private-')&&m.user_id===incoming.user_id&&m.body===incoming.body&&Math.abs(new Date(m.created_at).getTime()-new Date(incoming.created_at).getTime())<15000);if(optimistic)return prev.map(m=>m.id===optimistic.id?incoming:m).sort((a,b)=>a.created_at.localeCompare(b.created_at));return [...prev,incoming].sort((a,b)=>a.created_at.localeCompare(b.created_at))}))
@@ -607,7 +673,7 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
   const joinPrivateRoom=async()=>{setPrivateError('');const code=privateJoinCode.trim().toUpperCase();if(!/^[A-Z0-9]{8}$/.test(code)){setPrivateError('Enter a valid 8-character private code.');return}setPrivateSending(true);try{const {data,error}=await supabase.rpc('join_private_room',{p_join_code:code});if(error)throw error;const room={id:data.room_id,name:data.room_name,join_code:code,owner:Boolean(data.owner),owner_id:data.owner_id||null};setPrivateModal(null);setPrivateJoinCode('');setPrivateRoom(room)}catch(e){setPrivateError(e instanceof Error?e.message:'Invalid private code.')}finally{setPrivateSending(false)}};
   const playPrivateAction=(src:string)=>{if(!settings.sound)return;const a=new Audio(src);a.volume=0.42;void a.play().catch(()=>{});};
   const addFriend=async(userId:string)=>{if(!userId||userId===authUserId)return;const {error}=await supabase.rpc('send_friend_request',{p_recipient_id:userId});if(error){setError(error.message);window.setTimeout(()=>setError(v=>v===error.message?'':v),5000)}else setError('Friend request sent.');};
-   const sendPrivateMessage=async()=>{const body=text.trim();if(privateSendLockRef.current||!privateRoom||!body||privateSending)return;privateSendLockRef.current=true;setPrivateSending(true);setPrivateError('');const replyTo=replyTargetForPrivateRef.current;const tempId='optimistic-private-'+crypto.randomUUID();const optimistic={id:tempId,room_id:privateRoom.id,user_id:authUserId,name:profile.name,country:profile.country,subdivision:profile.subdivision,avatar_id:profile.avatarId,body,created_at:new Date().toISOString(),expires_at:new Date(Date.now()+24*60*60*1000).toISOString(),reply_to_id:replyTo?.reply_to_voice_id?null:replyTo?.id||null,reply_to_voice_id:replyTo?.reply_to_voice_id||null,reply_to_preview:replyTo?.body||'Voice message',reply_to_name:replyTo?.name||null};setText('');setReplyTargetForPrivate(null);setPrivateMessages(prev=>[...prev,optimistic].sort((a,b)=>a.created_at.localeCompare(b.created_at)));playPrivateAction('/sounds/send.wav');try{const {data,error}=await supabase.rpc('send_private_message',{p_room_id:privateRoom.id,p_name:profile.name,p_country:profile.country,p_subdivision:profile.subdivision,p_avatar_id:profile.avatarId,p_body:body.slice(0,500),p_reply_to_id:replyTo?.reply_to_voice_id?null:replyTo?.id||null,p_reply_to_voice_id:replyTo?.reply_to_voice_id||null});if(error)throw error;if(data)setPrivateMessages(prev=>prev.map(m=>m.id===tempId?data:m).sort((a,b)=>a.created_at.localeCompare(b.created_at)))}catch(e){setPrivateMessages(prev=>prev.filter(m=>m.id!==tempId));const x=e as any;setPrivateError(x?.message||x?.details||x?.hint||x?.code||JSON.stringify(x)||'Could not send private message.')}finally{setPrivateSending(false);privateSendLockRef.current=false}};
+   const sendPrivateMessage=async()=>{const body=text.trim();if(privateSendLockRef.current||!privateRoom||!body||privateSending)return;privateSendLockRef.current=true;setPrivateSending(true);setPrivateError('');const replyTo=replyTargetForPrivateRef.current;const tempId='optimistic-private-'+crypto.randomUUID();const optimistic={id:tempId,room_id:privateRoom.id,user_id:authUserId,name:profile.name,country:profile.country,subdivision:profile.subdivision,avatar_id:profile.avatarId,body,created_at:new Date().toISOString(),expires_at:new Date(Date.now()+24*60*60*1000).toISOString(),reply_to_id:replyTo?.reply_to_voice_id?null:replyTo?.id||null,reply_to_voice_id:replyTo?.reply_to_voice_id||null,reply_to_preview:replyTo?.body||'Voice message',reply_to_name:replyTo?.name||null};handlePrivateTyping('');setText('');setReplyTargetForPrivate(null);setPrivateMessages(prev=>[...prev,optimistic].sort((a,b)=>a.created_at.localeCompare(b.created_at)));playPrivateAction('/sounds/send.wav');try{const {data,error}=await supabase.rpc('send_private_message',{p_room_id:privateRoom.id,p_name:profile.name,p_country:profile.country,p_subdivision:profile.subdivision,p_avatar_id:profile.avatarId,p_body:body.slice(0,500),p_reply_to_id:replyTo?.reply_to_voice_id?null:replyTo?.id||null,p_reply_to_voice_id:replyTo?.reply_to_voice_id||null});if(error)throw error;if(data)setPrivateMessages(prev=>prev.map(m=>m.id===tempId?data:m).sort((a,b)=>a.created_at.localeCompare(b.created_at)))}catch(e){setPrivateMessages(prev=>prev.filter(m=>m.id!==tempId));const x=e as any;setPrivateError(x?.message||x?.details||x?.hint||x?.code||JSON.stringify(x)||'Could not send private message.')}finally{setPrivateSending(false);privateSendLockRef.current=false}};
   const clearChatLocally=()=>{const current=readLocalDeleted();const now=Date.now();messages.forEach(m=>{if(new Date(m.expires_at).getTime()>now)current[localMessageKey(m)]=new Date(m.expires_at).getTime()});persistLocalDeleted(current);setMessages([]);const voiceCurrent=readVoiceLocalDeleted();voiceMessages.forEach(v=>{if(new Date(v.expires_at).getTime()>now)voiceCurrent[v.id]=new Date(v.expires_at).getTime()});persistVoiceLocalDeleted(voiceCurrent);setVoiceLocalDeleted(voiceCurrent);setVoiceMessages([])};
   const onKey=(e:React.KeyboardEvent)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};
   return <div className="chat-app">
@@ -633,7 +699,7 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
       </div>
     </header>
     <div className={`connection-banner ${connectionState}`}><span>{connectionState==='connected'?<Wifi size={13}/>:connectionState==='offline'?<WifiOff size={13}/>:<Wifi size={13}/>}</span>{connectionState==='connected'?'Connected':connectionState==='offline'?'Offline':'Reconnecting...'}</div>
-    <main className="chat-main">{privateRoom&&authUserId?<PrivateRoomView profile={profile} room={privateRoom} messages={privateMessages} setMessages={setPrivateMessages} text={text} setText={setText} sending={privateSending} sendError={privateError} privateOnline={privateOnline} privateTyping={privateTyping} onTyping={handlePrivateTyping} sound={settings.sound} replyTarget={replyTargetForPrivate} setReplyTarget={setReplyTargetForPrivate} currentUserId={authUserId} onSend={()=>void sendPrivateMessage()} onClose={closePrivateRoom} onCopy={async(m:any)=>{try{await navigator.clipboard.writeText(m.body)}catch{}}} onMembers={()=>void openPrivateMembers()} onAddFriend={addFriend} privateRecording={privateRecording} onRecording={active=>{if(privateChannelRef.current&&authUserId)void privateChannelRef.current.send({type:'broadcast',event:'private-recording',payload:{userId:authUserId,recording:active}})}}/>:privateRoom?<div className="private-message-list private-empty-loading">Loading private chat...</div>:!authUserId?<div className="private-message-list private-empty-loading">Connecting...</div>:<>{searchOpen&&<div className="chat-search"><Search size={16}/><input autoFocus value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} placeholder="Search active messages..." aria-label="Search active messages"/><span>{displayedMessages.length}/{messages.length}</span><button className="chat-search-close" onClick={()=>{setSearchQuery('');setSearchOpen(false)}} aria-label="Close search" title="Close search"><X size={15}/></button></div>}<div className="message-list" ref={listRef} onScroll={handleScroll}>{messages.length===0&&voiceMessages.length===0?<div className="empty"><EarthGlobe/><h2>Talk to the world</h2><p>Say hello. Share ideas. Keep it friendly.</p></div>:<>{[...displayedMessages.map(data=>({kind:'text' as const,data})),...voiceMessages.filter(v=>!activeSearch||`${v.name} voice message`.toLowerCase().includes(activeSearch)).map(data=>({kind:'voice' as const,data}))].sort((a,b)=>a.data.created_at.localeCompare(b.data.created_at)).map(item=>item.kind==='text'?<Message key={messageRenderKeysRef.current[item.data.id]||item.data.id} m={item.data} current={item.data.user_id===authUserId} timeFormat={settings.timeFormat || '12h'} counts={reactionCounts[item.data.id]||EMPTY_REACTION_COUNTS} mine={myReactions[item.data.id]||EMPTY_REACTIONS} highlighted={highlightedMessageId===item.data.id} copied={copiedId===item.data.id} onCopy={()=>copyMessage(item.data)} onToggle={async(r)=>{const {error}=await supabase.functions.invoke('toggle-reaction',{body:{messageId:item.data.id,reaction:r}});if(!error)refreshReactions(messageIdsRef.current,sessionRef.current?.user?.id||authUserId)}} onDeleteForMe={()=>deleteLocally(item.data)} onDeleteForEveryone={()=>void deleteForEveryone(item.data)} onAddFriend={()=>void addFriend(item.data.user_id)} onReply={()=>beginReply(item.data)} onReplyJump={(id,isVoice)=>{const el=document.getElementById(isVoice?`voice-${id}`:`msg-${id}`);el?.scrollIntoView({behavior:'smooth',block:'center'});if(!isVoice)setHighlightedMessageId(id)}}/>:<VoiceBubble key={`voice-${voiceRenderKeysRef.current[item.data.id]||item.data.id}`} v={item.data} current={item.data.user_id===authUserId} onDeleteForMe={()=>deleteVoiceForMe(item.data)} onDeleteForEveryone={()=>void deleteVoiceForEveryone(item.data)} onAddFriend={()=>void addFriend(item.data.user_id)} onReply={()=>beginVoiceReply(item.data)} onReplyJump={(id,isVoice)=>{const el=document.getElementById(isVoice?`voice-${id}`:`msg-${id}`);el?.scrollIntoView({behavior:'smooth',block:'center'});if(!isVoice)setHighlightedMessageId(id)}} timeFormat={settings.timeFormat||'12h'} counts={voiceReactionCounts[item.data.id]||{}} mine={voiceMyReactions[item.data.id]||[]} onToggleReaction={async(r)=>{const {error}=await supabase.functions.invoke('toggle-voice-reaction',{body:{voiceId:item.data.id,reaction:r}});if(!error)refreshVoiceReactions(voiceMessages.map(v=>v.id),authUserId)}}/> )}</>}</div>{showJump&&<button className="jump-latest" onClick={jumpToLatest}><ArrowDown size={15}/>{newMessageCount>0?`${newMessageCount} NEW MESSAGE${newMessageCount===1?'':'S'}`:'LATEST MESSAGES'}</button>}{recordingUsers.length>0&&<div className="typing-indicator recording-indicator">Someone is recording<span className="typing-dots"><i></i><i></i><i></i></span></div>}{typingUsers.length>0&&<div className="typing-indicator">Someone is typing<span className="typing-dots"><i></i><i></i><i></i></span></div>}
+    <main className="chat-main">{privateRoom&&authUserId?<PrivateRoomView profile={profile} room={privateRoom} messages={privateMessages} setMessages={setPrivateMessages} text={text} setText={setText} sending={privateSending} sendError={privateError} privateOnline={privateOnline} privateTyping={privateTyping} onTyping={handlePrivateTyping} sound={settings.sound} replyTarget={replyTargetForPrivate} setReplyTarget={setReplyTargetForPrivate} currentUserId={authUserId} onSend={()=>void sendPrivateMessage()} onClose={closePrivateRoom} onCopy={async(m:any)=>{try{await navigator.clipboard.writeText(m.body)}catch{}}} onMembers={()=>void openPrivateMembers()} onAddFriend={addFriend} privateRecording={privateRecording} onRecording={broadcastPrivateRecording}/>:privateRoom?<div className="private-message-list private-empty-loading">Loading private chat...</div>:!authUserId?<div className="private-message-list private-empty-loading">Connecting...</div>:<>{searchOpen&&<div className="chat-search"><Search size={16}/><input autoFocus value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} placeholder="Search active messages..." aria-label="Search active messages"/><span>{displayedMessages.length}/{messages.length}</span><button className="chat-search-close" onClick={()=>{setSearchQuery('');setSearchOpen(false)}} aria-label="Close search" title="Close search"><X size={15}/></button></div>}<div className="message-list" ref={listRef} onScroll={handleScroll}>{messages.length===0&&voiceMessages.length===0?<div className="empty"><EarthGlobe/><h2>Talk to the world</h2><p>Say hello. Share ideas. Keep it friendly.</p></div>:<>{[...displayedMessages.map(data=>({kind:'text' as const,data})),...voiceMessages.filter(v=>!activeSearch||`${v.name} voice message`.toLowerCase().includes(activeSearch)).map(data=>({kind:'voice' as const,data}))].sort((a,b)=>a.data.created_at.localeCompare(b.data.created_at)).map(item=>item.kind==='text'?<Message key={messageRenderKeysRef.current[item.data.id]||item.data.id} m={item.data} current={item.data.user_id===authUserId} timeFormat={settings.timeFormat || '12h'} counts={reactionCounts[item.data.id]||EMPTY_REACTION_COUNTS} mine={myReactions[item.data.id]||EMPTY_REACTIONS} highlighted={highlightedMessageId===item.data.id} copied={copiedId===item.data.id} onCopy={()=>copyMessage(item.data)} onToggle={async(r)=>{const {error}=await supabase.functions.invoke('toggle-reaction',{body:{messageId:item.data.id,reaction:r}});if(!error)refreshReactions(messageIdsRef.current,sessionRef.current?.user?.id||authUserId)}} onDeleteForMe={()=>deleteLocally(item.data)} onDeleteForEveryone={()=>void deleteForEveryone(item.data)} onAddFriend={()=>void addFriend(item.data.user_id)} onReply={()=>beginReply(item.data)} onReplyJump={(id,isVoice)=>{const el=document.getElementById(isVoice?`voice-${id}`:`msg-${id}`);el?.scrollIntoView({behavior:'smooth',block:'center'});if(!isVoice)setHighlightedMessageId(id)}}/>:<VoiceBubble key={`voice-${voiceRenderKeysRef.current[item.data.id]||item.data.id}`} v={item.data} current={item.data.user_id===authUserId} onDeleteForMe={()=>deleteVoiceForMe(item.data)} onDeleteForEveryone={()=>void deleteVoiceForEveryone(item.data)} onAddFriend={()=>void addFriend(item.data.user_id)} onReply={()=>beginVoiceReply(item.data)} onReplyJump={(id,isVoice)=>{const el=document.getElementById(isVoice?`voice-${id}`:`msg-${id}`);el?.scrollIntoView({behavior:'smooth',block:'center'});if(!isVoice)setHighlightedMessageId(id)}} timeFormat={settings.timeFormat||'12h'} counts={voiceReactionCounts[item.data.id]||{}} mine={voiceMyReactions[item.data.id]||[]} onToggleReaction={async(r)=>{const {error}=await supabase.functions.invoke('toggle-voice-reaction',{body:{voiceId:item.data.id,reaction:r}});if(!error)refreshVoiceReactions(voiceMessages.map(v=>v.id),authUserId)}}/> )}</>}</div>{showJump&&<button className="jump-latest" onClick={jumpToLatest}><ArrowDown size={15}/>{newMessageCount>0?`${newMessageCount} NEW MESSAGE${newMessageCount===1?'':'S'}`:'LATEST MESSAGES'}</button>}{recordingUsers.length>0&&<div className="typing-indicator recording-indicator">Someone is recording<span className="typing-dots"><i></i><i></i><i></i></span></div>}{typingUsers.length>0&&<div className="typing-indicator">Someone is typing<span className="typing-dots"><i></i><i></i><i></i></span></div>}
         {replyTarget&&<div className="reply-composer"><div><b><ReplyIcon size={14}/> Replying to {replyTarget.name||'User'}</b><span>{replyTarget.reply_to_voice_id?`Voice message • ${formatDuration(replyTarget.duration_ms||0)}`:(replyTarget.body||'Reply')}</span></div><button className="private-modal-cancel" onClick={()=>setReplyTarget(null)} aria-label="CANCEL reply"><X size={16}/></button></div>}
         <div className="composer-wrap">
           {recording||recordedVoiceBlob
@@ -1526,12 +1592,6 @@ if (typeof window !== 'undefined') {
 
 
 /* GLOBAL CHAT voice duration live-time fix v1 */
-
-
-
-
-
-
 
 
 
