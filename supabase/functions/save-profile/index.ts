@@ -17,8 +17,10 @@ Deno.serve(async (req) => {
     const p = await req.json();
     const c = iso31661.find(x => x.state === 'assigned' && x.alpha2 === p.country);
     const s = iso31662.find(x => x.code === p.subdivision && x.code.startsWith(`${p.country}-`));
-    if (!c || !s || !Number.isInteger(p.avatarId) || p.avatarId < 1 || p.avatarId > 1262 || !themes.includes(p.themeId) || typeof p.name !== 'string' || p.name.trim().length < 2 || p.name.trim().length > 32 || p.agreed !== true) return json({ error: 'Invalid profile.' }, 400);
-    const { error: up } = await admin.from('profiles').upsert({ user_id: user.id, name: p.name.trim(), country: p.country, subdivision: p.subdivision, show_country: p.showCountry !== false, show_subdivision: p.showSubdivision !== false, avatar_id: p.avatarId, theme_id: p.themeId, agreed: true, updated_at: new Date().toISOString() });
+    const profileIntro = typeof p.profileIntro === 'string' ? p.profileIntro.trim() : '';
+    const profileIntroVisibility = ['everyone', 'friends', 'hidden'].includes(p.profileIntroVisibility) ? p.profileIntroVisibility : 'hidden';
+    if (!c || !s || !Number.isInteger(p.avatarId) || p.avatarId < 1 || p.avatarId > 1262 || !themes.includes(p.themeId) || typeof p.name !== 'string' || p.name.trim().length < 2 || p.name.trim().length > 32 || profileIntro.length > 80 || p.agreed !== true) return json({ error: 'Invalid profile.' }, 400);
+    const { error: up } = await admin.from('profiles').upsert({ user_id: user.id, name: p.name.trim(), country: p.country, subdivision: p.subdivision, show_country: p.showCountry !== false, show_subdivision: p.showSubdivision !== false, profile_intro: profileIntro, profile_intro_visibility: profileIntroVisibility, avatar_id: p.avatarId, theme_id: p.themeId, agreed: true, updated_at: new Date().toISOString() });
     if (up) return json({ error: 'Could not save profile.' }, 500);
     return json({ ok: true });
   } catch { return json({ error: 'Could not save profile.' }, 500); }

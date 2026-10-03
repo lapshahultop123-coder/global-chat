@@ -3579,3 +3579,61 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .friends-panel-chat .friend-compose .text-format-trigger{flex:0 0 32px;width:32px;height:38px;min-height:38px}
 .friends-panel-chat .friend-compose .text-format-menu button{width:32px;height:32px;min-height:32px}
 @media(max-width:430px){.text-format-toolbar{flex-basis:32px;width:32px}.text-format-trigger{width:32px;height:36px}.friends-panel-chat .friend-compose .text-format-toolbar{flex-basis:30px;width:30px}.friends-panel-chat .friend-compose .text-format-trigger{flex-basis:30px;width:30px}}
+
+/* New local preferences, profile intros, RSVP cards, and compact mobile controls. */
+.profile-intro-visible{display:block;max-width:min(42rem,75vw);margin-top:2px;color:#9eb5d2;font-size:.72em;font-weight:500;line-height:1.35;overflow-wrap:anywhere}
+.profile-intro-input{display:block;width:100%;min-height:58px;resize:vertical;padding:10px 12px;border:1px solid rgba(255,255,255,.14);border-radius:11px;background:rgba(255,255,255,.045);color:#f8fafc;font:inherit;line-height:1.45}
+.profile-intro-count{display:block;color:#91a4be;text-align:right;font-size:.68rem}
+.profile-intro-settings{display:grid;gap:8px}
+.profile-intro-settings h3{margin:0;font-size:.92rem}
+.profile-intro-settings p{margin:0;color:#9eafc5;font-size:.74rem;line-height:1.45}
+.profile-intro-settings select,.profile-card select{width:100%;min-height:42px;padding:8px 10px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:var(--surface);color:#f8fafc}
+.settings-help-note{display:block;margin-top:5px;color:#9eafc5;font-size:.7rem}
+.local-chat-color{position:relative;display:inline-flex;flex:none;z-index:4;color:#b8c8df;font-size:.66rem}
+.local-chat-color summary{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.035);list-style:none;cursor:pointer}
+.local-chat-color summary::-webkit-details-marker{display:none}
+.local-chat-color summary i{width:9px;height:9px;border:1px solid rgba(255,255,255,.38);border-radius:50%}
+.local-chat-color-options{position:absolute;top:calc(100% + 5px);left:0;display:flex;align-items:center;gap:5px;min-width:max-content;padding:7px;border:1px solid rgba(255,255,255,.15);border-radius:11px;background:var(--surface);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.local-chat-color-options button:not(.local-chat-color-clear){width:22px;height:22px;padding:0;border:2px solid rgba(255,255,255,.45);border-radius:50%}
+.local-chat-color-options button.selected{outline:2px solid #fff;outline-offset:2px}
+.local-chat-color-options .local-chat-color-clear{padding:4px 6px;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:transparent;color:#dbeafe;font-size:.62rem}
+.private-room-meta .local-chat-color{font-size:.6rem}
+.private-event-card{display:grid;gap:8px;max-width:640px;margin:8px auto;padding:12px;border:1px solid color-mix(in srgb,var(--primary) 34%,rgba(255,255,255,.12));border-left:3px solid var(--primary);border-radius:13px;background:color-mix(in srgb,var(--surface) 82%,transparent);color:#eff6ff}
+.private-event-heading{display:flex;align-items:center;gap:7px;color:#a9c9f5;font-size:.7rem}
+.private-event-heading time{margin-left:auto;color:#93a5bf;font-size:.66rem;text-align:right}
+.private-event-card h3{margin:0;font-size:.95rem;overflow-wrap:anywhere}
+.private-event-rsvp{display:flex;flex-wrap:wrap;gap:6px}
+.private-event-rsvp button{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:5px 9px;border:1px solid rgba(255,255,255,.13);border-radius:9px;background:rgba(255,255,255,.04);color:#dce8fa;font-size:.68rem;font-weight:750}
+.private-event-rsvp button.selected{border-color:var(--primary);background:color-mix(in srgb,var(--primary) 18%,transparent);color:#fff}
+.private-event-rsvp button:disabled{opacity:.58}
+.private-event-rsvp button small{min-width:16px;color:#9eb5d2;text-align:center}
+.private-events-list{display:grid;gap:4px}
+.private-message-list{position:relative}
+.private-jump-latest,.friend-jump-latest{position:sticky;z-index:5;top:8px;left:50%;width:max-content;max-width:calc(100% - 16px);transform:translateX(-50%);margin:0 auto 8px;padding:7px 10px;font-size:.68rem}
+.emoji-favorites-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 5px;color:#a8b8cd}
+.emoji-favorites-heading button{display:inline-flex;align-items:center;gap:5px;padding:4px 6px;border:0;border-radius:7px;background:transparent;color:#d8e7ff;font-size:.68rem;font-weight:750}
+.emoji-favorites-heading small{font-size:.6rem}
+.emoji-favorites-track{display:flex;gap:4px;min-height:34px;overflow-x:auto;margin-bottom:7px;padding:2px 0;overscroll-behavior-x:contain}
+.emoji-favorites-track>small{align-self:center;color:#9eafc5;font-size:.67rem}
+.emoji-picker-choice{position:relative;display:flex;flex:none}
+.emoji-favorite-toggle{position:absolute;right:-2px;bottom:-1px;display:grid;place-items:center;width:16px;height:16px;padding:0;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:#101827;color:#94a3b8;opacity:.78}
+.emoji-favorite-toggle.active{color:#ffd166;opacity:1}
+.emoji-picker-choice>.emoji-picker-item{padding-bottom:6px}
+.friend-voice-player{display:inline-flex;align-items:center;gap:6px;max-width:100%}
+.friend-voice-speed{min-width:38px;height:28px;padding:0 6px;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:rgba(255,255,255,.05);color:#cfe0f5;font-size:.67rem;font-weight:800}
+.friend-voice-speed:hover{border-color:var(--primary);color:#fff}
+.friend-local-nickname-input{display:flex;align-items:center;gap:5px}
+.friend-local-nickname-input>span{color:#a5c2e8;font-weight:800}
+.friend-local-nickname-input input{width:100%;min-width:0;padding:10px;border:1px solid rgba(255,255,255,.15);border-radius:9px;background:rgba(255,255,255,.05);color:#f8fafc}
+.friend-nickname-modal .feature-modal-actions{flex-wrap:wrap}
+@media(max-width:600px){
+  .profile-intro-visible{max-width:68vw;font-size:.68em}
+  .private-room-meta .local-chat-color summary{padding:3px 5px}
+  .private-event-card{padding:10px;margin:6px 4px}
+  .private-event-heading{align-items:flex-start}
+  .private-event-heading time{max-width:58%;font-size:.6rem}
+  .private-event-rsvp button{flex:1;justify-content:center;min-height:36px;padding:6px 5px}
+  .friend-voice-player{gap:4px}
+  .friend-voice-speed{min-width:34px;height:27px}
+  .local-chat-color-options{position:fixed;top:auto;bottom:18px;left:50%;transform:translateX(-50%);z-index:2100}
+}
