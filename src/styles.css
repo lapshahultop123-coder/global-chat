@@ -3557,3 +3557,4 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
   .private-room-code{font-size:.6rem!important;gap:3px}
   .private-room-code-copy{width:21px;height:21px}
 }
+.chat-app.private-room-open>.topbar{display:none}
