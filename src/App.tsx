@@ -20,6 +20,7 @@ import ReconnectQueuePanel from './ReconnectQueuePanel';
 import GlobalMessageSearch from './GlobalMessageSearch';
 import SafeMessageText from './SafeMessageText';
 import QuickTextPhrases from './QuickTextPhrases';
+import TextFormattingToolbar from './TextFormattingToolbar';
 import { readReconnectQueue, writeReconnectQueue, type QueuedChatText, type ChatTextContext } from './lib/reconnectQueue';
 
 import { validateMessage } from './lib/validation';
@@ -843,7 +844,8 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
                   title="Emoji" aria-expanded={emojiOpen}><Smile size={19}/></button>{emojiOpen&&<EmojiPicker
                   className="public-emoji-picker" onSelect={emoji=>{updateTyping(text+emoji);setEmojiOpen(false)}}/>}</div>
                 <QuickTextPhrases userId={authUserId} onInsert={phrase=>{updateTyping(phrase);requestAnimationFrame(()=>{const field=document.querySelector<HTMLTextAreaElement>('.composer:not(.private-composer) textarea');field?.focus();field?.setSelectionRange(phrase.length,phrase.length)})}}/>
-                <textarea value={text} maxLength={500} onChange={e=>updateTyping(e.target.value)}
+                <TextFormattingToolbar value={text} onChange={updateTyping}/>
+                <textarea data-message-input="true" value={text} maxLength={500} onChange={e=>updateTyping(e.target.value)}
                   onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}}
                   placeholder="Type a message..." rows={1}/>
                 <button type="button" className="voice-btn" onClick={()=>setScheduleTarget({context:'public',targetId:null,initialText:text,onCreated:()=>{setText('');setReplyTarget(null)}})} aria-label="Schedule message" title="Schedule message"><Clock3 size={17}/></button>
@@ -1453,7 +1455,8 @@ function PrivateRoomView({profile,room,messages,setMessages,text,setText,sending
       <div className="composer private-composer">
         <div className="tools private-tools"><button className="icon-btn" onClick={()=>setPrivateEmojiOpen(v=>!v)} aria-label="Emoji"><Smile size={19}/></button>{privateEmojiOpen&&<EmojiPicker className="private-emoji-picker" onSelect={emoji=>{const next=text+emoji;setText(next);onTyping(next);setPrivateEmojiOpen(false)}} />}</div>
         <QuickTextPhrases userId={currentUserId} onInsert={phrase=>{setText(phrase);onTyping(phrase);requestAnimationFrame(()=>{const field=document.querySelector<HTMLTextAreaElement>('.private-composer textarea');field?.focus();field?.setSelectionRange(phrase.length,phrase.length)})}}/>
-        <textarea value={text} maxLength={500} onChange={e=>{const value=e.target.value;setText(value);onTyping(value)}} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();onSend()}}} placeholder="Type a private message..." rows={1}/>
+        <TextFormattingToolbar value={text} onChange={value=>{setText(value);onTyping(value)}}/>
+        <textarea data-message-input="true" value={text} maxLength={500} onChange={e=>{const value=e.target.value;setText(value);onTyping(value)}} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();onSend()}}} placeholder="Type a private message..." rows={1}/>
         <button className="voice-btn" disabled={sending||voiceBusy||recording} onClick={()=>void startVoice()} aria-label="Record private voice message"><Mic size={18}/></button>
         <button className="voice-btn" disabled={!text.trim()||sending||voiceBusy} onClick={()=>onSchedule(text)} aria-label="Schedule message" title="Schedule message"><Clock3 size={17}/></button><button className={`send-btn ${(sending||voiceBusy)?'is-sending':''}`} disabled={!text.trim()||sending||voiceBusy} onClick={onSend}><Send size={18}/></button>
       </div>

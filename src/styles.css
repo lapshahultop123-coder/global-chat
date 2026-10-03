@@ -3558,3 +3558,24 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
   .private-room-code-copy{width:21px;height:21px}
 }
 .chat-app.private-room-open>.topbar{display:none}
+
+.text-format-toolbar{position:relative;z-index:140;display:flex;flex:0 0 35px;align-items:center;justify-content:center;width:35px;height:40px;align-self:center}
+.text-format-trigger{display:grid;place-items:center;flex:none;width:35px;height:36px;padding:0;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.045);color:#cbd5e1}
+.text-format-trigger:hover,.text-format-trigger[aria-expanded="true"]{border-color:color-mix(in srgb,var(--primary) 55%,transparent);background:color-mix(in srgb,var(--primary) 15%,var(--surface));color:#fff}
+.text-format-menu{position:absolute;left:0;bottom:calc(100% + 7px);display:flex;align-items:center;gap:4px;padding:5px;border:1px solid color-mix(in srgb,var(--primary) 35%,rgba(255,255,255,.14));border-radius:11px;background:color-mix(in srgb,var(--surface) 97%,#070b16);box-shadow:0 12px 32px rgba(0,0,0,.4)}
+.text-format-menu button{display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:transparent;color:#cbd5e1}
+.text-format-menu button:hover,.text-format-menu button:focus-visible{background:color-mix(in srgb,var(--primary) 20%,transparent);color:#fff;outline:none}
+.formatted-message-line{display:block;min-height:1em;white-space:pre-wrap;overflow-wrap:anywhere}
+.formatted-message-line.is-empty{min-height:.7em}
+.formatted-numbered-list{display:block;margin:.2em 0 .2em 1.1em}
+.formatted-list-item{display:flex;align-items:flex-start;gap:.45em;white-space:pre-wrap}
+.formatted-list-marker{flex:none;color:color-mix(in srgb,var(--primary) 76%,#dbeafe);font-weight:800}
+.formatted-list-item>span:last-child{min-width:0;overflow-wrap:anywhere}
+.private-bubble>.safe-message-text{flex:1;min-width:0}
+.friend-bubble p>.safe-message-text{display:block;text-align:left}
+.friend-compose .friend-message-input{flex:1 1 auto;min-width:0;min-height:42px;max-height:120px;overflow-y:auto;resize:none;padding:9px 11px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.045);color:#f8fafc;outline:0;font:inherit;line-height:1.4}
+.friend-compose .friend-message-input:focus{border-color:color-mix(in srgb,var(--primary) 48%,transparent);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 14%,transparent)}
+.friends-panel-chat .friend-compose .text-format-toolbar{flex:0 0 32px;width:32px}
+.friends-panel-chat .friend-compose .text-format-trigger{flex:0 0 32px;width:32px;height:38px;min-height:38px}
+.friends-panel-chat .friend-compose .text-format-menu button{width:32px;height:32px;min-height:32px}
+@media(max-width:430px){.text-format-toolbar{flex-basis:32px;width:32px}.text-format-trigger{width:32px;height:36px}.friends-panel-chat .friend-compose .text-format-toolbar{flex-basis:30px;width:30px}.friends-panel-chat .friend-compose .text-format-trigger{flex-basis:30px;width:30px}}
