@@ -27,7 +27,7 @@ Deno.serve(async(req)=>{
   const body=typeof payload.body==='string'?payload.body.trim():'';
   const scheduledAt=new Date(payload.scheduledAt);
   if(!['public','private','friend'].includes(context))return json({error:'Invalid chat type.'},400);
-  if([...body].length<1||[...body].length>500)return json({error:'Messages can contain up to 500 characters.'},400);
+  if([...body].length<1||[...body].length>550)return json({error:'Messages can contain up to 550 characters.'},400);
   if(!englishOnly(body))return json({error:'English only. Please use English letters, numbers, symbols, and approved emojis.'},400);
   if(banned.some(word=>normalize(body).includes(word)))return json({error:'Please use respectful language. Offensive language is not allowed.'},400);
   if(!Number.isFinite(scheduledAt.getTime())||scheduledAt.getTime()<Date.now()+60_000||scheduledAt.getTime()>Date.now()+30*24*60*60_000)return json({error:'Choose a time at least one minute from now and within 30 days.'},400);

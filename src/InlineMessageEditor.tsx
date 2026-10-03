@@ -14,7 +14,7 @@ export default function InlineMessageEditor({ value, onSave, onCancel }: Props) 
   const save = async (event: FormEvent) => {
     event.preventDefault();
     const next = body.trim();
-    if (!next || next.length > 500 || next === value || saving) return;
+    if (!next || [...next].length > 550 || next === value || saving) return;
     setSaving(true);
     setSaveError('');
     try {
@@ -31,14 +31,14 @@ export default function InlineMessageEditor({ value, onSave, onCancel }: Props) 
     <form className="message-edit-form" onSubmit={event => void save(event)}>
       <textarea
         autoFocus
-        maxLength={500}
+        maxLength={550}
         value={body}
         onChange={event => setBody(event.target.value)}
         aria-label="Edit message"
       />
       {saveError && <small className="message-edit-error" role="alert">{saveError}</small>}
       <div className="message-edit-footer">
-        <small>{body.length}/500 · You can edit for 5 minutes after sending.</small>
+        <small>{[...body].length}/550 · You can edit for 5 minutes after sending.</small>
         <div>
           <button type="button" onClick={onCancel} disabled={saving}>Cancel</button>
           <button type="submit" disabled={saving || !body.trim() || body.trim() === value}>

@@ -152,10 +152,10 @@ export default function PublicMessageThread({ message, profile, onClose, onCount
         </div>
 
         <form className="public-thread-composer" onSubmit={event => void send(event)}>
-          <textarea value={body} maxLength={500} rows={2} disabled={expired || sending}
+          <textarea value={body} maxLength={550} rows={2} disabled={expired || sending}
             onChange={event => setBody(event.target.value)} onKeyDown={handleKeyDown}
             placeholder={expired ? 'Discussion closed' : 'Write a reply…'} aria-label="Write a thread reply"/>
-          <div><small>Replies stay in this thread · Enter to send · Shift+Enter for a new line</small>
+          <div><small>{[...body].length}/550 · {550-[...body].length} left · Enter to send · Shift+Enter for a new line</small>
             <button type="submit" disabled={expired || sending || !body.trim()} aria-label="Send thread reply" title="Send reply"><Send size={17}/></button>
           </div>
         </form>

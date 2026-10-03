@@ -25,7 +25,7 @@ export function isEnglishOnly(value: string) {
 }
 export function validateMessage(value: string) {
   if (!value.trim()) return 'Message cannot be empty.';
-  if ([...value].length > 500) return 'Messages can contain up to 500 characters.';
+  if ([...value].length > 550) return 'Messages can contain up to 550 characters.';
   if (!isEnglishOnly(value)) return 'English only. Please use English letters, numbers, symbols, and approved emojis.';
   if (hasOffensiveLanguage(value)) return 'Please use respectful language. Offensive language is not allowed.';
   return null;

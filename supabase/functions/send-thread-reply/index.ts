@@ -60,8 +60,8 @@ Deno.serve(async request => {
     if (!validProfile(profile)) return json({ error: 'Your profile information is invalid. Please update it.' }, 400);
 
     const body = String(text ?? '');
-    if ([...body].length < 1 || [...body].length > 500) {
-      return json({ error: 'Messages can contain up to 500 characters.' }, 400);
+    if ([...body].length < 1 || [...body].length > 550) {
+      return json({ error: 'Messages can contain up to 550 characters.' }, 400);
     }
     if (!englishOnly(body)) {
       return json({ error: 'English only. Please use English letters, numbers, symbols, and approved emojis.' }, 400);
@@ -84,7 +84,7 @@ Deno.serve(async request => {
       const errors: Record<string, string> = {
         rate_limited: 'Please wait a moment before sending more messages.',
         duplicate_message: 'Please do not send the same message again so quickly.',
-        message_length: 'Messages can contain up to 500 characters.',
+        message_length: 'Messages can contain up to 550 characters.',
         thread_root_expired: 'This message has expired; its discussion is closed.',
       };
       return json({ error: errors[error.message] || 'Unable to send this thread reply.' }, 400);
