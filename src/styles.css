@@ -3523,3 +3523,37 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .quick-text-empty{margin:0}
 .friend-compose .quick-text-trigger{width:40px;flex:0 0 40px;background:rgba(255,255,255,.045);color:#cbd5e1}
 @media(max-width:420px){.quick-text-trigger{width:36px;height:38px}.friend-compose .quick-text-trigger{width:36px;flex-basis:36px}.private-room-capacity{padding:9px 11px}}
+
+.private-room-head{min-width:0;gap:10px}
+.private-room-identity{flex:1 1 auto;min-width:0}
+.private-room-title{display:flex!important;align-items:center;gap:6px;min-width:0;font-size:.9rem}
+.private-room-title>svg{flex:none}
+.private-room-title>span{display:block!important;min-width:0;overflow:hidden;margin:0!important;font-size:inherit!important;text-overflow:ellipsis;white-space:nowrap}
+.private-room-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0;margin-top:3px}
+.private-room-code{display:inline-flex!important;align-items:center;gap:4px;min-width:0;margin:0!important;font-size:.7rem!important;white-space:nowrap}
+.private-room-code>span{display:inline!important;margin:0!important;font-size:inherit!important;opacity:.72}
+.private-room-code strong{font-size:inherit;color:#dbeafe;letter-spacing:.035em}
+.private-room-code-copy{display:grid;place-items:center;flex:none;width:25px;height:25px;margin-left:1px;padding:0;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:rgba(255,255,255,.045);color:#bacbe1;cursor:pointer}
+.private-room-code-copy:hover{border-color:color-mix(in srgb,var(--primary) 50%,transparent);color:#fff}
+.private-room-meta .private-online-status{margin:0!important;font-size:.68rem!important}
+.private-room-actions{flex:none;gap:6px}
+.private-leave-btn{white-space:nowrap}
+@media(max-width:600px){
+  .private-room-head{padding:8px 9px;gap:7px}
+  .private-room-actions{gap:4px}
+  .private-room-actions .private-call-btn,.private-room-more-trigger{width:34px;height:34px;min-width:34px}
+  .private-room-actions .private-call-btn span{display:none}
+  .private-leave-btn{padding:6px 7px;font-size:9px}
+  .private-room-code{font-size:.65rem!important}
+  .private-room-code-copy{width:23px;height:23px}
+  .private-room-meta{column-gap:7px;row-gap:2px}
+}
+@media(max-width:380px){
+  .private-room-head{padding:7px 8px;gap:5px}
+  .private-room-actions{gap:3px}
+  .private-room-actions .private-call-btn,.private-room-more-trigger{width:31px;height:31px;min-width:31px}
+  .private-leave-btn{padding:5px 6px;font-size:8px}
+  .private-room-title{font-size:.82rem}
+  .private-room-code{font-size:.6rem!important;gap:3px}
+  .private-room-code-copy{width:21px;height:21px}
+}
