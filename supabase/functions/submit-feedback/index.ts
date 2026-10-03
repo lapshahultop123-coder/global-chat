@@ -54,21 +54,21 @@ Deno.serve(async (req) => {
       page: page || null,
       status: 'new',
     };
-    let { error: insertError } = await admin.from('feedback_reports').insert(row);
+    let insertResult = await admin.from('feedback_reports').insert(row).select('id,status,created_at').single();
 
     // Older deployments may not yet have the optional display-name column.
-    if (insertError?.code === 'PGRST204' || (insertError?.code === '42703' && /user_name/i.test(insertError.message))) {
+    if (insertResult.error?.code === 'PGRST204' || (insertResult.error?.code === '42703' && /user_name/i.test(insertResult.error.message))) {
       const { user_name: _userName, ...compatibleRow } = row;
-      ({ error: insertError } = await admin.from('feedback_reports').insert(compatibleRow));
+      insertResult = await admin.from('feedback_reports').insert(compatibleRow).select('id,status,created_at').single();
     }
 
-    if (insertError) {
-      console.error('Feedback insert failed:', insertError.code, insertError.message);
-      const dbCode = insertError.code || 'DB_INSERT_ERROR';
+    if (insertResult.error) {
+      console.error('Feedback insert failed:', insertResult.error.code, insertResult.error.message);
+      const dbCode = insertResult.error.code || 'DB_INSERT_ERROR';
       return json({ error: `Could not save the report (${dbCode}). Please retry in a moment.` }, 500);
     }
 
-    return json({ ok: true, message: 'Report submitted successfully.' });
+    return json({ ok: true, reportId: insertResult.data.id, status: insertResult.data.status, createdAt: insertResult.data.created_at, message: 'Report submitted successfully.' });
   } catch (error) {
     console.error('submit-feedback error:', error);
     return json({ error: 'Could not submit the report. Please try again.' }, 500);

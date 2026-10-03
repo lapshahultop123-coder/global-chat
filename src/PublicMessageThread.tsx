@@ -3,6 +3,7 @@ import { MessageCircle, Send, X } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { AVATARS } from './data/catalog';
 import { validateMessage } from './lib/validation';
+import SafeMessageText from './SafeMessageText';
 
 type PublicMessage = {
   id: string;
@@ -136,7 +137,7 @@ export default function PublicMessageThread({ message, profile, onClose, onCount
         <div className="public-thread-root-label">Original message</div>
         <article className="public-thread-root">
           <img src={avatar(message.avatar_id)} alt=""/>
-          <div><div className="public-thread-author"><strong>{message.name}</strong><time>{time(message.created_at)}</time></div><p>{message.body}</p></div>
+          <div><div className="public-thread-author"><strong>{message.name}</strong><time>{time(message.created_at)}</time></div><p><SafeMessageText text={message.body}/></p></div>
         </article>
 
         <div className="public-thread-replies" aria-live="polite">
@@ -144,7 +145,7 @@ export default function PublicMessageThread({ message, profile, onClose, onCount
             <div className="public-thread-empty">No replies yet. Start the discussion.</div> :
             replies.map(reply => <article className="public-thread-reply" key={reply.id}>
               <img src={avatar(reply.avatar_id)} alt=""/>
-              <div><div className="public-thread-author"><strong>{reply.name}</strong><span>{flag(reply.country)} {reply.subdivision}</span><time>{time(reply.created_at)}</time></div><p>{reply.body}</p></div>
+              <div><div className="public-thread-author"><strong>{reply.name}</strong><span>{flag(reply.country)} {reply.subdivision}</span><time>{time(reply.created_at)}</time></div><p><SafeMessageText text={reply.body}/></p></div>
             </article>)}
           {expired && <p className="public-thread-expired">This message has expired. Its discussion is closed.</p>}
           {error && <p className="public-thread-error" role="alert">{error}</p>}
