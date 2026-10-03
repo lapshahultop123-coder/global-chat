@@ -3494,3 +3494,32 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .private-member-action.transfer:hover{background:rgba(14,165,233,.17)}
 .privacy-shield-toggle.is-active{border-color:#38bdf8;background:rgba(14,165,233,.16);color:#bae6fd}
 .chat-app.privacy-shield :is(.message-list,.private-message-list,.friend-chat-messages,.global-search-results,.saved-message-card,.public-thread-root,.public-thread-replies){filter:blur(12px);user-select:none;pointer-events:none;transition:filter .16s ease}
+
+.private-room-capacity{display:grid;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);font-size:.72rem}
+.private-room-capacity>span{color:#cbd5e1;font-weight:800}
+.private-member-limit-control{display:grid;gap:5px}
+.private-member-limit-control label{margin:0;color:#dbeafe;font-size:.7rem;font-weight:800}
+.private-member-limit-control>div{display:flex;gap:7px}
+.private-member-limit-control input{width:100%;min-width:0;padding:8px 10px;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:rgba(255,255,255,.045);color:#f8fafc}
+.private-member-limit-control button{flex:none;padding:8px 10px;border:1px solid color-mix(in srgb,var(--primary) 60%,transparent);border-radius:9px;background:color-mix(in srgb,var(--primary) 18%,transparent);color:#eaf6ff;font-size:.64rem;font-weight:900}
+.private-member-limit-control button:disabled{opacity:.55}
+.private-member-limit-control small{color:#9eafc5;font-size:.65rem}
+.private-member-limit-control .private-limit-error{color:#fda4af}
+.quick-text-phrases{position:relative;flex:0 0 auto;align-self:center}
+.quick-text-trigger{display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.045);color:#cbd5e1}
+.quick-text-trigger:hover,.quick-text-trigger[aria-expanded="true"]{border-color:color-mix(in srgb,var(--primary) 60%,transparent);background:color-mix(in srgb,var(--primary) 15%,transparent);color:#fff}
+.quick-text-popover{position:absolute;z-index:1950;left:0;bottom:calc(100% + 8px);display:grid;gap:9px;width:min(320px,calc(100vw - 28px));max-height:min(48dvh,380px);overflow:auto;padding:12px;border:1px solid color-mix(in srgb,var(--primary) 35%,rgba(255,255,255,.15));border-radius:14px;background:color-mix(in srgb,var(--surface) 97%,#070b16);box-shadow:0 18px 48px rgba(0,0,0,.48)}
+.quick-text-popover>header{display:grid;gap:2px;color:#f1f5f9;font-size:.78rem}
+.quick-text-popover>header span,.quick-text-empty,.quick-text-limit{color:#9eafc5;font-size:.66rem;line-height:1.4}
+.quick-text-save{display:grid;gap:6px}
+.quick-text-popover textarea{width:100%;resize:vertical;min-height:52px;padding:8px 9px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:rgba(255,255,255,.04);color:#f8fafc;font-size:.75rem}
+.quick-text-save button{display:flex;align-items:center;justify-content:center;gap:5px;min-height:31px;border:1px solid color-mix(in srgb,var(--primary) 60%,transparent);border-radius:8px;background:color-mix(in srgb,var(--primary) 20%,transparent);color:#eaf6ff;font-size:.64rem;font-weight:900}
+.quick-text-save button:disabled{opacity:.5}
+.quick-text-list{display:grid;gap:5px}
+.quick-text-row{display:flex;align-items:stretch;gap:5px;min-width:0}
+.quick-text-insert{flex:1;min-width:0;overflow:hidden;padding:7px 8px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.035);color:#dbeafe;text-align:left;font-size:.7rem;line-height:1.35;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.quick-text-insert:hover{border-color:color-mix(in srgb,var(--primary) 55%,transparent);background:color-mix(in srgb,var(--primary) 12%,transparent)}
+.quick-text-remove{display:grid;place-items:center;flex:0 0 31px;width:31px;padding:0;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.035);color:#fda4af}
+.quick-text-empty{margin:0}
+.friend-compose .quick-text-trigger{width:40px;flex:0 0 40px;background:rgba(255,255,255,.045);color:#cbd5e1}
+@media(max-width:420px){.quick-text-trigger{width:36px;height:38px}.friend-compose .quick-text-trigger{width:36px;flex-basis:36px}.private-room-capacity{padding:9px 11px}}
