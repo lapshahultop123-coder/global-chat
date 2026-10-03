@@ -3298,6 +3298,17 @@ html[data-theme="mono"] .send-btn svg{
 .friends-panel .friend-voice-primary:hover:not(:disabled),.friends-panel .friend-compose .friend-send-btn:hover:not(:disabled){filter:brightness(1.08);box-shadow:0 7px 20px color-mix(in srgb,var(--primary) 24%,transparent)}
 .friends-panel-chat .friend-message-row:not(.mine) .friend-bubble{border-color:color-mix(in srgb,var(--primary) 23%,rgba(255,255,255,.12));background:color-mix(in srgb,var(--surface) 82%,var(--bg))}
 .friends-panel-chat .friend-message-row.mine .friend-bubble{border-color:color-mix(in srgb,var(--primary) 46%,transparent);background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 27%,var(--surface)),color-mix(in srgb,var(--accent) 22%,var(--surface)))}
+
+.message-edit-form{display:grid;gap:9px;width:min(100%,620px);padding:10px;border:1px solid color-mix(in srgb,var(--primary) 35%,transparent);border-radius:12px;background:color-mix(in srgb,var(--surface) 92%,var(--bg));color:var(--text,#eaf2ff)}
+.message-edit-form textarea{box-sizing:border-box;width:100%;min-height:76px;max-height:220px;resize:vertical;padding:10px 12px;border:1px solid rgba(148,163,184,.24);border-radius:9px;background:color-mix(in srgb,var(--bg) 55%,var(--surface));color:inherit;font:inherit;line-height:1.45}
+.message-edit-form textarea:focus{outline:2px solid color-mix(in srgb,var(--primary) 70%,transparent);outline-offset:1px}
+.message-edit-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.message-edit-footer small{font-size:11px;color:color-mix(in srgb,var(--text,#eaf2ff) 68%,transparent)}
+.message-edit-footer>div{display:flex;justify-content:flex-end;gap:7px;margin-left:auto}
+.message-edit-footer button{min-height:32px;padding:6px 12px;border:1px solid color-mix(in srgb,var(--primary) 35%,transparent);border-radius:8px;background:color-mix(in srgb,var(--primary) 13%,var(--surface));color:inherit;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.message-edit-footer button[type=submit]{background:color-mix(in srgb,var(--primary) 30%,var(--surface))}
+.message-edit-footer button:disabled{opacity:.55;cursor:not-allowed}
+.message-edit-error{color:#fca5a5;font-size:12px}
 .friends-panel .friend-voice-play:disabled{opacity:.7;cursor:wait}
 @media(max-width:520px){.settings-actions{grid-template-columns:1fr}.settings-actions .private-modal-cancel{order:2}.settings-actions .primary-btn{order:1}}
 
