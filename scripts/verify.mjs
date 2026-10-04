@@ -44,10 +44,10 @@ ok('all 40 theme CTA gradients maintain AA text contrast after foreground correc
 ok('theme buttons calculate contrast-safe foregrounds and gradient backgrounds',app.includes('function themeButtonText(stops:string[])')&&app.includes('function accessibleThemeGradient(stops:string[],foreground:string)')&&app.includes("setProperty('--theme-button-text'")&&app.includes("setProperty('--theme-button-gradient'")&&app.includes("setProperty('--theme-primary-gradient'")&&app.includes("setProperty('--theme-primary-text'")&&css.includes('var(--theme-button-text,#fff)')&&css.includes('var(--theme-button-gradient)')&&css.includes('var(--theme-primary-gradient)')&&css.includes('var(--theme-primary-text,#fff)'));
 ok('all 40 themes are accepted by server-side profile validation',themeIds.length===40&&themeIds.every(id=>profile.includes(`'${id}'`))&&/themes\.includes\(p\.themeId\)/.test(profile));
 ok('exactly 8 reactions',reactions.length===8);
-ok('500-char client validation',/\[\.\.\.value\]\.length > 500/.test(validation));
+ok('550-char client validation',/\[\.\.\.value\]\.length > 550/.test(validation));
 ok('English-only client validation',/isEnglishOnly/.test(validation));
 ok('offensive filter client',/hasOffensiveLanguage/.test(validation));
-ok('server-side 500-char validation',/\[\.\.\.body\]\.length>500/.test(send));
+ok('server-side 550-char validation',/\[\.\.\.body\]\.length>550/.test(send)&&migrations.includes('check (char_length(btrim(body)) between 1 and 550)')&&migrations.includes("v_definition := replace(v_definition, '>500', '>550')"));
 ok('server-side English validation',/englishOnly\(body\)/.test(send));
 ok('server-side offensive filter',/offensive\(body\)/.test(send));
 ok('server-side 3-in-10 rate limit',/interval '10 seconds'/.test(schema)&&/recent_count >= 3/.test(schema));
@@ -76,7 +76,8 @@ ok('realtime presence count',/presenceState\(\)/.test(app)&&/presence:\{key:self
 ok('realtime cleanup',/removeChannel\(channel\)/.test(app));
 ok('anonymous auth',/signInAnonymously/.test(app));
 ok('no upload input',!/<input[^>]+type=["']file/i.test(app));
-ok('no Notification API',!/new Notification|Notification\.requestPermission/.test(app));
+ok('browser notifications require a test action or granted permission',app.includes("if(permission==='default')permission=await Notification.requestPermission()")&&app.includes("if(document.hidden&&typeof Notification!=='undefined'&&Notification.permission==='granted')")&&app.includes('TEST NOTIFICATION &amp; SOUND'));
+ok('public sender ignore list is account-local with temporary, turn-off and undo controls',app.includes("const PUBLIC_IGNORE_KEY_PREFIX='global-chat-public-ignore-v1:'")&&app.includes('persistPublicIgnoreList(authUserId,next)')&&app.includes('onIgnore(60*60*1000)')&&app.includes('onIgnore(24*60*60*1000)')&&app.includes('Until I turn it off')&&app.includes('onUnignore={unignorePublicSender}')&&app.includes('onClick={()=>unignorePublicSender(ignoreNotice.userId)}')&&app.includes('!activePublicIgnoreList[message.user_id]'));
 ok('two sounds only',/send\.wav/.test(app)&&/receive\.wav/.test(app)&&!/(notification|alert)\.wav/i.test(app));
 ok('four text sizes',/small.*medium.*large.*xl/.test(catalog));
 ok('scrollable emoji picker with browser-local favorites',/emoji-picker-track/.test(emojiPicker)&&/scrollBy/.test(emojiPicker)&&/favoriteKey\(userId\)/.test(emojiPicker)&&/emoji-favorites-track/.test(css));
