@@ -3727,3 +3727,4 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .local-cleanup-options label{display:flex;align-items:center;gap:8px}
 .feature-modal textarea{max-width:100%;box-sizing:border-box}
 @media(max-width:560px){.public-message-feedback{margin-left:8px}.friend-organization-controls{grid-template-columns:1fr 1fr}.connection-quality-details{font-size:10px}.room-message-pause-banner,.new-device-login-notice{align-items:flex-start;font-size:12px}}
+.public-feedback-error{flex-basis:100%;color:#fca5a5;font-size:11px}
