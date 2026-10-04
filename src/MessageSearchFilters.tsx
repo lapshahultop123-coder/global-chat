@@ -26,13 +26,14 @@ export function matchesMessageSearch(message: any, kind: 'text' | 'voice', query
   return true;
 }
 
-export function MessageSearchFilters({ query, onQueryChange, filters, onFiltersChange, messages, showQuery = true }: {
+export function MessageSearchFilters({ query, onQueryChange, filters, onFiltersChange, messages, showQuery = true, onSubmitQuery }: {
   query: string;
   onQueryChange: (value: string) => void;
   filters: SearchFilters;
   onFiltersChange: (value: SearchFilters) => void;
   messages: any[];
   showQuery?: boolean;
+  onSubmitQuery?: () => void;
 }) {
   const senders = [...new Map(messages.map(message => [String(message.user_id || message.sender_id || ''), String(message.name || 'User')])).entries()]
     .filter(([id]) => id)
@@ -41,7 +42,7 @@ export function MessageSearchFilters({ query, onQueryChange, filters, onFiltersC
     onFiltersChange({ ...filters, [key]: event.target.value });
 
   return <div className="message-search-controls">
-    {showQuery&&<label className="message-search-query"><Search size={16}/><input autoFocus value={query} onChange={event => onQueryChange(event.target.value)} placeholder="Search messages..." aria-label="Search messages"/></label>}
+    {showQuery&&<label className="message-search-query"><Search size={16}/><input autoFocus value={query} onChange={event => onQueryChange(event.target.value)} onKeyDown={event=>{if(event.key==='Enter')onSubmitQuery?.()}} placeholder="Search messages..." aria-label="Search messages"/></label>}
     <div className="message-search-filters">
       <label><Filter size={14}/><select value={filters.senderId} onChange={update('senderId')} aria-label="Filter by sender"><option value="">All senders</option>{senders.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
       <label><span>Type</span><select value={filters.content} onChange={update('content')} aria-label="Filter by message type"><option value="all">All content</option><option value="text">Text</option><option value="voice">Voice / audio</option><option value="links">Links</option><option value="files">Files / audio</option></select></label>

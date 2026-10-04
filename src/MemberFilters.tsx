@@ -1,0 +1,17 @@
+import { useEffect, useState } from 'react';
+import { EyeOff, X } from 'lucide-react';
+export type LocalMemberFilter={name:string;until:number|null};
+const key=(userId:string,scope:string)=>`global-chat-member-filters-v1:${userId}:${scope}`;
+export function useLocalMemberFilters(userId:string,scope:string){
+ const read=()=>{try{const data=JSON.parse(localStorage.getItem(key(userId,scope))||'{}');return Object.fromEntries(Object.entries(data).filter(([,item]:any)=>item&&(item.until===null||Number(item.until)>Date.now())) as [string,LocalMemberFilter][])}catch{return {}}};
+ const [filters,setFilters]=useState<Record<string,LocalMemberFilter>>(read);
+ useEffect(()=>{const next=read();setFilters(next);try{localStorage.setItem(key(userId,scope),JSON.stringify(next))}catch{}},[userId,scope]);
+ useEffect(()=>{const end=Object.values(filters).flatMap(value=>value.until===null?[]:[value.until]);if(!end.length)return;const timer=window.setTimeout(()=>{const next=read();setFilters(next);try{localStorage.setItem(key(userId,scope),JSON.stringify(next))}catch{}},Math.max(0,Math.min(...end)-Date.now()+10));return()=>window.clearTimeout(timer)},[filters,userId,scope]);
+ const hide=(memberId:string,name:string,duration:number|null)=>{const next={...filters,[memberId]:{name,until:duration===null?null:Date.now()+duration}};setFilters(next);try{localStorage.setItem(key(userId,scope),JSON.stringify(next))}catch{}};
+ const unhide=(memberId:string)=>{const next={...filters};delete next[memberId];setFilters(next);try{localStorage.setItem(key(userId,scope),JSON.stringify(next))}catch{}};
+ const clear=()=>{setFilters({});try{localStorage.removeItem(key(userId,scope))}catch{}};
+ return {filters,hide,unhide,clear};
+}
+export default function MemberFilterDialog({target,filters,onHide,onUnhide,onClear,onClose}:{target:{id:string;name:string}|null;filters:Record<string,LocalMemberFilter>;onHide:(id:string,name:string,duration:number|null)=>void;onUnhide:(id:string)=>void;onClear:()=>void;onClose:()=>void}){
+ return <div className="feature-modal-backdrop member-filter-backdrop" role="dialog" aria-modal="true" aria-labelledby="member-filter-title"><section className="feature-modal member-filter-modal"><header><div><b id="member-filter-title">{target?`Hide ${target.name} in this chat`:'Member filters'}</b><small>Only your view changes. They are not notified.</small></div><button type="button" onClick={onClose} aria-label="Close"><X size={18}/></button></header>{target?<div className="member-filter-durations"><button type="button" onClick={()=>{onHide(target.id,target.name,60*60*1000);onClose()}}>Hide for 1 hour</button><button type="button" onClick={()=>{onHide(target.id,target.name,24*60*60*1000);onClose()}}>Hide for 24 hours</button><button type="button" onClick={()=>{onHide(target.id,target.name,null);onClose()}}>Hide until I turn it off</button></div>:<>{Object.entries(filters).length?<div className="member-filter-list">{Object.entries(filters).map(([id,value])=><div key={id}><span><strong>{value.name}</strong><small>{value.until===null?'Until turned off':`Until ${new Date(value.until).toLocaleString()}`}</small></span><button type="button" onClick={()=>onUnhide(id)}>Show</button></div>)}</div>:<p className="member-filter-empty"><EyeOff size={16}/> No members are hidden in this chat.</p>}<footer>{Object.keys(filters).length>0&&<button type="button" onClick={onClear}>Show all</button>}<button type="button" onClick={onClose}>Done</button></footer></>}</section></div>
+}

@@ -1,0 +1,33 @@
+import { useEffect, useState } from 'react';
+import { Bell, Search, Settings2, X } from 'lucide-react';
+
+export type ChatComposerPreferences={enterToSend:boolean;sound:boolean;formatting:boolean};
+const composerKey=(userId:string,chatKey:string)=>`global-chat-composer-settings-v1:${userId}:${chatKey}`;
+export function readChatComposerPreferences(userId:string,chatKey:string):ChatComposerPreferences{
+  const defaults={enterToSend:true,sound:true,formatting:true};
+  try{return {...defaults,...JSON.parse(localStorage.getItem(composerKey(userId,chatKey))||'{}')}}catch{return defaults}
+}
+function writeChatComposerPreferences(userId:string,chatKey:string,preferences:ChatComposerPreferences){try{localStorage.setItem(composerKey(userId,chatKey),JSON.stringify(preferences));window.dispatchEvent(new CustomEvent('global-chat-composer-settings',{detail:{userId,chatKey}}))}catch{}}
+export function useChatComposerPreferences(userId:string,chatKey:string){
+  const [preferences,setPreferences]=useState(()=>readChatComposerPreferences(userId,chatKey));
+  useEffect(()=>{setPreferences(readChatComposerPreferences(userId,chatKey));const update=(event:Event)=>{const detail=(event as CustomEvent).detail;if(detail?.userId===userId&&detail?.chatKey===chatKey)setPreferences(readChatComposerPreferences(userId,chatKey))};window.addEventListener('global-chat-composer-settings',update);return()=>window.removeEventListener('global-chat-composer-settings',update)},[userId,chatKey]);
+  const update=(key:keyof ChatComposerPreferences,value:boolean)=>{const next={...readChatComposerPreferences(userId,chatKey),[key]:value};writeChatComposerPreferences(userId,chatKey,next);setPreferences(next)};
+  return [preferences,update] as const;
+}
+export function ChatComposerSettingsButton({userId,chatKey}:{userId:string;chatKey:string}){
+  const [open,setOpen]=useState(false);const [preferences,update]=useChatComposerPreferences(userId,chatKey);
+  return <><button type="button" role="menuitem" onClick={()=>setOpen(true)}><Settings2 size={15}/> Composer settings</button>{open&&<div className="feature-modal-backdrop chat-composer-settings-backdrop" role="dialog" aria-modal="true" aria-labelledby="chat-composer-settings-title"><section className="feature-modal chat-composer-settings-modal"><header><div><b id="chat-composer-settings-title">This chat’s composer</b><small>Saved only in this browser</small></div><button type="button" onClick={()=>setOpen(false)} aria-label="Close"><X size={18}/></button></header><label className="chat-control-toggle"><span><strong>Enter sends</strong><small>Turn off to use Enter for a new line</small></span><input type="checkbox" checked={preferences.enterToSend} onChange={event=>update('enterToSend',event.target.checked)}/></label><label className="chat-control-toggle"><span><strong>Sound effects</strong><small>Use this chat’s send and receive sounds</small></span><input type="checkbox" checked={preferences.sound} onChange={event=>update('sound',event.target.checked)}/></label><label className="chat-control-toggle"><span><strong>Text formatting toolbar</strong><small>Show bold, italic, and list tools</small></span><input type="checkbox" checked={preferences.formatting} onChange={event=>update('formatting',event.target.checked)}/></label><div className="feature-modal-actions"><button className="primary-btn" type="button" onClick={()=>setOpen(false)}>DONE</button></div></section></div>}</>;
+}
+
+const searchKey=(userId:string,scope:string)=>`global-chat-search-history-v1:${userId}:${scope}`;
+type SearchTerm={text:string;at:number};
+export function rememberChatSearch(userId:string,scope:string,value:string){const text=value.trim().slice(0,120);if(!userId||!text)return;try{const key=searchKey(userId,scope);const raw=JSON.parse(localStorage.getItem(key)||'[]');const old=Array.isArray(raw)?raw.filter((item:any)=>item&&typeof item.text==='string'):[];const next:SearchTerm[]=[{text,at:Date.now()},...old.filter((item:any)=>item.text.toLowerCase()!==text.toLowerCase())].slice(0,20);localStorage.setItem(key,JSON.stringify(next))}catch{}}
+export function clearChatSearchHistory(userId:string,scope:string,terms:Set<string>){try{const key=searchKey(userId,scope);const raw=JSON.parse(localStorage.getItem(key)||'[]');localStorage.setItem(key,JSON.stringify((Array.isArray(raw)?raw:[]).filter((item:any)=>!terms.has(item.text))))}catch{}}
+export function SearchHistoryButton({userId,scope,onUse}:{userId:string;scope:string;onUse:(query:string)=>void}){
+ const [open,setOpen]=useState(false),[terms,setTerms]=useState<SearchTerm[]>([]),[selected,setSelected]=useState<Set<string>>(new Set());
+ useEffect(()=>{if(open){try{const raw=JSON.parse(localStorage.getItem(searchKey(userId,scope))||'[]');setTerms(Array.isArray(raw)?raw.filter((item:any)=>item&&typeof item.text==='string'):[])}catch{setTerms([])}setSelected(new Set())}},[open,userId,scope]);
+ const clear=(items:Set<string>)=>{clearChatSearchHistory(userId,scope,items);setTerms(previous=>previous.filter(item=>!items.has(item.text)));setSelected(new Set())};
+ return <><button type="button" className="search-history-trigger" onClick={()=>setOpen(true)} aria-label="Search history" title="Search history"><Search size={15}/><span>History</span></button>{open&&<div className="feature-modal-backdrop chat-search-history-backdrop" role="dialog" aria-modal="true" aria-labelledby="chat-search-history-title"><section className="feature-modal chat-search-history-modal"><header><div><b id="chat-search-history-title">Recent searches</b><small>Stored in this browser</small></div><button type="button" onClick={()=>setOpen(false)} aria-label="Close"><X size={18}/></button></header>{terms.length===0?<p className="chat-search-history-empty">No recent searches.</p>:<div className="chat-search-history-list">{terms.map(item=><label key={item.text}><input type="checkbox" checked={selected.has(item.text)} onChange={event=>setSelected(previous=>{const next=new Set(previous);if(event.target.checked)next.add(item.text);else next.delete(item.text);return next})}/><span><button type="button" onClick={()=>{onUse(item.text);setOpen(false)}}>{item.text}</button><small>{new Date(item.at).toLocaleString()}</small></span></label>)}</div>}<footer><button type="button" disabled={!selected.size} onClick={()=>clear(selected)}>Clear selected</button><button type="button" disabled={!terms.length} onClick={()=>clear(new Set(terms.map(item=>item.text)))}>Clear all</button><button type="button" onClick={()=>setOpen(false)}>Done</button></footer></section></div>}</>;
+}
+
+export function SnoozeReminder({until}:{until:number}){return <small className="chat-snooze-reminder"><Bell size={13}/><span>Muted until {new Date(until).toLocaleString()}</span></small>}
