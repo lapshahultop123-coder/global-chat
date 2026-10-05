@@ -15,17 +15,19 @@ type BulkMessageActionsProps = {
   onCancel: () => void;
 };
 
-export function BulkMessageActions({ active, selectedCount, totalCount, canSave, busy = false, status = '', onStart, onSelectAll, onCopy, onSave, onDelete, onCancel }: BulkMessageActionsProps) {
+export function BulkMessageActions({ active, selectedCount, totalCount, canSave, busy = false, status = '', onSelectAll, onCopy, onSave, onDelete, onCancel }: BulkMessageActionsProps) {
+  if (!active) return status ? <div className="bulk-message-actions-wrap"><small className="bulk-message-status" role="status">{status}</small></div> : null;
+
   return <div className="bulk-message-actions-wrap">
     <div className={`bulk-message-actions${active ? ' is-active' : ''}`} role="group" aria-label="Bulk message actions">
-      {!active ? <button type="button" className="bulk-message-start" onClick={onStart}><Check size={15}/> Select messages</button> : <>
+      <>
         <span className="bulk-message-count" aria-live="polite">{selectedCount} selected</span>
         <button type="button" onClick={onSelectAll} disabled={busy || totalCount === 0}>Select all ({totalCount})</button>
         <button type="button" onClick={onCopy} disabled={busy || selectedCount === 0}><Copy size={15}/> Copy</button>
         <button type="button" onClick={onSave} disabled={busy || !canSave}><Bookmark size={15}/> Save</button>
         <button type="button" className="bulk-message-delete" onClick={onDelete} disabled={busy || selectedCount === 0}><Trash2 size={15}/> Delete for me</button>
         <button type="button" className="bulk-message-cancel" onClick={onCancel} disabled={busy}><X size={15}/> Cancel</button>
-      </>}
+      </>
       {busy && <span className="bulk-message-busy" role="status">Working…</span>}
     </div>
     {status && <small className="bulk-message-status" role="status">{status}</small>}
