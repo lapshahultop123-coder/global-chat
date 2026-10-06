@@ -1408,6 +1408,7 @@ html[data-theme="mono"] .send-btn svg{
 .public-message.highlighted .private-bubble{box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 55%,transparent),0 12px 32px color-mix(in srgb,var(--accent) 12%,transparent)!important}
 .public-message .private-item-actions{position:relative;z-index:1;overflow:visible!important}
 .public-message .private-item-menu{z-index:3000!important;pointer-events:auto!important}
+.public-message .private-item-menu.open-down{top:calc(100% + 8px)!important;bottom:auto!important}
 .public-message.menu-open{z-index:2000!important;isolation:isolate}
 .public-message.menu-open .private-item-actions,
 .public-message.menu-open .private-bubble{z-index:2001!important}

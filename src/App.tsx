@@ -1,4 +1,4 @@
-import { Fragment, lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, lazy, memo, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { iso31661, iso31662 } from 'iso-3166';
 import { Activity, AlertTriangle, ArrowDown, ArrowLeft, Ban, Bell, BookOpen, Bug, CalendarDays, Check, ChevronDown, Clock3, Copy, Eye, EyeOff, Globe2, Image, KeyRound, LockKeyhole, LogOut, MessageCircle, Mic, MicOff, MoreVertical, Palette, Pause, Pencil, Pin, Play, Plus, Reply as ReplyIcon, RefreshCw, Search, Send, Settings, ShieldCheck, Smile, Square, Trash2, UserRound, Users, Volume2, Wifi, WifiOff, X, Bookmark, GraduationCap } from 'lucide-react';
 import { supabase } from './lib/supabase';
@@ -1005,7 +1005,33 @@ function formatDuration(ms:number){const total=Math.max(0,Math.round((ms||0)/100
 const Message=memo(function Message({m,current,viewerId,counts,mine,onToggle,onDeleteForMe,onDeleteForEveryone,onEdit,onOpenThread,threadCount,onAddFriend,onSaveMessage,onReply,onCopy,onReplyJump,onIgnoreSender,highlighted,copied,timeFormat,intro,bulkActive,bulkSelected,onToggleBulk}:{m:ChatMessage;current:boolean;viewerId:string;counts:Record<string,number>;mine:string[];onToggle:(r:string)=>Promise<void>;onDeleteForMe:()=>void;onDeleteForEveryone:()=>void;onEdit:(body:string)=>Promise<boolean>;onOpenThread:()=>void;threadCount:number;onAddFriend:()=>void;onIgnoreSender:(userId:string,name:string)=>void;onSaveMessage:()=>void;onReply:()=>void;onCopy:()=>void;onReplyJump:(id:string,isVoice:boolean)=>void;highlighted:boolean;copied:boolean;timeFormat:TimeFormat;intro:string;bulkActive:boolean;bulkSelected:boolean;onToggleBulk:()=>void}){
   const [expanded,setExpanded]=useState(false);
   const [menu,setMenu]=useState(false);
+  const [menuPlacement,setMenuPlacement]=useState<'above'|'below'>('above');
+  const menuRef=useRef<HTMLDivElement|null>(null);
   const [editing,setEditing]=useState(false);
+  useLayoutEffect(()=>{
+    if(!menu)return;
+    const menuElement=menuRef.current;
+    const actionArea=menuElement?.parentElement;
+    if(!menuElement||!actionArea)return;
+    const scrollViewport=actionArea.closest('.message-list') as HTMLElement|null;
+    const updatePlacement=()=>{
+      const areaRect=actionArea.getBoundingClientRect();
+      const viewportRect=scrollViewport?.getBoundingClientRect();
+      const top=viewportRect?.top??0;
+      const bottom=viewportRect?.bottom??window.innerHeight;
+      const spaceAbove=Math.max(0,areaRect.top-top-8);
+      const spaceBelow=Math.max(0,bottom-areaRect.bottom-8);
+      const menuHeight=Math.min(menuElement.scrollHeight,360,window.innerHeight*.6);
+      const placement=spaceAbove>=menuHeight?'above':spaceBelow>=menuHeight?'below':spaceBelow>=spaceAbove?'below':'above';
+      const available=placement==='above'?spaceAbove:spaceBelow;
+      menuElement.style.setProperty('max-height',`${Math.max(72,Math.min(360,window.innerHeight*.6,available))}px`,'important');
+      setMenuPlacement(placement);
+    };
+    updatePlacement();
+    scrollViewport?.addEventListener('scroll',updatePlacement,{passive:true});
+    window.addEventListener('resize',updatePlacement);
+    return()=>{scrollViewport?.removeEventListener('scroll',updatePlacement);window.removeEventListener('resize',updatePlacement)};
+  },[menu]);
   const isLong=m.body.length>250;
   const visibleBody=!isLong||expanded?m.body:m.body.slice(0,250)+'...';
   const canDeleteForEveryone=current&&!m.id.startsWith('optimistic-')&&canLocalDelete(m);
@@ -1022,7 +1048,7 @@ const Message=memo(function Message({m,current,viewerId,counts,mine,onToggle,onD
       <button onClick={onReply} aria-label="Reply" title="Reply"><ReplyIcon size={13}/></button>
       <button onClick={onCopy} aria-label="Copy" title={copied?'Copied':'Copy'}>{copied?<Check size={13}/>:<Copy size={13}/>}</button>
       {(canDeleteForMe||canDeleteForEveryone||!current)&&<button onClick={()=>setMenu(v=>!v)} aria-label="Message options" title="Message options"><MoreVertical size={15}/></button>}
-      {menu&&<div className="private-item-menu">
+      {menu&&<div ref={menuRef} className={`private-item-menu ${menuPlacement==='below'?'open-down':''}` }>
         {!current&&<button onClick={()=>{onAddFriend();setMenu(false)}}><UserRound size={14}/> Add Friend</button>}
         {!current&&<button type="button" onClick={()=>{onIgnoreSender(m.user_id,m.name);setMenu(false)}}><EyeOff size={14}/> Ignore sender</button>}
         {canEdit&&<button onClick={()=>{setEditing(true);setMenu(false)}}><Pencil size={14}/> Edit message</button>}
@@ -2005,9 +2031,6 @@ if (typeof window !== 'undefined') {
 
 
 /* GLOBAL CHAT voice duration live-time fix v1 */
-
-
-
 
 
 
