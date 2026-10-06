@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CalendarDays, LoaderCircle, Search, X } from 'lucide-react';
 import { supabase } from './lib/supabase';
+import { rememberChatSearch, SearchHistoryButton } from './ChatControls';
 
 type SearchScope = 'all' | 'public' | 'private' | 'friends';
 type Result = { id: string; scope: Exclude<SearchScope, 'all'>; name: string; body: string; created_at: string; room_id?: string };
@@ -23,6 +24,7 @@ export default function GlobalMessageSearch({ userId, onClose }: { userId: strin
     event.preventDefault();
     const term = query.trim();
     if (term.length < 2) { setError('Enter at least 2 characters to search.'); return; }
+    rememberChatSearch(userId, 'all', term);
     setBusy(true); setError(''); setSearched(true);
     const pattern = `%${escapedLike(term)}%`;
     const applyDate = <T extends { gte: (column: string, value: string) => T; lte: (column: string, value: string) => T }>(builder: T) => {
@@ -75,6 +77,7 @@ export default function GlobalMessageSearch({ userId, onClose }: { userId: strin
       <header><div><h2 id="global-search-title"><Search size={19}/> Search messages</h2><p>Search text in Public, Private, and Friends chats.</p></div><button type="button" onClick={onClose} aria-label="Close search"><X size={19}/></button></header>
       <form onSubmit={event => void runSearch(event)}>
         <label className="global-search-input"><Search size={17}/><input autoFocus value={query} maxLength={120} onChange={event => setQuery(event.target.value)} placeholder="Search by keyword…" aria-label="Search keyword"/></label>
+        <SearchHistoryButton userId={userId} scope="all" className="search-history-inline-trigger" onUse={setQuery}/>
         <div className="global-search-options"><label>Chat<select value={scope} onChange={event => setScope(event.target.value as SearchScope)}><option value="all">All chats</option><option value="public">Public</option><option value="private">Private</option><option value="friends">Friends</option></select></label><label><CalendarDays size={14}/> From<input type="date" value={from} onChange={event => setFrom(event.target.value)}/></label><label>To<input type="date" value={to} onChange={event => setTo(event.target.value)}/></label></div>
         <button className="primary-btn" type="submit" disabled={busy || query.trim().length < 2}>{busy ? <><LoaderCircle size={16} className="spinning"/> Searching…</> : 'SEARCH MESSAGES'}</button>
       </form>
