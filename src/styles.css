@@ -3806,3 +3806,27 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
   .global-search-options{grid-template-columns:1fr}
   .friends-panel-chat .friend-voice-player{width:min(220px,100%)}
 }
+
+/* Search history controls stay readable inside both search layouts. */
+.chat-search{min-width:0}
+.chat-search .search-history-trigger{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:5px;width:auto;min-width:0;height:32px;padding:0 8px;border:1px solid color-mix(in srgb,var(--primary) 30%,rgba(255,255,255,.14));border-radius:9px;background:color-mix(in srgb,var(--primary) 9%,var(--surface));color:var(--text,#e2e8f0);white-space:nowrap}
+.chat-search .search-history-trigger:hover{border-color:color-mix(in srgb,var(--primary) 55%,transparent);background:color-mix(in srgb,var(--primary) 18%,var(--surface));color:#fff}
+.chat-search .search-history-trigger svg{width:14px;height:14px}
+.chat-search .search-history-trigger span{color:inherit;font-size:.66rem;line-height:1}
+.chat-search>span{flex:0 0 auto;margin-left:0}
+.global-message-search .search-history-trigger{display:inline-flex;justify-self:start;align-items:center;gap:7px;width:auto;min-width:0;min-height:36px;padding:7px 11px;border:1px solid color-mix(in srgb,var(--primary) 32%,rgba(255,255,255,.14));border-radius:10px;background:color-mix(in srgb,var(--primary) 10%,var(--surface));color:var(--text,#e2e8f0);font-size:.76rem;font-weight:750}
+.global-message-search .search-history-trigger:hover{border-color:color-mix(in srgb,var(--primary) 58%,transparent);background:color-mix(in srgb,var(--primary) 20%,var(--surface));color:#fff}
+.message-search-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));align-items:stretch}
+.message-search-filters label{min-width:0;white-space:nowrap}
+.message-search-filters select,.message-search-filters input{width:100%;min-width:0;max-width:100%}
+.skill-exchange-create .primary-btn{color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.2)}
+.skill-exchange-create .primary-btn:disabled{opacity:.58}
+@media(max-width:600px){
+  .message-search-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .message-search-filters label{gap:4px;padding-inline:6px;font-size:.66rem}
+  .chat-search .search-history-trigger{width:30px;min-width:30px;padding:0}
+  .chat-search .search-history-trigger span{display:none}
+}
+@media(max-width:380px){
+  .message-search-filters{grid-template-columns:minmax(0,1fr)}
+}
