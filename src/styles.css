@@ -3821,6 +3821,13 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .message-search-filters select,.message-search-filters input{width:100%;min-width:0;max-width:100%}
 .skill-exchange-create .primary-btn{color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.2)}
 .skill-exchange-create .primary-btn:disabled{opacity:.58}
+.skill-exchange-actions .skill-exchange-delete{border-color:rgba(248,113,113,.38);background:rgba(127,29,29,.18);color:#fecaca}
+.skill-exchange-actions .skill-exchange-delete:hover{border-color:rgba(248,113,113,.65);background:rgba(127,29,29,.32);color:#fff}
+.skill-post-delete-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:7px;padding:10px;border:1px solid rgba(248,113,113,.28);border-radius:10px;background:rgba(127,29,29,.1)}
+.skill-post-delete-confirm p{flex:1 0 100%;margin:0;color:#fecaca;font-size:.73rem;line-height:1.45}
+.skill-post-delete-confirm button{min-height:34px;padding:6px 10px;border:1px solid rgba(255,255,255,.15);border-radius:8px;background:rgba(255,255,255,.05);color:#e2e8f0;font-size:.7rem;font-weight:750}
+.skill-post-delete-confirm .confirm-delete{border-color:rgba(248,113,113,.52);background:rgba(185,28,28,.72);color:#fff}
+.skill-post-delete-confirm button:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:600px){
   .message-search-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
   .message-search-filters label{gap:4px;padding-inline:6px;font-size:.66rem}
