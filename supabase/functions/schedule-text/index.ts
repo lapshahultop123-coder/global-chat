@@ -20,7 +20,9 @@ Deno.serve(async(req)=>{
   if(profileError||!profile)return json({error:'Your profile could not be loaded.'},400);
   const country=iso31661.find(x=>x.state==='assigned'&&x.alpha2===profile.country);
   const subdivision=iso31662.find(x=>x.code===profile.subdivision&&x.code.startsWith(`${profile.country}-`));
-  if(!country||!subdivision||!profile.agreed||typeof profile.name!=='string'||profile.name.trim().length<2||profile.name.trim().length>32||!Number.isInteger(profile.avatar_id)||profile.avatar_id<1||profile.avatar_id>1262)return json({error:'Your profile information is invalid. Please update it.'},400);
+  const hasSubdivisions=iso31662.some(x=>x.code.startsWith(`${profile.country}-`));
+  const validSubdivision=hasSubdivisions?!!subdivision:profile.subdivision==='';
+  if(!country||!validSubdivision||!profile.agreed||typeof profile.name!=='string'||profile.name.trim().length<2||profile.name.trim().length>32||!Number.isInteger(profile.avatar_id)||profile.avatar_id<1||profile.avatar_id>1262)return json({error:'Your profile information is invalid. Please update it.'},400);
   const payload=await req.json();
   const context=payload.context;
   const targetId=typeof payload.targetId==='string'?payload.targetId:null;

@@ -39,7 +39,9 @@ function englishOnly(value: string) {
 function validProfile(profile: any) {
   const country = iso31661.find(item => item.state === 'assigned' && item.alpha2 === profile?.country);
   const subdivision = iso31662.find(item => item.code === profile?.subdivision && item.code.startsWith(`${profile?.country}-`));
-  return !!country && !!subdivision && Number.isInteger(profile?.avatarId) && profile.avatarId >= 1 &&
+  const hasSubdivisions = iso31662.some(item => item.code.startsWith(`${profile?.country}-`));
+  const validSubdivision = hasSubdivisions ? !!subdivision : profile?.subdivision === '';
+  return !!country && validSubdivision && Number.isInteger(profile?.avatarId) && profile.avatarId >= 1 &&
     profile.avatarId <= 1262 && typeof profile?.name === 'string' && profile.name.trim().length >= 2 &&
     profile.name.trim().length <= 32 && profile.agreed === true;
 }
