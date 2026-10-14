@@ -1,8 +1,7 @@
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createAdminClient } from '../_shared/adminClient.ts';
 import { iso31661, iso31662 } from 'npm:iso-3166@4.4.0';
 
-const secrets=JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')!);
-const admin=createClient(Deno.env.get('SUPABASE_URL')!,secrets.default,{auth:{persistSession:false,autoRefreshToken:false}});
+const admin=createAdminClient();
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json'}});
 const allowedEmoji=['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','👍','👎','👏','🙌','🙏','👋','💪','🔥','❤️','💯'];

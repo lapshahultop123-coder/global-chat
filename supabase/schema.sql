@@ -44,12 +44,16 @@ create table if not exists public.messages (
   subdivision text not null,
   avatar_id integer not null check (avatar_id between 1 and 1262),
   body text not null check (char_length(body) between 1 and 500),
+  client_request_id uuid,
   created_at timestamptz not null default now(),
   expires_at timestamptz not null default (now() + interval '5 minutes')
 );
 
 create index if not exists messages_active_idx on public.messages(expires_at, created_at);
 create index if not exists messages_user_time_idx on public.messages(user_id, created_at desc);
+create unique index if not exists messages_user_client_request_id_uq
+  on public.messages(user_id, client_request_id)
+  where client_request_id is not null;
 
 create table if not exists public.message_reactions (
   message_id uuid not null references public.messages(id) on delete cascade,

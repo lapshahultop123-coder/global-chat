@@ -3934,3 +3934,39 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 @media(max-width:900px){.profile-setup-grid{grid-template-columns:minmax(0,1fr);gap:15px}.profile-setup-grid>.theme-card{order:2}}
 @media(max-width:600px){.profile-setup-page{padding:16px 12px max(24px,env(safe-area-inset-bottom))}.profile-setup-brand{display:grid;grid-template-columns:46px minmax(0,1fr);align-items:center;column-gap:11px;row-gap:10px;margin-bottom:17px}.profile-setup-brand .brand-mark{width:46px;height:46px;border-radius:14px}.profile-setup-brand .profile-login-back{grid-column:1/-1;justify-self:start;min-height:40px;margin:0;padding-inline:12px}.profile-setup-wordmark{font-size:1.4rem}.profile-setup-brand .profile-setup-brand-copy p{font-size:.68rem;letter-spacing:.08em}.profile-setup-grid>.profile-setup-card{padding:17px;border-radius:19px}.profile-setup-card-heading{margin-bottom:14px;padding-bottom:13px}.profile-setup-grid>.profile-card>label{margin-top:13px}.profile-setup-grid>.profile-card>input,.profile-setup-grid>.profile-card .select-wrap input,.profile-setup-grid>.profile-card select,.profile-setup-grid>.profile-card .setup-password-confirm{height:44px;min-height:44px}.profile-setup-grid>.profile-card .setup-password-wrap{min-height:44px}.profile-setup-grid>.profile-card .setup-password-wrap input{height:40px}.profile-setup-grid>.theme-card .rules{padding:12px}.profile-setup-grid>.theme-card .rules ul{font-size:.78rem}}
 @media(max-width:360px){.profile-setup-page{padding-inline:9px}.profile-setup-grid>.profile-setup-card{padding:14px}.profile-setup-brand .profile-login-back{max-width:100%;font-size:.65rem}.profile-setup-brand .profile-login-back svg{width:15px;height:15px}}
+
+.private-active-controls .call-speaker-volume{grid-column:1/-1;display:grid;grid-template-columns:auto auto minmax(60px,1fr) auto;align-items:center;gap:8px;min-width:0;padding:2px 2px 5px;font-size:10px;font-weight:800;opacity:.9}
+.private-active-controls .call-speaker-volume input{width:100%;min-width:48px;margin:0;accent-color:var(--primary);cursor:pointer}
+.private-active-controls .call-speaker-volume input:focus-visible{outline:2px solid var(--primary);outline-offset:3px;border-radius:6px}
+.private-active-controls .call-speaker-volume output{min-width:34px;text-align:right;font-variant-numeric:tabular-nums;opacity:.75}
+
+/* Keep failed sends visible and operable without taking focus away from the composer. */
+.public-send-status{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:min(78%,560px);margin:5px 8px 10px auto;padding:8px 10px;border:1px solid #9f4152;border-radius:11px;background:#2b141b;color:#fecaca;font-size:.76rem;line-height:1.4;overflow-wrap:anywhere}
+.public-send-status.sending{justify-content:flex-start;border-color:#47618c;background:#111b2b;color:#dbeafe}
+.public-send-status>span{min-width:0}
+.public-send-status.failed>span{display:grid;gap:2px}
+.public-send-status.failed strong{color:#fff;font-weight:800}
+.public-send-status.failed button{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:none;min-height:36px;padding:6px 10px;border:1px solid #ef8494;border-radius:9px;background:#7f1d1d;color:#fff;font-size:.7rem;font-weight:850;letter-spacing:.035em}
+.public-send-status.failed button:hover:not(:disabled){background:#991b1b}
+.public-send-status.failed button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.public-send-status.failed button:disabled{opacity:.7;cursor:wait}
+.profile-intro-disclosure{margin-top:15px;border:1px solid rgba(164,184,222,.16);border-radius:13px;background:rgba(255,255,255,.025)}
+.profile-intro-disclosure>summary,.profile-rules-disclosure>summary{display:flex;align-items:center;gap:8px;min-height:44px;padding:9px 11px;border-radius:12px;color:#e8efff;font-size:.84rem;font-weight:780;line-height:1.35;list-style:none;cursor:pointer}
+.profile-intro-disclosure>summary::-webkit-details-marker,.profile-rules-disclosure>summary::-webkit-details-marker{display:none}
+.profile-intro-disclosure>summary::after,.profile-rules-disclosure>summary::after{content:'+';margin-left:auto;color:var(--accent,#22d3ee);font-size:1.15rem;font-weight:700}
+.profile-intro-disclosure[open]>summary::after,.profile-rules-disclosure[open]>summary::after{content:'−'}
+.profile-intro-disclosure>summary small,.profile-rules-disclosure>summary small{color:#cbd5e1;font-size:.72rem;font-weight:550}
+.profile-intro-disclosure>summary:focus-visible,.profile-rules-disclosure>summary:focus-visible{outline:3px solid color-mix(in srgb,var(--accent,#22d3ee) 72%,white);outline-offset:2px}
+.profile-intro-fields{padding:0 11px 12px}
+.profile-intro-fields>label{display:block;margin:9px 0 6px;color:#d9e2f1;font-size:.8rem;font-weight:700}
+.profile-intro-fields>label:first-child{margin-top:0}
+.profile-rules-disclosure>summary{min-height:38px;padding:4px 0;font-size:.86rem}
+.profile-rules-disclosure>summary svg{flex:none;color:var(--accent,#22d3ee)}
+.profile-rules-disclosure ul{padding-left:20px;margin:9px 0 0;color:#e2e8f0;line-height:1.55;font-size:.8rem}
+.profile-rules-disclosure li+li{margin-top:3px}
+.profile-setup-grid>.theme-card .agree{margin-top:11px;color:#f1f5f9}
+.profile-setup-grid>.theme-card .agree input{flex:none;min-width:20px;min-height:20px;accent-color:var(--accent,#22d3ee)}
+.profile-setup-grid>.theme-card>.primary-btn:disabled,.account-access-card .account-login-btn:disabled{opacity:1;color:#fff;background:linear-gradient(135deg,#43307a,#155b71);filter:saturate(.78);box-shadow:none;cursor:not-allowed}
+.account-access-card .account-login-btn:disabled:focus-visible,.profile-setup-grid>.theme-card>.primary-btn:disabled:focus-visible{outline:3px solid #fff;outline-offset:3px}
+@media(max-width:600px){.profile-intro-disclosure{margin-top:13px}.profile-intro-disclosure>summary,.profile-rules-disclosure>summary{min-height:46px}.profile-rules-disclosure ul{font-size:.78rem}.profile-setup-grid>.theme-card .agree{align-items:flex-start}.public-send-status{max-width:calc(100% - 32px);margin-left:auto;margin-right:8px}}
+@media(max-width:380px){.public-send-status{align-items:flex-start;gap:7px;padding:8px;font-size:.72rem}.public-send-status.failed button{min-height:34px;padding-inline:8px}.profile-rules-disclosure>summary{gap:6px;font-size:.78rem}.profile-rules-disclosure>summary small{font-size:.65rem}}

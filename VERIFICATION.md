@@ -1,52 +1,32 @@
-# Zynyro — Verification Report
+# Zynyro Verification Report
 
-Date: 2026-09-28
+Date: 2026-10-14
 
-## Static verification
+## Local code checks
 
-`node scripts/verify.mjs` completed successfully: **96 static checks passed**.
+- `npm.cmd run verify` — **180 static checks passed**.
+- `npm.cmd run build` — **production build passed** (`tsc -b` and Vite bundle).
+- `git diff --check` — **passed**.
+- Supabase Edge Function source audit found inconsistent service-key loading. All Edge Functions now use `supabase/functions/_shared/adminClient.ts`, which accepts `SUPABASE_SECRET_KEYS` (including `default`, `service_role`, `serviceRole`, or `key`), `SUPABASE_SECRET_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`.
+- Public text send uses a stable request UUID and a database idempotency RPC. Failed public text sends are saved per account in browser storage and can be retried after reload. Realtime receives public inserts, with refresh fallback when database-change subscriptions are degraded.
+- Call source requests browser echo cancellation and noise suppression, warns when the browser does not apply them, and includes speaker-volume controls and early ICE candidate buffering.
 
-The checks cover the existing public/private chat, voice-message, reactions, replies, presence, friends, and database safeguards, plus:
+## Remaining live verification
 
-- Friends 1:1 WebRTC call UI and signaling flow
-- Incoming call, accept/decline, connected/calling states, mic mute, speaker mute, and end-call controls
-- Server RPC validation that both users are accepted friends and neither has blocked the other
-- Persistent Friends call listener while the Friends panel is open
-- Unique database-assigned 10-digit numeric public UID and Settings display
-- Friends directory name and state/country display
-- Mojibake scan across application source files
+These checks need the deployed Supabase project and real browser sessions/devices, so they were not claimed as passed here:
 
-## Production build
+- Send and receive text between two separate accounts, including retry after disconnect and reload.
+- Send and play voice messages on multiple browsers/devices.
+- Start and receive Friends and Private calls, then test microphone mute, speaker volume, hang-up, and echo with real microphones and speakers.
+- Confirm the latest migration and Edge Functions are deployed to the linked Supabase project. The local environment could not confirm remote migration state.
+- Inspect rendered layout at phone, tablet, and desktop widths. The local dev server at `127.0.0.1:5173` was not running during this scan, and the in-app browser was unavailable.
 
-A production build could **not** be completed in this environment because npm dependencies could not be installed.
+## Call network limitation
 
-Attempted:
+Friends and Private calls currently configure a public STUN server without a TURN relay. Calls can fail on restrictive NAT, firewall, or corporate/mobile networks. Browser echo cancellation also depends on the user's audio hardware and browser. A TURN service and real-device audio testing are needed before claiming calls work on every network or echo is eliminated.
 
-```powershell
-npm ci --ignore-scripts --no-audit --no-fund
-npm install --offline --ignore-scripts --no-audit --no-fund
-```
+## Before release
 
-The first command timed out; the offline attempt failed because the required package tarballs were not cached. A global TypeScript check also could not run because the project's installed type definitions and packages are unavailable. Therefore this report does **not** claim that `npm run build` passed.
-
-Before deployment, run on Windows in the project folder:
-
-```powershell
-npm.cmd install
-npm.cmd run verify
-npm.cmd run build
-```
-
-## Required Supabase migration
-
-Apply this new migration before testing the new Friends features:
-
-```text
-supabase/migrations/20260928120000_friends_calls_and_public_uid.sql
-```
-
-It assigns each existing profile a unique numeric UID, sets the default for new profiles, adds a restricted Friends directory RPC, and adds a server-side call eligibility check. The migration is included in the ZIP but has not been applied to the remote Supabase project by this packaging step.
-
-## Voice-call network note
-
-Friends calls use WebRTC audio and Supabase Realtime signaling, with a public STUN server. Calls may not connect on some restrictive mobile/corporate networks without a TURN server. Calls are intended for friends who are online with the Friends panel open to receive the incoming-call prompt.
+1. Link the intended Supabase project and run `supabase db push` so all migrations, including `20261014120000_public_message_idempotency.sql`, are applied.
+2. Deploy the updated Edge Functions so the shared service-key loader and message idempotency flow are active.
+3. Test with two independent accounts and devices. Confirm message persistence/retry, voice delivery/playback, calls, and responsive layouts before publishing.

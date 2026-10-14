@@ -1,13 +1,6 @@
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createAdminClient } from '../_shared/adminClient.ts';
 
-const secretKeys = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') ?? '{}');
-const serviceKey = secretKeys.default as string | undefined;
-const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-if (!serviceKey || !supabaseUrl) throw new Error('Supabase service credentials are missing.');
-
-const admin = createClient(supabaseUrl, serviceKey, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+const admin = createAdminClient();
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',

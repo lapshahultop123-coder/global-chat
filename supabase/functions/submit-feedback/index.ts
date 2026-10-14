@@ -1,19 +1,6 @@
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createOptionalAdminClient } from '../_shared/adminClient.ts';
 
-const rawSecret = Deno.env.get('SUPABASE_SECRET_KEYS')
-  || Deno.env.get('SUPABASE_SECRET_KEY')
-  || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-  || '';
-let serviceKey = rawSecret;
-try {
-  const parsed = JSON.parse(rawSecret);
-  serviceKey = parsed.default || parsed.service_role || parsed.key || rawSecret;
-} catch {}
-
-const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-const admin = serviceKey
-  ? createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
-  : null;
+const admin = createOptionalAdminClient();
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

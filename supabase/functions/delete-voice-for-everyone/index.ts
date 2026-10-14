@@ -1,9 +1,6 @@
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createAdminClient } from '../_shared/adminClient.ts';
 
-const K = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')!);
-const admin = createClient(Deno.env.get('SUPABASE_URL')!, K.default, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+const admin = createAdminClient();
 
 const C = {
   'Access-Control-Allow-Origin': '*',

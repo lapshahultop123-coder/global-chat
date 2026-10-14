@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Phone, PhoneCall, PhoneOff, Mic, MicOff, Volume2, VolumeX, X, Users, ShieldOff, ShieldCheck, CheckSquare, Square } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { AVATARS } from './data/catalog';
-import { claimVoiceCall, ownsVoiceCall, releaseVoiceCall, requestVoiceCallStream } from './callAudio';
+import { claimVoiceCall, flushCallIceCandidates, ownsVoiceCall, queueCallIceCandidate, releaseVoiceCall, requestVoiceCallStream, type PendingCallIce } from './callAudio';
 
 const ICE_SERVERS: RTCConfiguration = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -28,6 +28,7 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
   const [callStatus,setCallStatus]=useState<'idle'|'calling'|'connecting'|'connected'|'ended'>('idle');
   const [muted,setMuted]=useState(false);
   const [speakerMuted,setSpeakerMuted]=useState(false);
+  const [speakerVolume,setSpeakerVolume]=useState(0.6);
   const [selected,setSelected]=useState<string[]>([]);
   const [error,setError]=useState('');
   const [remoteStreams,setRemoteStreams]=useState<Record<string,MediaStream>>({});
@@ -45,6 +46,9 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
   const callOwnerRef=useRef(Symbol('private-voice-call'));
   const callStartingRef=useRef(false);
   const localStreamRequestRef=useRef<Promise<MediaStream>|null>(null);
+  const peerRequestsRef=useRef<Record<string,Promise<RTCPeerConnection>>>({});
+  const pendingIceRef=useRef<PendingCallIce>(new Map());
+  const offerPendingRef=useRef<Set<string>>(new Set());
 
   const loadMembers=useCallback(async()=>{
     const {data,error}=await supabase.rpc('get_private_call_members',{p_room_id:roomId});
@@ -65,6 +69,9 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
   const clearPeers=useCallback(()=>{
     Object.values(peersRef.current).forEach(pc=>{try{pc.onicecandidate=null;pc.ontrack=null;pc.close()}catch{}});
     peersRef.current={};
+    peerRequestsRef.current={};
+    pendingIceRef.current.clear();
+    offerPendingRef.current.clear();
     setRemoteStreams({});
   },[]);
 
@@ -79,7 +86,7 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
     localStreamRef.current=null;
     localStreamRequestRef.current=null;
     await leaveCallChannel();
-    callRef.current=null;
+    callRef.current=null;incomingRef.current=null;
     if(mountedRef.current){setActiveCall(null);setIncoming(null);setMuted(false);setSpeakerMuted(false);setCallStatus('idle');}
   },[clearPeers,leaveCallChannel]);
 
@@ -105,35 +112,51 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
   },[]);
 
   const ensurePeer=useCallback(async(remoteId:string)=>{
-    if(peersRef.current[remoteId])return peersRef.current[remoteId];
-    const pc=new RTCPeerConnection(ICE_SERVERS);
-    peersRef.current[remoteId]=pc;
-    const stream=await ensureLocalStream();
-    const audioTrack=stream.getAudioTracks().find(track=>track.readyState==='live');
-    if(!audioTrack)throw new Error('The microphone track ended. Please retry the call.');
-    if(!pc.getSenders().some(sender=>sender.track?.id===audioTrack.id))pc.addTrack(audioTrack,stream);
-    pc.onicecandidate=e=>{if(e.candidate)sendCallEvent('ice',{from:currentUserId,to:remoteId,candidate:e.candidate});};
-    pc.ontrack=e=>{
-      if(e.track.kind!=='audio')return;
-      const s=e.streams[0]||new MediaStream([e.track]);
-      setRemoteStreams(prev=>prev[remoteId]===s?prev:{...prev,[remoteId]:s});
-    };
-    pc.onconnectionstatechange=()=>{
-      if(pc.connectionState==='failed'||pc.connectionState==='closed'){
-        setRemoteStreams(prev=>{const next={...prev};delete next[remoteId];return next;});
-      }
-      const anyConnected=Object.values(peersRef.current).some(x=>x.connectionState==='connected');
-      if(anyConnected)setCallStatus('connected');
-    };
-    return pc;
+    const existing=peersRef.current[remoteId];
+    if(existing&&existing.connectionState!=='closed')return existing;
+    const pending=peerRequestsRef.current[remoteId];
+    if(pending)return pending;
+    const request=(async()=>{
+      const stream=await ensureLocalStream();
+      const audioTrack=stream.getAudioTracks().find(track=>track.readyState==='live');
+      if(!audioTrack)throw new Error('The microphone track ended. Please retry the call.');
+      if(!ownsVoiceCall(callOwnerRef.current))throw new Error('The call ended before the peer connection was ready.');
+      const pc=new RTCPeerConnection(ICE_SERVERS);
+      if(!pc.getSenders().some(sender=>sender.track?.id===audioTrack.id))pc.addTrack(audioTrack,stream);
+      peersRef.current[remoteId]=pc;
+      pc.onicecandidate=e=>{if(e.candidate)sendCallEvent('ice',{from:currentUserId,to:remoteId,candidate:e.candidate});};
+      pc.ontrack=e=>{
+        if(e.track.kind!=='audio')return;
+        const s=e.streams[0]||new MediaStream([e.track]);
+        setRemoteStreams(prev=>prev[remoteId]===s?prev:{...prev,[remoteId]:s});
+      };
+      pc.onconnectionstatechange=()=>{
+        if(pc.connectionState==='failed'||pc.connectionState==='closed'){
+          if(peersRef.current[remoteId]===pc)delete peersRef.current[remoteId];
+          pendingIceRef.current.delete(remoteId);
+          setRemoteStreams(prev=>{const next={...prev};delete next[remoteId];return next;});
+          if(pc.connectionState==='failed')setError('Call connection failed. Check the network, then restart the call.');
+        }
+        const anyConnected=Object.values(peersRef.current).some(x=>x.connectionState==='connected');
+        if(anyConnected)setCallStatus('connected');
+      };
+      return pc;
+    })();
+    peerRequestsRef.current[remoteId]=request;
+    try{return await request}finally{if(peerRequestsRef.current[remoteId]===request)delete peerRequestsRef.current[remoteId]}
   },[currentUserId,ensureLocalStream,sendCallEvent]);
 
   const maybeOffer=useCallback(async(remoteId:string)=>{
-    if(currentUserId>=remoteId)return;
-    const pc=await ensurePeer(remoteId);
-    const offer=await pc.createOffer({offerToReceiveAudio:true});
-    await pc.setLocalDescription(offer);
-    sendCallEvent('offer',{from:currentUserId,to:remoteId,description:offer});
+    if(currentUserId>=remoteId||offerPendingRef.current.has(remoteId))return;
+    offerPendingRef.current.add(remoteId);
+    try{
+      const pc=await ensurePeer(remoteId);
+      if(pc.signalingState!=='stable')return;
+      const offer=await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      sendCallEvent('offer',{from:currentUserId,to:remoteId,description:pc.localDescription||offer});
+    }catch(error){setError(error instanceof Error?error.message:'Could not start the voice call.')}
+    finally{offerPendingRef.current.delete(remoteId)}
   },[currentUserId,ensurePeer,sendCallEvent]);
 
   const joinCallChannel=useCallback(async(call:ActiveCall)=>{
@@ -147,26 +170,27 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
     ch.on('broadcast' as any,{event:'join-call'},({payload}:any)=>{if(payload?.userId!==currentUserId)void maybeOffer(payload.userId);});
     ch.on('broadcast' as any,{event:'offer'},async({payload}:any)=>{
       if(payload?.to!==currentUserId||!payload?.description)return;
-      try{const pc=await ensurePeer(payload.from);await pc.setRemoteDescription(payload.description);const answer=await pc.createAnswer();await pc.setLocalDescription(answer);sendCallEvent('answer',{from:currentUserId,to:payload.from,description:answer});}catch(e:any){setError(e?.message||'Could not establish the voice call.');}
+      try{const pc=await ensurePeer(payload.from);await pc.setRemoteDescription(payload.description);await flushCallIceCandidates(pendingIceRef.current,payload.from,pc);const answer=await pc.createAnswer();await pc.setLocalDescription(answer);sendCallEvent('answer',{from:currentUserId,to:payload.from,description:pc.localDescription||answer});}catch(e:any){setError(e?.message||'Could not establish the voice call.');}
     });
     ch.on('broadcast' as any,{event:'answer'},async({payload}:any)=>{
       if(payload?.to!==currentUserId||!payload?.description)return;
       const pc=peersRef.current[payload.from];if(!pc)return;
-      try{await pc.setRemoteDescription(payload.description);}catch(e:any){setError(e?.message||'Could not complete the voice call.');}
+      try{await pc.setRemoteDescription(payload.description);await flushCallIceCandidates(pendingIceRef.current,payload.from,pc);}catch(e:any){setError(e?.message||'Could not complete the voice call.');}
     });
     ch.on('broadcast' as any,{event:'ice'},async({payload}:any)=>{
-      if(payload?.to!==currentUserId||!payload?.candidate)return;
-      const pc=peersRef.current[payload.from];if(!pc)return;
+      if(payload?.to!==currentUserId||!payload?.from||!payload?.candidate)return;
+      const pc=peersRef.current[payload.from];
+      if(!pc||!pc.remoteDescription){queueCallIceCandidate(pendingIceRef.current,payload.from,payload.candidate);return;}
       try{await pc.addIceCandidate(payload.candidate);}catch{}
     });
     ch.on('broadcast' as any,{event:'end-call'},async({payload}:any)=>{
       if(payload?.from!==currentUserId){await cleanupCall();}
     });
     ch.on('broadcast' as any,{event:'leave-call'},({payload}:any)=>{
-      if(payload?.userId&&peersRef.current[payload.userId]){try{peersRef.current[payload.userId].close()}catch{}delete peersRef.current[payload.userId];setRemoteStreams(prev=>{const next={...prev};delete next[payload.userId];return next;});}
+      if(payload?.userId&&peersRef.current[payload.userId]){try{peersRef.current[payload.userId].close()}catch{}delete peersRef.current[payload.userId];pendingIceRef.current.delete(payload.userId);offerPendingRef.current.delete(payload.userId);setRemoteStreams(prev=>{const next={...prev};delete next[payload.userId];return next;});}
     });
     callChannelRef.current=ch;
-    await new Promise<void>((resolve,reject)=>ch.subscribe((status:string)=>{if(status==='SUBSCRIBED')resolve();else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')reject(new Error('Call connection failed.'))}));
+    await new Promise<void>((resolve,reject)=>{const timeout=window.setTimeout(()=>reject(new Error('Call signaling timed out. Check your connection and retry.')),15000);ch.subscribe((status:string)=>{if(status==='SUBSCRIBED'){window.clearTimeout(timeout);resolve()}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){window.clearTimeout(timeout);reject(new Error('Call connection failed.'))}})});
     await ch.track({userId:currentUserId,name:currentUserName,joinedAt:new Date().toISOString()});
     await ch.send({type:'broadcast',event:'join-call',payload:{userId:currentUserId}});
   },[cleanupCall,currentUserId,currentUserName,ensurePeer,maybeOffer,sendCallEvent]);
@@ -204,14 +228,14 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
       if(!data?.[0]?.allowed)throw new Error('This call is blocked.');
       await ensureLocalStream();
       const call={id:inc.id,callerId:inc.callerId,callerName:inc.callerName,participantIds:inc.participantIds,startedAt:Date.now()};
-      callRef.current=call;setIncoming(null);setActiveCall(call);setCallStatus('connecting');
+      callRef.current=call;incomingRef.current=null;setIncoming(null);setActiveCall(call);setCallStatus('connecting');
       await joinCallChannel(call);
       if(roomChannelRef.current)void roomChannelRef.current.send({type:'broadcast',event:'call-accepted',payload:{callId:inc.id,userId:currentUserId}});
-    }catch(e:any){setError(e?.message||'Could not join the voice call.');setIncoming(null);await cleanupCall();}
+    }catch(e:any){setError(e?.message||'Could not join the voice call.');incomingRef.current=null;setIncoming(null);await cleanupCall();}
     finally{callStartingRef.current=false;}
   };
 
-  const declineCall=()=>{if(incoming&&roomChannelRef.current)void roomChannelRef.current.send({type:'broadcast',event:'call-declined',payload:{callId:incoming.id,userId:currentUserId}});setIncoming(null);};
+  const declineCall=()=>{if(incoming&&roomChannelRef.current)void roomChannelRef.current.send({type:'broadcast',event:'call-declined',payload:{callId:incoming.id,userId:currentUserId}});incomingRef.current=null;setIncoming(null);};
 
   const endCall=async()=>{const call=callRef.current;if(call){sendCallEvent('end-call',{from:currentUserId});if(roomChannelRef.current)void roomChannelRef.current.send({type:'broadcast',event:'call-cancelled',payload:{callId:call.id,from:currentUserId}});}await cleanupCall();};
   const toggleMute=()=>{const next=!muted;localStreamRef.current?.getAudioTracks().forEach(t=>{t.enabled=!next});setMuted(next);};
@@ -239,12 +263,12 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
     const ch=supabase.channel(`private-room-call-control-${roomId}`,{config:{broadcast:{self:false,ack:true}}});
     ch.on('broadcast' as any,{event:'call-invite'},({payload}:any)=>{
       if(!payload?.participantIds?.includes(currentUserId)||payload.callerId===currentUserId)return;
-      if(callRef.current||incoming){void ch.send({type:'broadcast',event:'call-declined',payload:{callId:payload.callId,userId:currentUserId}});return;}
-      setIncoming({id:payload.callId,callerId:payload.callerId,callerName:payload.callerName,participantIds:payload.participantIds});beep('ring');
+      if(callRef.current||incomingRef.current){void ch.send({type:'broadcast',event:'call-declined',payload:{callId:payload.callId,userId:currentUserId}});return;}
+      const call={id:payload.callId,callerId:payload.callerId,callerName:payload.callerName,participantIds:payload.participantIds};incomingRef.current=call;setIncoming(call);beep('ring');
     });
     ch.on('broadcast' as any,{event:'call-accepted'},({payload}:any)=>{if(callRef.current?.id===payload?.callId)setCallStatus('connecting');});
     ch.on('broadcast' as any,{event:'call-declined'},({payload}:any)=>{if(callRef.current?.id===payload?.callId&&payload.userId)setError(`${remoteNames[payload.userId]||'A member'} declined the call.`);});
-    ch.on('broadcast' as any,{event:'call-cancelled'},({payload}:any)=>{if(incomingRef.current?.id===payload?.callId)setIncoming(null);});
+    ch.on('broadcast' as any,{event:'call-cancelled'},({payload}:any)=>{if(incomingRef.current?.id===payload?.callId){incomingRef.current=null;setIncoming(null);}});
     ch.subscribe();roomChannelRef.current=ch;
     return()=>{mountedRef.current=false;void supabase.removeChannel(ch);roomChannelRef.current=null;void cleanupCall();};
   },[roomId,currentUserId,beep,cleanupCall]);
@@ -275,7 +299,7 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
 
     {incoming&&<div className="private-call-backdrop" role="alertdialog" aria-modal="true"><div className="private-incoming-call"><div className="private-incoming-icon"><PhoneCall size={28}/></div><span className="private-call-kicker">INCOMING VOICE CALL</span><h3>{incoming.callerName}</h3><p>{incoming.participantIds.length>2?`Group call · ${incoming.participantIds.length} invited`: 'Private one-to-one call'}</p><div className="private-incoming-actions"><button className="private-call-decline" onClick={declineCall}><PhoneOff size={17}/> DECLINE</button><button className="private-call-accept" onClick={()=>void acceptCall()}><Phone size={17}/> ACCEPT</button></div></div></div>}
 
-    {activeCall&&<div className="private-active-call"><div className="private-active-call-head"><div><span>VOICE CALL</span><strong>{callStatus==='connected'?'CONNECTED':callStatus==='calling'?'CALLING...':callStatus==='connecting'?'CONNECTING...':'CALLING...'}</strong></div></div><div className="private-active-participants">{activeParticipants.map(id=><div key={id} className="private-active-person"><div className="private-active-avatar">{id===currentUserId?<Mic size={17}/>:<Users size={17}/>}</div><span>{id===currentUserId?'You':remoteNames[id]||'Member'}</span>{id!==currentUserId&&remoteStreams[id]&&<audio autoPlay playsInline muted={speakerMuted} ref={el=>{if(el){el.volume=0.8;if(el.srcObject!==remoteStreams[id])el.srcObject=remoteStreams[id]}}}/>}</div>)}</div><div className="private-active-controls"><button onClick={toggleMute} className={muted?'active':''} title={muted?'Turn microphone on':'Mute microphone'}>{muted?<MicOff size={18}/>:<Mic size={18}/>}<span>{muted?'MIC OFF':'MIC ON'}</span></button><button onClick={toggleSpeaker} className={speakerMuted?'active':''} title={speakerMuted?'Unmute call audio':'Mute call audio'}>{speakerMuted?<VolumeX size={18}/>:<Volume2 size={18}/>}<span>{speakerMuted?'SOUND OFF':'SOUND ON'}</span></button><button className="danger" onClick={()=>void endCall()}><PhoneOff size={18}/><span>END</span></button></div></div>}
+    {activeCall&&<div className="private-active-call"><div className="private-active-call-head"><div><span>VOICE CALL</span><strong>{callStatus==='connected'?'CONNECTED':callStatus==='calling'?'CALLING...':callStatus==='connecting'?'CONNECTING...':'CALLING...'}</strong></div></div><div className="private-active-participants">{activeParticipants.map(id=><div key={id} className="private-active-person"><div className="private-active-avatar">{id===currentUserId?<Mic size={17}/>:<Users size={17}/>}</div><span>{id===currentUserId?'You':remoteNames[id]||'Member'}</span>{id!==currentUserId&&remoteStreams[id]&&<audio autoPlay playsInline muted={speakerMuted} ref={el=>{if(el){el.volume=speakerVolume;if(el.srcObject!==remoteStreams[id]){el.srcObject=remoteStreams[id];void el.play().catch(()=>setError('Call audio is blocked by your browser. Check site sound permissions.'))}}}}/>}</div>)}</div><div className="private-active-controls"><label className="call-speaker-volume"><Volume2 size={15}/><span>Speaker</span><input type="range" min="0.2" max="1" step="0.05" value={speakerVolume} aria-label="Call speaker volume" onChange={event=>setSpeakerVolume(Number(event.target.value))}/><output>{Math.round(speakerVolume*100)}%</output></label><button onClick={toggleMute} className={muted?'active':''} title={muted?'Turn microphone on':'Mute microphone'}>{muted?<MicOff size={18}/>:<Mic size={18}/>}<span>{muted?'MIC OFF':'MIC ON'}</span></button><button onClick={toggleSpeaker} className={speakerMuted?'active':''} title={speakerMuted?'Unmute call audio':'Mute call audio'}>{speakerMuted?<VolumeX size={18}/>:<Volume2 size={18}/>}<span>{speakerMuted?'SOUND OFF':'SOUND ON'}</span></button><button className="danger" onClick={()=>void endCall()}><PhoneOff size={18}/><span>END</span></button></div></div>}
     {activeCall&&error&&<div className="private-call-error" role="alert" style={{position:'fixed',right:18,bottom:150,zIndex:5101,width:'min(370px,calc(100vw - 36px))'}}>{error}</div>}
   </>;
 }

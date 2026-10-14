@@ -1,9 +1,6 @@
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createAdminClient } from '../_shared/adminClient.ts';
 
-const rawSecret=Deno.env.get('SUPABASE_SECRET_KEYS')||Deno.env.get('SUPABASE_SECRET_KEY')||Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'';
-let serviceKey=rawSecret;
-try{const parsed=JSON.parse(rawSecret);serviceKey=parsed.default||parsed.service_role||parsed.key||rawSecret}catch{}
-const admin=createClient(Deno.env.get('SUPABASE_URL')!,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
+const admin=createAdminClient();
 
 const C={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(x:unknown,s=200)=>new Response(JSON.stringify(x),{status:s,headers:{...C,'Content-Type':'application/json'}});
