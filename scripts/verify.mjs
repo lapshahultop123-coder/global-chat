@@ -236,6 +236,8 @@ ok('Public reconnect retries confirm a server message before removing queued tex
 ok('Chat controls and new dialogs include narrow-screen layout rules',css.includes('.feature-modal')&&css.includes('@media(max-width:560px)')&&css.includes('@media(max-width:600px)')&&css.includes('friend-organization-controls'));
 ok('Reduced-motion rules and private lock animation asset are present',css.includes('prefers-reduced-motion')&&privateLockVideoPattern.test(app)&&fs.existsSync(path.join(root,'public/animations/private-chat-lock-bubbles.webm')));
 
+ok('Login UID autofill keeps the input surface color consistent',css.includes('.account-access-input-wrap:has(>input:-webkit-autofill)')&&css.includes('input:-webkit-autofill:focus')&&css.includes('-webkit-text-fill-color:#f6f8ff'));
+
 const edgeFunctionsRoot=path.join(root,'supabase/functions'); const edgeFunctions=fs.readdirSync(edgeFunctionsRoot,{withFileTypes:true}).filter(item=>item.isDirectory()&&item.name!=='_shared').map(item=>read('supabase/functions/'+item.name+'/index.ts')); const adminClient=read('supabase/functions/_shared/adminClient.ts'); ok('all Edge Functions share support for current and legacy Supabase service keys',adminClient.includes('SUPABASE_SECRET_KEYS')&&adminClient.includes('SUPABASE_SECRET_KEY')&&adminClient.includes('SUPABASE_SERVICE_ROLE_KEY')&&edgeFunctions.length>0&&edgeFunctions.every(source=>source.includes('../_shared/adminClient.ts')));
 
 let failed=0; for(const [name,passed] of checks){console.log(`${passed?'PASS':'FAIL'}  ${name}`);if(!passed)failed++;}

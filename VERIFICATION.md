@@ -4,12 +4,13 @@ Date: 2026-10-14
 
 ## Local code checks
 
-- `npm.cmd run verify` — **180 static checks passed**.
+- `npm.cmd run verify` — **181 static checks passed**.
 - `npm.cmd run build` — **production build passed** (`tsc -b` and Vite bundle).
 - `git diff --check` — **passed**.
 - Supabase Edge Function source audit found inconsistent service-key loading. All Edge Functions now use `supabase/functions/_shared/adminClient.ts`, which accepts `SUPABASE_SECRET_KEYS` (including `default`, `service_role`, `serviceRole`, or `key`), `SUPABASE_SECRET_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`.
 - Public text send uses a stable request UUID and a database idempotency RPC. Failed public text sends are saved per account in browser storage and can be retried after reload. Realtime receives public inserts, with refresh fallback when database-change subscriptions are degraded.
 - Call source requests browser echo cancellation and noise suppression, warns when the browser does not apply them, and includes speaker-volume controls and early ICE candidate buffering.
+- Login UID/password autofill styling overrides the browser highlight so the input fill matches the surrounding field.
 
 ## Remaining live verification
 
