@@ -1,10 +1,14 @@
 # Avatar artwork credits
 
-Avatar SVGs in `public/avatars/` are generated locally with DiceBear styles. Each SVG embeds its style attribution metadata.
+Avatar SVGs in `public/avatars/` are generated locally with DiceBear styles or original custom vector artwork. Each SVG embeds style attribution metadata.
+Chibi Pop is archived and hidden from the picker; its SVGs and IDs are retained so previously saved profiles keep working.
 DiceBear style definitions are individually licensed; see each license and source below.
 
 | Style | Creator | License | Source |
 | --- | --- | --- | --- |
+| Heartglass | Zynyro project | Original vector artwork | Created for Zynyro |
+| Moodglow | Zynyro project | Original vector artwork | Created for Zynyro |
+| Chibi Pop | Zynyro project | Original vector artwork | Created for Zynyro |
 | Initials | [DiceBear](https://www.dicebear.com) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [Initials](https://www.dicebear.com) |
 | Adventurer | [Lisa Wischofsky](https://www.instagram.com/lischi_art/) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | [Adventurer](https://www.figma.com/community/file/1184595184137881796) |
 | Adventurer Neutral | [Lisa Wischofsky](https://www.instagram.com/lischi_art/) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | [Adventurer Neutral](https://www.figma.com/community/file/1184595184137881796) |

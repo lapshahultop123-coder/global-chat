@@ -11,7 +11,7 @@ Production-oriented single-room public chat built with React + Vite + Supabase.
 - **Security:** Row Level Security on every exposed table; direct message inserts are blocked
 - **Country/subdivision data:** `iso-3166` package, using ISO 3166-1 assigned countries and ISO 3166-2 subdivisions
 - **No uploads:** no file input, camera, gallery, or image upload path exists
-- **Avatars:** exactly 100 fixed local image avatars; no avatar emoji text is used by the website UI
+- **Avatars:** 1,181 selectable local SVG avatars across 34 picker styles, including 33 illustrated styles plus A–Z Initials; archived Chibi Pop assets remain stored for existing profile compatibility
 
 Supabase supports anonymous sign-ins without collecting PII, and authenticated anonymous users can be protected with RLS.
 
@@ -99,7 +99,7 @@ The project deliberately uses the `iso-3166` dataset rather than a hand-written 
 
 - One global room only
 - No DMs/private chat/groups/admin dashboard/online-user list
-- 100 fixed avatar IDs; no upload UI
+- 1,181 selectable local avatar IDs; archived Chibi Pop IDs remain available for existing profiles; no upload UI
 - 25 fixed themes; no custom themes/backgrounds
 - Text-only messages
 - Curated emoji picker

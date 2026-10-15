@@ -39,7 +39,7 @@ function validProfile(profile: any) {
   const hasSubdivisions = iso31662.some(item => item.code.startsWith(`${profile?.country}-`));
   const validSubdivision = hasSubdivisions ? !!subdivision : profile?.subdivision === '';
   return !!country && validSubdivision && Number.isInteger(profile?.avatarId) && profile.avatarId >= 1 &&
-    profile.avatarId <= 1262 && typeof profile?.name === 'string' && profile.name.trim().length >= 2 &&
+    profile.avatarId <= 1448 && typeof profile?.name === 'string' && profile.name.trim().length >= 2 &&
     profile.name.trim().length <= 32 && profile.agreed === true;
 }
 

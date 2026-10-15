@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     const validSubdivision = hasSubdivisions ? !!s : p.subdivision === '';
     const profileIntro = typeof p.profileIntro === 'string' ? p.profileIntro.trim() : '';
     const profileIntroVisibility = ['everyone', 'friends', 'hidden'].includes(p.profileIntroVisibility) ? p.profileIntroVisibility : 'hidden';
-    if (!c || !validSubdivision || !Number.isInteger(p.avatarId) || p.avatarId < 1 || p.avatarId > 1262 || !themes.includes(p.themeId) || typeof p.name !== 'string' || p.name.trim().length < 2 || p.name.trim().length > 32 || profileIntro.length > 80 || p.agreed !== true) return json({ error: 'Invalid profile.' }, 400);
+    if (!c || !validSubdivision || !Number.isInteger(p.avatarId) || p.avatarId < 1 || p.avatarId > 1448 || !themes.includes(p.themeId) || typeof p.name !== 'string' || p.name.trim().length < 2 || p.name.trim().length > 32 || profileIntro.length > 80 || p.agreed !== true) return json({ error: 'Invalid profile.' }, 400);
     const { error: up } = await admin.from('profiles').upsert({ user_id: user.id, name: p.name.trim(), country: p.country, subdivision: p.subdivision, show_country: p.showCountry !== false, show_subdivision: p.showSubdivision !== false, profile_intro: profileIntro, profile_intro_visibility: profileIntroVisibility, avatar_id: p.avatarId, theme_id: p.themeId, agreed: true, updated_at: new Date().toISOString() });
     if (up) return json({ error: 'Could not save profile.' }, 500);
     return json({ ok: true });

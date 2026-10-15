@@ -303,5 +303,20 @@
     "name": "Weave",
     "slug": "weave",
     "count": 8
+  },
+  {
+    "name": "Heartglass",
+    "slug": "heartglass",
+    "count": 0
+  },
+  {
+    "name": "Moodglow",
+    "slug": "moodglow",
+    "count": 0
+  },
+  {
+    "name": "Chibi Pop",
+    "slug": "chibi-pop",
+    "count": 0
   }
 ]

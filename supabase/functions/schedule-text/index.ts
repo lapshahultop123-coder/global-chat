@@ -21,7 +21,7 @@ Deno.serve(async(req)=>{
   const subdivision=iso31662.find(x=>x.code===profile.subdivision&&x.code.startsWith(`${profile.country}-`));
   const hasSubdivisions=iso31662.some(x=>x.code.startsWith(`${profile.country}-`));
   const validSubdivision=hasSubdivisions?!!subdivision:profile.subdivision==='';
-  if(!country||!validSubdivision||!profile.agreed||typeof profile.name!=='string'||profile.name.trim().length<2||profile.name.trim().length>32||!Number.isInteger(profile.avatar_id)||profile.avatar_id<1||profile.avatar_id>1262)return json({error:'Your profile information is invalid. Please update it.'},400);
+  if(!country||!validSubdivision||!profile.agreed||typeof profile.name!=='string'||profile.name.trim().length<2||profile.name.trim().length>32||!Number.isInteger(profile.avatar_id)||profile.avatar_id<1||profile.avatar_id>1448)return json({error:'Your profile information is invalid. Please update it.'},400);
   const payload=await req.json();
   const context=payload.context;
   const targetId=typeof payload.targetId==='string'?payload.targetId:null;
