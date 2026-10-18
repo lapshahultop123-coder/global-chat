@@ -4046,3 +4046,53 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .settings-panel input:not([type=checkbox]):not([type=radio]):not([type=range]),.settings-panel textarea,.settings-panel select{color:#f3f7ff;background-color:color-mix(in srgb,var(--surface) 86%,#000);border-color:color-mix(in srgb,var(--primary) 24%,rgba(255,255,255,.14))}
 .settings-panel select option{color:#f3f7ff;background:#101827}
 .settings-panel input:focus-visible,.settings-panel textarea:focus-visible,.settings-panel select:focus-visible,.settings-panel .segmented button:focus-visible{outline:2px solid color-mix(in srgb,var(--accent) 76%,#fff);outline-offset:2px}
+
+/* Keep long-message expansion controls below the body and readable on every chat theme. */
+.public-message .private-bubble.has-long-text{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) max-content;
+  align-items:end!important;
+  justify-content:stretch!important;
+  gap:4px 8px!important;
+}
+.public-message .private-bubble.has-long-text>.safe-message-text{
+  grid-column:1/-1;
+  display:block;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.public-message .private-bubble.has-long-text>.read-more-btn{
+  grid-column:1;
+  justify-self:start;
+  align-self:center;
+  min-height:36px;
+  margin:4px 0 0!important;
+  padding:6px 12px;
+  border:1px solid rgba(103,232,249,.52);
+  border-radius:999px;
+  background:rgba(8,47,73,.78);
+  color:#d9f7ff;
+  font-size:.78em;
+  font-weight:750;
+  line-height:1.15;
+  text-decoration:none;
+  box-shadow:0 2px 8px rgba(2,8,23,.18);
+  transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+.public-message .private-bubble.has-long-text>.read-more-btn:hover{
+  border-color:#a5f3fc;
+  background:rgba(8,145,178,.46);
+  box-shadow:0 0 0 2px rgba(34,211,238,.13);
+  text-decoration:none;
+}
+.public-message .private-bubble.has-long-text>.read-more-btn:focus-visible{
+  outline:2px solid #a5f3fc;
+  outline-offset:2px;
+}
+.public-message .private-bubble.has-long-text>.message-time-cluster{
+  grid-column:2;
+  justify-self:end;
+  align-self:center;
+  margin:0!important;
+}
+@media(prefers-reduced-motion:reduce){.public-message .private-bubble.has-long-text>.read-more-btn{transition:none}}

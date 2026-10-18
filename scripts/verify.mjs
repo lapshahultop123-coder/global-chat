@@ -102,6 +102,8 @@ ok('private delete-for-me persists locally',/global-chat-private-local-deleted-v
 ok('private voice polling is only used while Realtime is degraded',/if\(!privateVoiceChangesReady\)void loadVoices\(\)/.test(app)&&/setInterval\(\(\)=>\{if\(!privateVoiceChangesReady\)void loadVoices\(\)\},5000\)/.test(app));
 ok('private realtime presence count',/presenceState\(\)/.test(app)&&/setPrivateOnline\(Object\.keys\(state\)\.length\)/.test(app));
 ok('public sent messages use mine alignment',/current\?['"]mine['"]/.test(app)&&/message-row\.mine/.test(css));
+ok('long public messages place Read more below the body with an accessible high-contrast control',app.includes('has-long-text')&&app.includes('aria-expanded={expanded}')&&css.includes('.public-message .private-bubble.has-long-text{')&&css.includes('grid-template-columns:minmax(0,1fr) max-content')&&css.includes('grid-column:1/-1')&&css.includes('grid-column:1;')&&css.includes('grid-column:2;')&&css.includes('color:#d9f7ff')&&css.includes('background:rgba(8,47,73,.78)'));
+ok('browser right-click menu is suppressed in the chat app while editable fields retain native menus',app.includes('onContextMenu={event=>{')&&app.includes("event.target.closest('input,textarea,select,[contenteditable=\"true\"],[role=\"textbox\"]')")&&app.includes('event.preventDefault()'));
 ok('public voice menu has MoreVertical icon',/MoreVertical/.test(app));
 ok('public/private typing indicators present',/Someone is typing/.test(app)&&/private-typing/.test(app)&&/event:'typing'/.test(app));
 ok('public/private recording indicators present',/Someone is recording/.test(app)&&/private-recording/.test(app)&&/event:'recording'/.test(app));
