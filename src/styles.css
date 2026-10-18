@@ -4018,3 +4018,11 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .settings-device-sessions .settings-logout-btn:disabled{cursor:wait;opacity:.78;box-shadow:none}
 @media(max-width:380px){.settings-device-sessions .settings-logout-btn{min-height:46px;gap:7px;padding-inline:9px;font-size:.7rem}}
 @media(prefers-reduced-motion:reduce){.settings-device-sessions .settings-logout-btn{transition:none}}
+
+/* Keep mobile Settings on one vertical scroller and avoid costly fixed-layer blur. */
+@media(max-width:760px){
+  .modal-backdrop{background:rgba(2,6,23,.78);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .settings-panel{-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+  .settings-panel-head,.settings-actions{background:var(--surface);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .settings-panel .avatar-grid{max-height:none;overflow:visible;overscroll-behavior:auto}
+}
