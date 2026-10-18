@@ -111,6 +111,9 @@ ok('private voice playback prepares audio before the next tap without changing b
 ok('public voice delete-for-everyone removes the row optimistically and restores it on failure',app.includes('pendingVoiceDeleteIdsRef.current.add(v.id)')&&app.includes('setVoiceMessages(prev=>prev.filter(x=>x.id!==v.id))')&&app.includes('Could not delete this voice message. Please try again.'));
 ok('private voice local-delete filter survives refresh',/filter\(v=>!localDeleted\['v:'\+v\.id\]\)/.test(app));
 ok('header search/clear/settings menu',/header-more-menu/.test(app)&&/Search/.test(app)&&/Clear Chat/.test(app)&&/Settings/.test(app)&&/MoreVertical/.test(app));
+const privateHeaderButtonRule=css.match(/\.private-top-btn\s*\+\s*\.private-top-btn\s*\{([^}]*)\}/);
+ok('adjacent mobile header action borders do not overlap',!!privateHeaderButtonRule&&/margin-left:\s*0(?:!important)?/.test(privateHeaderButtonRule[1])&&!/margin-left:\s*-\d/.test(privateHeaderButtonRule[1]));
+ok('mobile public voice and send controls have larger touch targets and icons',/\.composer:not\(\.private-composer\)>\.voice-btn,\s*\.composer:not\(\.private-composer\)>\.send-btn\{[^}]*width:48px;[^}]*min-height:48px/.test(css)&&/\.composer:not\(\.private-composer\)>\.voice-btn svg,\s*\.composer:not\(\.private-composer\)>\.send-btn svg\{width:22px;height:22px\}/.test(css)&&/\.composer:not\(\.private-composer\)>\.voice-btn,\s*\.composer:not\(\.private-composer\)>\.send-btn\{[^}]*width:46px;[^}]*min-height:46px/.test(css));
 
 ok('production build script',pkg.scripts?.build==='tsc -b && vite build');
 ok('typecheck configs present',fs.existsSync(path.join(root,'tsconfig.app.json'))&&fs.existsSync(path.join(root,'tsconfig.node.json')));

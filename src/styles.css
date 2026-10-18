@@ -603,9 +603,9 @@ html[data-theme="mono"] .send-btn svg{
   flex:none!important;
 }
 
-/* No space between JOIN and CREATE */
+/* Keep adjacent header controls visually separate at every viewport size. */
 .private-top-btn + .private-top-btn{
-  margin-left:-8px!important;
+  margin-left:0!important;
 }
 
 
@@ -3974,3 +3974,17 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 /* Keep browser autofill from painting a different color over the login input. */
 .account-access-input-wrap:has(>input:-webkit-autofill),.account-access-input-wrap:has(>input:autofill){background:#142a55}
 .account-access-card .account-access-input-wrap input:-webkit-autofill,.account-access-card .account-access-input-wrap input:-webkit-autofill:hover,.account-access-card .account-access-input-wrap input:-webkit-autofill:focus,.account-access-card .account-access-input-wrap input:-webkit-autofill:active,.account-access-card .account-access-input-wrap input:autofill{ -webkit-text-fill-color:#f6f8ff!important;caret-color:#f6f8ff;-webkit-box-shadow:0 0 0 1000px #142a55 inset!important;box-shadow:0 0 0 1000px #142a55 inset!important;transition:background-color 99999s ease-out 0s}
+
+/* Give the public chat voice and send actions comfortable touch targets on phones. */
+@media(max-width:600px){
+  .composer:not(.private-composer)>.voice-btn,
+  .composer:not(.private-composer)>.send-btn{flex:0 0 48px;width:48px;min-width:48px;height:48px;min-height:48px;border-radius:15px}
+  .composer:not(.private-composer)>.voice-btn svg,
+  .composer:not(.private-composer)>.send-btn svg{width:22px;height:22px}
+}
+@media(max-width:380px){
+  .composer:not(.private-composer)>.voice-btn,
+  .composer:not(.private-composer)>.send-btn{flex-basis:46px;width:46px;min-width:46px;height:46px;min-height:46px}
+  .composer:not(.private-composer)>.voice-btn svg,
+  .composer:not(.private-composer)>.send-btn svg{width:21px;height:21px}
+}
