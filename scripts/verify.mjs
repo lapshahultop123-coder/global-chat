@@ -162,6 +162,7 @@ ok('no release .env',!releaseAudit||!fs.existsSync(path.join(root,'.env')));
 const reactionLoader=app.slice(app.indexOf('const loadReactions'),app.indexOf('useEffect(()=>{void loadReactions',app.indexOf('const loadReactions')));
 ok('private reaction loader avoids per-reaction auth calls',!reactionLoader.includes('supabase.auth.getUser'));
 ok('public empty state uses a rotating globe with real country boundaries and respects reduced-motion settings',app.includes("import EarthGlobe from './EarthGlobe'")&&app.includes('<EarthGlobe/>')&&earth.includes('earth-map-layer')&&(earth.match(/href="\/world-countries\.svg"/g)||[]).length===3&&(earthMap.match(/<path d=/g)||[]).length>=200&&earthMap.includes('Natural Earth 1:50m Admin 0')&&css.includes('@keyframes earth-map-turn')&&css.includes('prefers-reduced-motion:reduce){.earth-map-layer{animation:none')&&!app.includes('earth-animation.mp4'));
+ok('public empty-state globe and text adapt to narrow and short displays',css.includes('.empty-earth-globe{width:clamp(120px,min(44vw,22dvh),180px)')&&css.includes('@media(max-height:560px){.message-list')&&css.includes('@media(max-width:380px){.empty')&&css.includes('text-wrap:balance'));
 
 
 ok('private room waits for auth before presence',/if\(authUserId&&privateRoom\?\.id\)void enterPrivateRoom\(privateRoom\)/.test(app));
