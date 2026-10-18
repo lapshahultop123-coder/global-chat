@@ -54,11 +54,11 @@ export const THEMES = [
   ['olive','Olive','#131509','#242710','#556b2f','#3f6212'],
   ['steel','Steel','#0b1016','#18212b','#475569','#334155'],
   ['twilight','Twilight','#10101c','#1d1d31','#4338ca','#6d28d9'],
-  ['blue-hour','Blue Hour Glow','#10172b','#17213e','#2563eb','#831843','linear-gradient(180deg,rgba(7,11,22,.22) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#222222 0%,#1b2b4f 28%,#376de0 56%,#9b62e8 79%,#e86ac5 100%)'],
-  ['violet-dawn','Violet Dawn','#100d22','#1d1736','#581c87','#701a75','linear-gradient(180deg,rgba(7,11,22,.22) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#222222 0%,#1e284b 29%,#3e63cf 53%,#865be6 76%,#d77adf 100%)'],
-  ['pink-horizon','Pink Horizon','#160e23','#241733','#be185d','#a21caf','linear-gradient(180deg,rgba(7,11,22,.22) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#202020 0%,#1e3157 30%,#3d68d9 54%,#bd5bcd 76%,#f472b6 100%)'],
-  ['rose-cosmos','Rose Cosmos','#180d21','#29172f','#a31858','#b91c74','linear-gradient(180deg,rgba(7,11,22,.22) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#212121 0%,#253052 28%,#456fe1 53%,#b54fc4 75%,#ff58b0 100%)'],
-  ['electric-dusk','Electric Dusk','#0c1426','#16213b','#273c9b','#712e83','linear-gradient(180deg,rgba(7,11,22,.22) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#1f1f1f 0%,#1f3156 30%,#3268de 55%,#8a55dc 78%,#d946ef 100%)']
+  ['blue-hour','Blue Hour Glow','#080e1c','#101a2d','#1e3a8a','#312e81','linear-gradient(180deg,rgba(7,11,22,.24) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#0a1020 0%,#102d5c 28%,#2464c1 56%,#574fa5 79%,#b45bb5 100%)'],
+  ['violet-dawn','Violet Dawn','#10091c','#211330','#7c3aed','#9333ea','linear-gradient(180deg,rgba(7,11,22,.24) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#10091c 0%,#37166d 28%,#772fc0 55%,#b452d0 78%,#ef9ad8 100%)'],
+  ['pink-horizon','Pink Horizon','#180b19','#2b1327','#be185d','#a21caf','linear-gradient(180deg,rgba(7,11,22,.24) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#1a0c20 0%,#4e1753 28%,#ad318b 55%,#e653b4 78%,#f8a2ca 100%)'],
+  ['rose-cosmos','Rose Cosmos','#1b0a12','#2c121c','#be123c','#c2410c','linear-gradient(180deg,rgba(7,11,22,.24) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#1b0a13 0%,#5b132e 28%,#b92749 55%,#f05a55 78%,#ffc18b 100%)'],
+  ['electric-dusk','Electric Dusk','#071517','#0d2525','#0f766e','#166534','linear-gradient(180deg,rgba(7,11,22,.24) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#071315 0%,#0a3e4a 28%,#057c90 55%,#19a99e 78%,#8bc34a 100%)']
 ].map(([id,name,bg,surface,primary,accent,wallpaper]) => ({id,name,bg,surface,primary,accent,wallpaper}));
 
 export const EMOJIS = [

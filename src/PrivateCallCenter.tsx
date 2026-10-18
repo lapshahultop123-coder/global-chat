@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Phone, PhoneCall, PhoneOff, Mic, MicOff, Volume2, VolumeX, X, Users, ShieldOff, ShieldCheck, CheckSquare, Square } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { AVATARS } from './data/catalog';
-import { claimVoiceCall, flushCallIceCandidates, ownsVoiceCall, queueCallIceCandidate, releaseVoiceCall, requestVoiceCallStream, type PendingCallIce } from './callAudio';
+import { claimVoiceCall, flushCallIceCandidates, ownsVoiceCall, queueCallIceCandidate, releaseVoiceCall, requestVoiceCallStream, startIncomingCallRingtone, stopIncomingCallRingtone, type PendingCallIce } from './callAudio';
 
 const ICE_SERVERS: RTCConfiguration = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -28,7 +28,7 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
   const [callStatus,setCallStatus]=useState<'idle'|'calling'|'connecting'|'connected'|'ended'>('idle');
   const [muted,setMuted]=useState(false);
   const [speakerMuted,setSpeakerMuted]=useState(false);
-  const [speakerVolume,setSpeakerVolume]=useState(0.6);
+  const [speakerVolume,setSpeakerVolume]=useState(0.42);
   const [selected,setSelected]=useState<string[]>([]);
   const [error,setError]=useState('');
   const [remoteStreams,setRemoteStreams]=useState<Record<string,MediaStream>>({});
@@ -49,6 +49,13 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
   const peerRequestsRef=useRef<Record<string,Promise<RTCPeerConnection>>>({});
   const pendingIceRef=useRef<PendingCallIce>(new Map());
   const offerPendingRef=useRef<Set<string>>(new Set());
+  const ringtoneOwnerRef=useRef(Symbol('private-call-ringtone'));
+
+  useEffect(()=>{
+    if(incoming&&sound)startIncomingCallRingtone(ringtoneOwnerRef.current,true);
+    else stopIncomingCallRingtone(ringtoneOwnerRef.current);
+    return()=>stopIncomingCallRingtone(ringtoneOwnerRef.current);
+  },[incoming?.id,sound]);
 
   const loadMembers=useCallback(async()=>{
     const {data,error}=await supabase.rpc('get_private_call_members',{p_room_id:roomId});
@@ -59,12 +66,6 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
   },[roomId,currentUserId]);
 
   useEffect(()=>{void loadMembers();},[loadMembers]);
-
-  const beep=useCallback((kind:'ring'|'end')=>{
-    if(!sound)return;
-    const src=kind==='ring'?'/sounds/receive.wav':'/sounds/send.wav';
-    const a=new Audio(src);a.volume=.38;void a.play().catch(()=>{});
-  },[sound]);
 
   const clearPeers=useCallback(()=>{
     Object.values(peersRef.current).forEach(pc=>{try{pc.onicecandidate=null;pc.ontrack=null;pc.close()}catch{}});
@@ -104,7 +105,7 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
       if(!ownsVoiceCall(owner)){stream.getTracks().forEach(track=>track.stop());throw new Error('Call was cancelled before the microphone was ready.');}
       localStreamRef.current=stream;
       const micSettings=stream.getAudioTracks()[0]?.getSettings();
-      if(micSettings?.echoCancellation===false||micSettings?.noiseSuppression===false||micSettings?.autoGainControl===true)setError('Your browser could not apply all echo-control settings. Use headphones or lower speaker volume to prevent echo.');
+      if(micSettings?.echoCancellation!==true||micSettings?.noiseSuppression===false||micSettings?.autoGainControl===true)setError('Echo reduction may be limited by this browser. Lower the call speaker volume or use headphones to prevent feedback.');
       return stream;
     }).finally(()=>{if(localStreamRequestRef.current===request)localStreamRequestRef.current=null});
     localStreamRequestRef.current=request;
@@ -264,14 +265,14 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
     ch.on('broadcast' as any,{event:'call-invite'},({payload}:any)=>{
       if(!payload?.participantIds?.includes(currentUserId)||payload.callerId===currentUserId)return;
       if(callRef.current||incomingRef.current){void ch.send({type:'broadcast',event:'call-declined',payload:{callId:payload.callId,userId:currentUserId}});return;}
-      const call={id:payload.callId,callerId:payload.callerId,callerName:payload.callerName,participantIds:payload.participantIds};incomingRef.current=call;setIncoming(call);beep('ring');
+      const call={id:payload.callId,callerId:payload.callerId,callerName:payload.callerName,participantIds:payload.participantIds};incomingRef.current=call;setIncoming(call);
     });
     ch.on('broadcast' as any,{event:'call-accepted'},({payload}:any)=>{if(callRef.current?.id===payload?.callId)setCallStatus('connecting');});
     ch.on('broadcast' as any,{event:'call-declined'},({payload}:any)=>{if(callRef.current?.id===payload?.callId&&payload.userId)setError(`${remoteNames[payload.userId]||'A member'} declined the call.`);});
     ch.on('broadcast' as any,{event:'call-cancelled'},({payload}:any)=>{if(incomingRef.current?.id===payload?.callId){incomingRef.current=null;setIncoming(null);}});
     ch.subscribe();roomChannelRef.current=ch;
     return()=>{mountedRef.current=false;void supabase.removeChannel(ch);roomChannelRef.current=null;void cleanupCall();};
-  },[roomId,currentUserId,beep,cleanupCall]);
+  },[roomId,currentUserId,cleanupCall]);
 
   useEffect(()=>()=>{void cleanupCall()},[cleanupCall]);
 
@@ -299,7 +300,7 @@ export default function PrivateCallCenter({roomId,currentUserId,currentUserName,
 
     {incoming&&<div className="private-call-backdrop" role="alertdialog" aria-modal="true"><div className="private-incoming-call"><div className="private-incoming-icon"><PhoneCall size={28}/></div><span className="private-call-kicker">INCOMING VOICE CALL</span><h3>{incoming.callerName}</h3><p>{incoming.participantIds.length>2?`Group call · ${incoming.participantIds.length} invited`: 'Private one-to-one call'}</p><div className="private-incoming-actions"><button className="private-call-decline" onClick={declineCall}><PhoneOff size={17}/> DECLINE</button><button className="private-call-accept" onClick={()=>void acceptCall()}><Phone size={17}/> ACCEPT</button></div></div></div>}
 
-    {activeCall&&<div className="private-active-call"><div className="private-active-call-head"><div><span>VOICE CALL</span><strong>{callStatus==='connected'?'CONNECTED':callStatus==='calling'?'CALLING...':callStatus==='connecting'?'CONNECTING...':'CALLING...'}</strong></div></div><div className="private-active-participants">{activeParticipants.map(id=><div key={id} className="private-active-person"><div className="private-active-avatar">{id===currentUserId?<Mic size={17}/>:<Users size={17}/>}</div><span>{id===currentUserId?'You':remoteNames[id]||'Member'}</span>{id!==currentUserId&&remoteStreams[id]&&<audio autoPlay playsInline muted={speakerMuted} ref={el=>{if(el){el.volume=speakerVolume;if(el.srcObject!==remoteStreams[id]){el.srcObject=remoteStreams[id];void el.play().catch(()=>setError('Call audio is blocked by your browser. Check site sound permissions.'))}}}}/>}</div>)}</div><div className="private-active-controls"><label className="call-speaker-volume"><Volume2 size={15}/><span>Speaker</span><input type="range" min="0.2" max="1" step="0.05" value={speakerVolume} aria-label="Call speaker volume" onChange={event=>setSpeakerVolume(Number(event.target.value))}/><output>{Math.round(speakerVolume*100)}%</output></label><button onClick={toggleMute} className={muted?'active':''} title={muted?'Turn microphone on':'Mute microphone'}>{muted?<MicOff size={18}/>:<Mic size={18}/>}<span>{muted?'MIC OFF':'MIC ON'}</span></button><button onClick={toggleSpeaker} className={speakerMuted?'active':''} title={speakerMuted?'Unmute call audio':'Mute call audio'}>{speakerMuted?<VolumeX size={18}/>:<Volume2 size={18}/>}<span>{speakerMuted?'SOUND OFF':'SOUND ON'}</span></button><button className="danger" onClick={()=>void endCall()}><PhoneOff size={18}/><span>END</span></button></div></div>}
+    {activeCall&&<div className="private-active-call"><div className="private-active-call-head"><div><span>VOICE CALL</span><strong>{callStatus==='connected'?'CONNECTED':callStatus==='calling'?'CALLING...':callStatus==='connecting'?'CONNECTING...':'CALLING...'}</strong></div></div><div className="private-active-participants">{activeParticipants.map(id=><div key={id} className="private-active-person"><div className="private-active-avatar">{id===currentUserId?<Mic size={17}/>:<Users size={17}/>}</div><span>{id===currentUserId?'You':remoteNames[id]||'Member'}</span>{id!==currentUserId&&remoteStreams[id]&&<audio autoPlay playsInline muted={speakerMuted} ref={el=>{if(el){el.volume=speakerVolume;if(el.srcObject!==remoteStreams[id]){el.srcObject=remoteStreams[id];void el.play().catch(()=>setError('Call audio is blocked by your browser. Check site sound permissions.'))}}}}/>}</div>)}</div><div className="private-active-controls"><label className="call-speaker-volume"><Volume2 size={15}/><span>Speaker</span><input type="range" min="0.1" max="0.85" step="0.05" value={speakerVolume} aria-label="Call speaker volume" onChange={event=>setSpeakerVolume(Number(event.target.value))}/><output>{Math.round(speakerVolume*100)}%</output></label><button onClick={toggleMute} className={muted?'active':''} title={muted?'Turn microphone on':'Mute microphone'}>{muted?<MicOff size={18}/>:<Mic size={18}/>}<span>{muted?'MIC OFF':'MIC ON'}</span></button><button onClick={toggleSpeaker} className={speakerMuted?'active':''} title={speakerMuted?'Unmute call audio':'Mute call audio'}>{speakerMuted?<VolumeX size={18}/>:<Volume2 size={18}/>}<span>{speakerMuted?'SOUND OFF':'SOUND ON'}</span></button><button className="danger" onClick={()=>void endCall()}><PhoneOff size={18}/><span>END</span></button></div></div>}
     {activeCall&&error&&<div className="private-call-error" role="alert" style={{position:'fixed',right:18,bottom:150,zIndex:5101,width:'min(370px,calc(100vw - 36px))'}}>{error}</div>}
   </>;
 }
