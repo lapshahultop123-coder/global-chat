@@ -3988,3 +3988,33 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
   .composer:not(.private-composer)>.voice-btn svg,
   .composer:not(.private-composer)>.send-btn svg{width:21px;height:21px}
 }
+
+/* Make the security action clear, theme-aware, and easy to tap. */
+.settings-device-sessions .settings-logout-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  width:100%;
+  min-height:48px;
+  margin:0;
+  padding:11px 14px;
+  border:1px solid color-mix(in srgb,var(--theme-button-text,#fff) 22%,transparent);
+  border-radius:12px;
+  background-color:var(--primary);
+  background-image:var(--theme-button-gradient,linear-gradient(135deg,var(--primary),var(--accent)));
+  color:var(--theme-button-text,#fff);
+  font-size:.76rem;
+  font-weight:850;
+  letter-spacing:.045em;
+  line-height:1.25;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--primary) 24%,transparent);
+  transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;
+}
+.settings-device-sessions .settings-logout-btn svg{width:18px;height:18px;flex:none}
+.settings-device-sessions .settings-logout-btn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.06);box-shadow:0 10px 26px color-mix(in srgb,var(--primary) 30%,transparent)}
+.settings-device-sessions .settings-logout-btn:active:not(:disabled){transform:translateY(0) scale(.99)}
+.settings-device-sessions .settings-logout-btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.settings-device-sessions .settings-logout-btn:disabled{cursor:wait;opacity:.78;box-shadow:none}
+@media(max-width:380px){.settings-device-sessions .settings-logout-btn{min-height:46px;gap:7px;padding-inline:9px;font-size:.7rem}}
+@media(prefers-reduced-motion:reduce){.settings-device-sessions .settings-logout-btn{transition:none}}
