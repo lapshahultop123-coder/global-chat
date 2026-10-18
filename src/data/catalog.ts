@@ -53,8 +53,13 @@ export const THEMES = [
   ['amber','Amber','#191407','#2a210e','#92400e','#854d0e'],
   ['olive','Olive','#131509','#242710','#556b2f','#3f6212'],
   ['steel','Steel','#0b1016','#18212b','#475569','#334155'],
-  ['twilight','Twilight','#10101c','#1d1d31','#4338ca','#6d28d9']
-].map(([id,name,bg,surface,primary,accent]) => ({id,name,bg,surface,primary,accent}));
+  ['twilight','Twilight','#10101c','#1d1d31','#4338ca','#6d28d9'],
+  ['blue-hour','Blue Hour Glow','#10172b','#17213e','#2563eb','#831843','linear-gradient(180deg,rgba(7,11,22,.22) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#222222 0%,#1b2b4f 28%,#376de0 56%,#9b62e8 79%,#e86ac5 100%)'],
+  ['violet-dawn','Violet Dawn','#100d22','#1d1736','#581c87','#701a75','linear-gradient(180deg,rgba(7,11,22,.22) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#222222 0%,#1e284b 29%,#3e63cf 53%,#865be6 76%,#d77adf 100%)'],
+  ['pink-horizon','Pink Horizon','#160e23','#241733','#be185d','#a21caf','linear-gradient(180deg,rgba(7,11,22,.22) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#202020 0%,#1e3157 30%,#3d68d9 54%,#bd5bcd 76%,#f472b6 100%)'],
+  ['rose-cosmos','Rose Cosmos','#180d21','#29172f','#a31858','#b91c74','linear-gradient(180deg,rgba(7,11,22,.22) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#212121 0%,#253052 28%,#456fe1 53%,#b54fc4 75%,#ff58b0 100%)'],
+  ['electric-dusk','Electric Dusk','#0c1426','#16213b','#273c9b','#712e83','linear-gradient(180deg,rgba(7,11,22,.22) 0%,rgba(7,11,22,.5) 100%),linear-gradient(180deg,#1f1f1f 0%,#1f3156 30%,#3268de 55%,#8a55dc 78%,#d946ef 100%)']
+].map(([id,name,bg,surface,primary,accent,wallpaper]) => ({id,name,bg,surface,primary,accent,wallpaper}));
 
 export const EMOJIS = [
   '👍','❤️','😂','😮','😢','😡','🎉','🙏','👋','😊','🔥','⭐',

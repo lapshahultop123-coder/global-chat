@@ -4,7 +4,7 @@ import { iso31661, iso31662 } from 'npm:iso-3166@4.4.0';
 const admin = createAdminClient();
 const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-const themes = ['midnight','ocean','sunset','forest','galaxy','arctic','pink','carbon','aurora','gold','crimson','mint','royal','lavender','coffee','coral','slate','emerald','violet','sky','sand','rose','teal','indigo','mono','deep-space','sapphire','cobalt','glacier','jade','moss','plum','amethyst','berry','ruby','copper','amber','olive','steel','twilight'];
+const themes = ['midnight','ocean','sunset','forest','galaxy','arctic','pink','carbon','aurora','gold','crimson','mint','royal','lavender','coffee','coral','slate','emerald','violet','sky','sand','rose','teal','indigo','mono','deep-space','sapphire','cobalt','glacier','jade','moss','plum','amethyst','berry','ruby','copper','amber','olive','steel','twilight','blue-hour','violet-dawn','pink-horizon','rose-cosmos','electric-dusk'];
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
