@@ -4511,3 +4511,93 @@ html { scrollbar-color: color-mix(in srgb,var(--primary) 55%,#718096) transparen
 .profile-setup-geo-retry { margin-left: 5px; padding: 2px 7px; border: 1px solid var(--ui-border-strong); border-radius: 7px; background: color-mix(in srgb,var(--primary) 14%,var(--surface)); color: #f3f7ff; }
 @keyframes profile-visibility-pop { from { opacity: 0; transform: translateY(-3px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media(prefers-reduced-motion:reduce) { .profile-intro-visibility-trigger,.profile-intro-visibility-trigger svg,.profile-intro-visibility-options,.profile-intro-visibility-options button { transition: none; animation: none; } }
+
+/* Shared friend request note dialog for public chat and the Friends panel. */
+.friend-request-note-backdrop {
+  z-index: 2400;
+  padding: max(14px,env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) max(14px,env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));
+  background: rgba(3,8,20,.78);
+  -webkit-backdrop-filter: blur(10px) saturate(118%);
+  backdrop-filter: blur(10px) saturate(118%);
+}
+.friend-request-note-modal {
+  width: min(460px,100%);
+  max-height: calc(100dvh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(18px,4vw,24px);
+  border: 1px solid color-mix(in srgb,var(--primary,#3b82f6) 43%,var(--ui-border,rgba(255,255,255,.14)));
+  border-radius: 22px;
+  background: linear-gradient(145deg,color-mix(in srgb,var(--primary,#3b82f6) 12%,var(--surface,#111a2e)),color-mix(in srgb,var(--accent,#8b5cf6) 9%,var(--surface,#111a2e) 91%) 48%,color-mix(in srgb,var(--surface,#111a2e) 97%,#080e1d));
+  box-shadow: 0 28px 84px rgba(0,0,0,.58),0 0 0 1px rgba(255,255,255,.035) inset;
+  animation: friend-request-note-enter 180ms cubic-bezier(.2,.75,.25,1) both;
+}
+.friend-request-note-modal>header {
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.friend-request-note-modal>header>div { min-width: 0; gap: 7px; }
+.friend-request-note-modal>header b { gap: 9px; line-height: 1.35; }
+.friend-request-note-modal>header b svg { flex: 0 0 auto; color: var(--accent,#93c5fd); }
+.friend-request-note-modal>header small { line-height: 1.45; }
+.friend-request-note-modal>header>button {
+  width: 40px;
+  height: 40px;
+  border-color: color-mix(in srgb,var(--primary,#3b82f6) 25%,rgba(255,255,255,.13));
+  border-radius: 12px;
+  transition: background 140ms ease,border-color 140ms ease,transform 140ms ease;
+}
+.friend-request-note-modal>header>button:hover:not(:disabled) { border-color: color-mix(in srgb,var(--primary,#3b82f6) 54%,white 8%); background: color-mix(in srgb,var(--primary,#3b82f6) 13%,rgba(255,255,255,.04)); }
+.friend-request-note-modal :focus-visible { outline: 2px solid color-mix(in srgb,var(--accent,#93c5fd) 80%,white); outline-offset: 3px; }
+.friend-request-note-modal[tabindex="-1"]:focus { outline: none; }
+.friend-request-note-modal form { display: grid; gap: 9px; }
+.friend-request-note-modal form>label { color: #e5edf8; font-size: .82rem; font-weight: 760; }
+.friend-request-note-modal form>label span { color: var(--muted,#9aa9bd); font-size: .74rem; font-weight: 500; }
+.friend-request-note-modal textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 132px;
+  max-height: min(40dvh,320px);
+  resize: vertical;
+  padding: 13px 14px;
+  border: 1px solid color-mix(in srgb,var(--primary,#3b82f6) 27%,rgba(255,255,255,.15));
+  border-radius: 14px;
+  outline: 0;
+  background: color-mix(in srgb,var(--surface,#111a2e) 88%,#070d19);
+  color: #f5f8ff;
+  color-scheme: dark;
+  font: inherit;
+  font-size: .92rem;
+  line-height: 1.55;
+  box-shadow: 0 1px 0 rgba(255,255,255,.035) inset;
+  transition: border-color 150ms ease,box-shadow 150ms ease,background 150ms ease;
+}
+.friend-request-note-modal textarea::placeholder { color: color-mix(in srgb,var(--muted,#94a3b8) 78%,#dbeafe); opacity: .82; }
+.friend-request-note-modal textarea:focus { border-color: color-mix(in srgb,var(--primary,#3b82f6) 75%,white 12%); background: color-mix(in srgb,var(--surface,#111a2e) 92%,#070d19); box-shadow: 0 0 0 3px color-mix(in srgb,var(--primary,#3b82f6) 20%,transparent),0 1px 0 rgba(255,255,255,.04) inset; }
+.friend-request-note-meta { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-width: 0; }
+.friend-request-note-meta>small { color: var(--muted,#9aa9bd); font-size: .7rem; line-height: 1.45; }
+.friend-request-note-meta output { flex: 0 0 auto; color: color-mix(in srgb,var(--accent,#93c5fd) 78%,white); font-size: .72rem; font-variant-numeric: tabular-nums; font-weight: 750; }
+.friend-request-note-error { margin: 2px 0 0; }
+.friend-request-note-modal footer { display: grid; grid-template-columns: minmax(92px,.8fr) minmax(0,1.2fr); gap: 9px; margin-top: 9px; }
+.friend-request-note-modal footer button { display: inline-flex; align-items: center; justify-content: center; min-width: 0; min-height: 46px; padding: 10px 13px; border-radius: 13px; font: inherit; font-size: .84rem; font-weight: 780; cursor: pointer; transition: filter 140ms ease,transform 140ms ease,border-color 140ms ease,background 140ms ease; }
+.friend-request-note-modal footer .friend-request-note-cancel { border: 1px solid color-mix(in srgb,var(--primary,#3b82f6) 22%,rgba(255,255,255,.13)); background: rgba(255,255,255,.045); color: #d5dfed; }
+.friend-request-note-modal footer .friend-request-note-cancel:hover:not(:disabled) { border-color: color-mix(in srgb,var(--primary,#3b82f6) 42%,rgba(255,255,255,.2)); background: rgba(255,255,255,.085); }
+.friend-request-note-modal footer .primary-btn { min-height: 46px; margin: 0; border: 1px solid color-mix(in srgb,var(--primary,#3b82f6) 26%,rgba(255,255,255,.2)); box-shadow: 0 8px 22px color-mix(in srgb,var(--primary,#3b82f6) 26%,transparent),0 1px 0 rgba(255,255,255,.18) inset; }
+.friend-request-note-modal footer button:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+.friend-request-note-modal footer button:active:not(:disabled) { transform: translateY(0); }
+.friend-request-note-modal button:disabled,.friend-request-note-modal textarea:disabled { cursor: wait; opacity: .72; }
+@keyframes friend-request-note-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media(max-width:600px) {
+  .friend-request-note-backdrop { padding: max(10px,env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px)); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+  .friend-request-note-modal { width: 100%; max-height: calc(100dvh - 20px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)); padding: 18px; border-radius: 20px; }
+  .friend-request-note-modal textarea { min-height: 124px; }
+}
+@media(max-width:350px) {
+  .friend-request-note-modal { padding: 15px; }
+  .friend-request-note-modal footer { grid-template-columns: 1fr 1.15fr; gap: 7px; }
+  .friend-request-note-modal footer button { padding-inline: 8px; font-size: .78rem; }
+}
+@media(prefers-reduced-motion:reduce) { .friend-request-note-modal,.friend-request-note-modal * { animation: none!important; transition: none!important; } }
