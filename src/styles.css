@@ -3494,7 +3494,7 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .private-member-action.transfer{color:#7dd3fc;border-color:rgba(56,189,248,.35);background:rgba(14,165,233,.08)}
 .private-member-action.transfer:hover{background:rgba(14,165,233,.17)}
 .privacy-shield-toggle.is-active{border-color:#38bdf8;background:rgba(14,165,233,.16);color:#bae6fd}
-.chat-app.privacy-shield :is(.message-list,.private-message-list,.friend-chat-messages,.global-search-results,.saved-message-card,.public-thread-root,.public-thread-replies){filter:blur(12px);user-select:none;pointer-events:none;transition:filter .16s ease}
+.chat-app.privacy-shield :is(.message-list .private-message,.private-message-list .private-message,.friend-chat-messages .friend-message-row,.global-search-results>article,.saved-message-card,.public-thread-root,.public-thread-reply){filter:blur(12px);user-select:none;pointer-events:none;transition:filter .16s ease}
 
 .private-room-capacity{display:grid;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);font-size:.72rem}
 .private-room-capacity>span{color:#cbd5e1;font-weight:800}
@@ -3720,10 +3720,12 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .composer-tools-menu{position:relative;z-index:180;display:flex;flex:0 0 38px;width:38px;height:40px;align-self:center;align-items:center;justify-content:center}
 .composer-tools-trigger{display:grid;flex:none;width:38px;height:38px;place-items:center;padding:0;border:1px solid color-mix(in srgb,var(--primary) 32%,rgba(255,255,255,.14));border-radius:12px;background:color-mix(in srgb,var(--primary) 9%,var(--surface));color:var(--text,#e2e8f0)}
 .composer-tools-trigger:hover,.composer-tools-trigger[aria-expanded="true"]{border-color:color-mix(in srgb,var(--primary) 65%,transparent);background:color-mix(in srgb,var(--primary) 22%,var(--surface));color:#fff}
-.composer-tools-popover{position:absolute;left:0;bottom:calc(100% + 8px);z-index:2200;display:flex;align-items:center;gap:6px;width:max-content;max-width:calc(100vw - 20px);padding:7px;border:1px solid color-mix(in srgb,var(--primary) 38%,rgba(255,255,255,.16));border-radius:13px;background:color-mix(in srgb,var(--surface) 97%,#05070d);box-shadow:0 16px 42px rgba(0,0,0,.44)}
+.composer-tools-popover{position:absolute;left:0;bottom:calc(100% + 8px);z-index:2200;display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:max-content;max-width:calc(100vw - 20px);padding:7px;border:1px solid color-mix(in srgb,var(--primary) 38%,rgba(255,255,255,.16));border-radius:13px;background:color-mix(in srgb,var(--surface) 97%,#05070d);box-shadow:0 16px 42px rgba(0,0,0,.44)}
 .composer-tools-popover .quick-text-phrases,.composer-tools-popover .text-format-toolbar{align-self:center}
 .composer-tools-popover .composer-tool-action{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:5px;min-width:38px;height:38px;padding:0 9px;border:1px solid color-mix(in srgb,var(--primary) 34%,rgba(255,255,255,.14));border-radius:10px;background:rgba(255,255,255,.045);color:var(--text,#e2e8f0);font-size:11px;font-weight:700}
 .composer-tools-popover .composer-tool-action:disabled{opacity:.48;cursor:not-allowed}
+.composer-tools-popover .privacy-shield-tool{width:38px;min-width:38px;height:38px;flex:0 0 38px;padding:0}
+.composer-tools-popover .privacy-shield-tool.is-active,.friend-compose .composer-tools-popover .privacy-shield-tool.is-active{border-color:color-mix(in srgb,var(--primary) 72%,transparent);background:color-mix(in srgb,var(--primary) 22%,var(--surface));color:var(--text,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--primary) 18%,transparent)}
 .composer-tools-popover .quick-text-trigger{width:38px;height:38px}
 .composer-tools-popover .text-format-toolbar{width:35px;height:40px}
 .composer-tools-popover .text-format-trigger{width:35px;height:38px}
@@ -3731,11 +3733,12 @@ html,body,#root{width:100%;max-width:100%;min-width:0}button,input,textarea,sele
 .friend-compose .composer-tools-menu{flex-basis:38px}
 .friend-compose .composer-tools-trigger{width:38px;min-width:38px;height:38px;padding:0;background:color-mix(in srgb,var(--primary) 10%,var(--surface));color:var(--text,#e2e8f0)}
 .friend-compose .composer-tools-popover .composer-tool-action{width:auto;min-width:38px;height:38px;flex:0 0 auto;padding:0 9px;background:rgba(255,255,255,.045);color:var(--text,#e2e8f0)}
+.friend-compose .composer-tools-popover .privacy-shield-tool{width:38px;min-width:38px;height:38px;flex:0 0 38px;padding:0}
 .friend-compose .composer-tools-popover .quick-text-trigger,.friend-compose .composer-tools-popover .text-format-trigger{width:38px;min-width:38px;height:38px}
 .friend-compose .composer-tools-popover .quick-text-phrases,.friend-compose .composer-tools-popover .text-format-toolbar{width:auto;flex:0 0 auto}
 .private-composer .composer-tools-menu{margin-bottom:1px}
 .friends-panel-chat .friend-message-menu{max-height:min(60dvh,360px);overflow:auto}
-@media(max-width:430px){.composer-tools-menu,.friend-compose .composer-tools-menu{flex-basis:36px;width:36px}.composer-tools-trigger,.friend-compose .composer-tools-trigger{width:36px;min-width:36px;height:36px}.composer-tools-popover{gap:5px;padding:6px}.composer-tools-popover .composer-tool-action{padding-inline:7px}.connection-details-popover{max-width:calc(100vw - 16px)}}
+@media(max-width:430px){.composer-tools-menu,.friend-compose .composer-tools-menu{flex-basis:36px;width:36px}.composer-tools-trigger,.friend-compose .composer-tools-trigger{width:36px;min-width:36px;height:36px}.composer-tools-popover{gap:5px;padding:6px;max-width:calc(100vw - 76px)}.composer-tools-popover .composer-tool-action{padding-inline:7px}.connection-details-popover{max-width:calc(100vw - 16px)}}
 .public-feedback-error{flex-basis:100%;color:#fca5a5;font-size:11px}
 
 /* Keep the public empty state balanced across phone, tablet, and short displays. */
