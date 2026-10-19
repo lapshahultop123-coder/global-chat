@@ -4601,3 +4601,27 @@ html { scrollbar-color: color-mix(in srgb,var(--primary) 55%,#718096) transparen
   .friend-request-note-modal footer button { padding-inline: 8px; font-size: .78rem; }
 }
 @media(prefers-reduced-motion:reduce) { .friend-request-note-modal,.friend-request-note-modal * { animation: none!important; transition: none!important; } }
+
+/* Keep friend actions on the trailing edge of each friend card. */
+.friends-panel-list .friend-row:has(> .friend-options-wrap) {
+  display: grid;
+  grid-template-columns: 46px minmax(0,1fr) max-content 40px;
+  align-items: center;
+  gap: clamp(6px,2vw,10px);
+  flex-wrap: initial;
+}
+.friends-panel-list .friend-row:has(> .friend-options-wrap)>.friend-avatar { grid-column: 1; grid-row: 1; }
+.friends-panel-list .friend-row:has(> .friend-options-wrap)>.friend-details { grid-column: 2; grid-row: 1; }
+.friends-panel-list .friend-row:has(> .friend-options-wrap)>.friend-action { grid-column: 3; grid-row: 1; justify-self: end; min-height: 40px; padding-inline: 11px; }
+.friends-panel-list .friend-row:has(> .friend-options-wrap)>.friend-options-wrap { grid-column: 4; grid-row: 1; }
+@media(max-width:420px) {
+  .friends-panel-list .friend-row:has(> .friend-options-wrap) { grid-template-columns: 42px minmax(0,1fr) max-content 40px; gap: 7px; padding-inline: 8px; }
+  .friends-panel-list .friend-row:has(> .friend-options-wrap)>.friend-avatar { width: 42px; height: 42px; }
+  .friends-panel-list .friend-row:has(> .friend-options-wrap)>.friend-action { padding-inline: 9px; font-size: .7rem; }
+}
+@media(max-width:350px) {
+  .friends-panel-list .friend-row:has(> .friend-options-wrap) { grid-template-columns: 42px minmax(0,1fr) 40px; grid-template-rows: auto auto; column-gap: 8px; row-gap: 7px; }
+  .friends-panel-list .friend-row:has(> .friend-options-wrap)>.friend-details { grid-column: 2 / 4; grid-row: 1; }
+  .friends-panel-list .friend-row:has(> .friend-options-wrap)>.friend-action { grid-column: 2; grid-row: 2; justify-self: end; }
+  .friends-panel-list .friend-row:has(> .friend-options-wrap)>.friend-options-wrap { grid-column: 3; grid-row: 2; }
+}
