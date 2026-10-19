@@ -4625,3 +4625,16 @@ html { scrollbar-color: color-mix(in srgb,var(--primary) 55%,#718096) transparen
   .friends-panel-list .friend-row:has(> .friend-options-wrap)>.friend-action { grid-column: 2; grid-row: 2; justify-self: end; }
   .friends-panel-list .friend-row:has(> .friend-options-wrap)>.friend-options-wrap { grid-column: 3; grid-row: 2; }
 }
+
+/* Unread counts stay visible without covering either topbar action. */
+.your-private-chats-top-btn,.friends-top-btn{position:relative!important;overflow:visible!important}
+.top-notification-badge{top:-7px!important;right:-7px!important;z-index:12;display:grid;place-items:center;min-width:19px;height:19px;padding:0 4px;border:2px solid var(--surface,#10172b);border-radius:999px;background:linear-gradient(145deg,#ff7188,#e11d48);color:#fff;font:800 9px/1 system-ui,sans-serif;font-style:normal;font-variant-numeric:tabular-nums;white-space:nowrap;box-shadow:0 3px 9px rgba(0,0,0,.32);pointer-events:none}
+
+/* Per-message select controls have their own row so sender names and avatars remain unobstructed. */
+.bulk-message-select-row{display:flex;align-items:center;width:100%;max-width:100%;margin:0 0 5px}
+.bulk-message-select-row.mine{justify-content:flex-end}
+.bulk-message-select{position:relative!important;inset:auto!important;z-index:1;min-height:32px;padding:5px 9px;border-color:color-mix(in srgb,var(--ui-border-strong,rgba(255,255,255,.2)) 75%,transparent);background:color-mix(in srgb,var(--surface,#10172b) 94%,var(--primary,#2488d8) 6%);font-size:.67rem;transition:background var(--ui-motion,160ms ease),border-color var(--ui-motion,160ms ease),color var(--ui-motion,160ms ease),transform var(--ui-motion,160ms ease)}
+.bulk-message-select:hover:not(:disabled){transform:translateY(-1px);border-color:var(--ui-border-strong,color-mix(in srgb,var(--primary,#2488d8) 55%,white));background:color-mix(in srgb,var(--primary,#2488d8) 17%,var(--surface,#10172b))}
+.bulk-message-select:focus-visible{outline:2px solid var(--accent,#7dd3fc);outline-offset:2px}
+.bulk-message-select.selected{border-color:color-mix(in srgb,var(--accent,#22d3ee) 70%,transparent);background:color-mix(in srgb,var(--accent,#22d3ee) 20%,var(--surface,#10172b));color:var(--accent,#7dd3fc)}
+@media(max-width:540px){.top-notification-badge{top:-6px!important;right:-6px!important;min-width:18px;height:18px;font-size:8px}.bulk-message-select-row{margin-bottom:4px}.bulk-message-select{min-height:34px;padding:6px 10px;font-size:.68rem}}

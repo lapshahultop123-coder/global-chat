@@ -17,12 +17,13 @@ type BulkMessageActionsProps = {
 
 export function BulkMessageActions({ active, selectedCount, totalCount, canSave, busy = false, status = '', onSelectAll, onCopy, onSave, onDelete, onCancel }: BulkMessageActionsProps) {
   if (!active) return status ? <div className="bulk-message-actions-wrap"><small className="bulk-message-status" role="status">{status}</small></div> : null;
+  const allSelected=totalCount>0&&selectedCount>=totalCount;
 
   return <div className="bulk-message-actions-wrap">
     <div className={`bulk-message-actions${active ? ' is-active' : ''}`} role="group" aria-label="Bulk message actions">
       <>
         <span className="bulk-message-count" aria-live="polite">{selectedCount} selected</span>
-        <button type="button" onClick={onSelectAll} disabled={busy || totalCount === 0}>Select all ({totalCount})</button>
+        <button type="button" onClick={onSelectAll} disabled={busy || totalCount === 0} aria-pressed={allSelected}>{allSelected?'Deselect all':`Select all (${totalCount})`}</button>
         <button type="button" onClick={onCopy} disabled={busy || selectedCount === 0}><Copy size={15}/> Copy</button>
         <button type="button" onClick={onSave} disabled={busy || !canSave}><Bookmark size={15}/> Save</button>
         <button type="button" className="bulk-message-delete" onClick={onDelete} disabled={busy || selectedCount === 0}><Trash2 size={15}/> Delete for me</button>
