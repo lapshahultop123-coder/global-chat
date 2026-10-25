@@ -698,7 +698,7 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
             setConnectionState('connected');
             setServiceMaintenance(false);
             postgresChangesReady=true;
-            await channel.track({online_at:new Date().toISOString(),typing:false});
+            await channel.track({online_at:new Date().toISOString(),typing:false,country:profile.showCountry===false?'':profile.country});
             presenceUsers();
             void refreshNow();
           }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
@@ -735,6 +735,11 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
       channelRef.current=null;
     };
   },[refresh,localDeleted,refreshThreadCounts]);
+  useEffect(()=>{
+    const channel=channelRef.current;
+    if(!connected||!authUserId||!channel)return;
+    void channel.track({online_at:new Date().toISOString(),typing:false,country:profile.showCountry===false?'':profile.country});
+  },[authUserId,connected,profile.country,profile.showCountry]);
   useEffect(()=>{
     if(!authUserId)return;
     const restored=readPublicPendingMessages(authUserId).filter(message=>!localDeleted[localMessageKey(message)]);

@@ -4653,3 +4653,11 @@ html { scrollbar-color: color-mix(in srgb,var(--primary) 55%,#718096) transparen
 @keyframes games-backdrop-in{from{opacity:0}to{opacity:1}}@keyframes games-panel-in{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes games-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @media(max-width:540px){.games-backdrop{padding:14px}.games-panel{max-height:calc(100dvh - 28px);padding:17px;border-radius:21px}.games-empty-state{min-height:230px;padding-inline:8px}}
 @media(prefers-reduced-motion:reduce){.games-backdrop,.games-panel,.games-empty-art{animation:none}.games-close{transition:none}}
+
+/* Earth Pulse presence markers and read-only country counts. */
+.earth-pulse-map>.earth-pulse-marker{position:absolute;display:flex;align-items:center;gap:5px;transform:translate(-50%,-50%);padding:4px 7px;border:1px solid rgba(103,232,249,.45);border-radius:999px;background:rgba(3,24,37,.88);color:#c7f9ff;font-size:.68rem;font-weight:800;line-height:1;box-shadow:0 4px 15px rgba(0,0,0,.24);pointer-events:none}
+.earth-pulse-map>.earth-pulse-marker i,.earth-pulse-country-card b i{width:7px;height:7px;flex:none;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px rgba(52,211,153,.16),0 0 12px #34d399;animation:earth-pulse-dot 1.7s ease-out infinite}
+.earth-pulse-country-list h3{display:flex;align-items:center;justify-content:space-between;gap:8px}.earth-pulse-country-list h3 span{color:#8ddcf3;font-size:.72rem;font-weight:700;font-variant-numeric:tabular-nums}
+.earth-pulse-country-card{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.035);color:#dbeafe}
+.earth-pulse-country-card>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.earth-pulse-country-card>b{display:flex;align-items:center;gap:8px;color:#7dd3fc;font-variant-numeric:tabular-nums}
+@media(max-width:600px){.earth-pulse-map>.earth-pulse-marker{gap:3px;padding:3px 5px;font-size:.59rem}.earth-pulse-country-card{min-height:40px}}
