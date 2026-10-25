@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Check, Gamepad2, Keyboard, Play, RotateCcw, Search, Sparkles, X } from 'lucide-react';
 import ArcadeGame, { clearAllGameRecords } from './ArcadeGame';
+import { GameCharacterArt } from './GameCharacter';
 
 export type GameId='runner'|'memory'|'reef'|'breaker'|'orbit'|'rune'|'maze'|'garden'|'rail'|'kitchen'|'drums'|'hopper'|'archery'|'solar'|'sorter';
 export type GameInfo={id:GameId;title:string;desc:string;controls:string;accent:string;deep:string;avatar:number;genre:string};
@@ -22,22 +23,7 @@ export const GAMES:GameInfo[]=[
   {id:'sorter',title:'Astro Sorter',desc:'Sort falling orbit gems into the matching color gates.',controls:'A / S / D or tap a color gate',accent:'#8be1ff',deep:'#142e48',avatar:14,genre:'Puzzle'}
 ];
 
-export function GameMascot({game,size=48}:{game:GameInfo;size?:number}){
-  const v=game.avatar,shape=v%5,grad='game-mascot-'+game.id;
-  return <svg className="games-mascot" width={size} height={size} viewBox="0 0 64 64" role="img" aria-label={game.title+' character'}>
-    <defs><linearGradient id={grad} x1="0" y1="0" x2="1" y2="1"><stop stopColor={game.accent}/><stop offset="1" stopColor={game.deep}/></linearGradient></defs>
-    {shape===0&&<><path d="M15 24 10 8q12 1 17 11M49 24l5-16q-12 1-17 11" fill={game.accent} stroke="#fff" strokeOpacity=".45" strokeWidth="2"/></>}
-    {shape===1&&<><path d="M17 22 19 8l9 10M47 22 45 8l-9 10" fill={game.accent}/><path d="m25 12 7-8 7 8" fill="none" stroke="#fff5c8" strokeWidth="3" strokeLinecap="round"/></>}
-    {shape===2&&<><path d="M12 32 3 20l14 2M52 32l9-12-14 2" fill={game.accent}/><path d="M24 49q8 7 16 0" fill="none" stroke="#fff" strokeWidth="3"/></>}
-    {shape===3&&<><path d="M18 21 11 9l14 5M46 21 53 9l-14 5" fill={game.accent}/><path d="m28 12 4-8 4 8" fill="#fff3a8"/></>}
-    {shape===4&&<><path d="M14 28q-8-14 3-18 7 7 8 15M50 28q8-14-3-18-7 7-8 15" fill={game.accent}/><path d="M45 47q15 2 12 10" fill="none" stroke={game.accent} strokeWidth="5" strokeLinecap="round"/></>}
-    <ellipse cx="32" cy="37" rx="22" ry="20" fill={'url(#'+grad+')'} stroke="#fff" strokeOpacity=".45" strokeWidth="2"/>
-    <ellipse cx="24" cy="35" rx="3" ry="4" fill="#10182a"/><ellipse cx="40" cy="35" rx="3" ry="4" fill="#10182a"/>
-    <circle cx="25" cy="34" r="1" fill="#fff"/><circle cx="41" cy="34" r="1" fill="#fff"/>
-    <path d="M28 43q4 4 8 0" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M15 43q-5 2-2 6M49 43q5 2 2 6" fill="none" stroke="#ffb3d0" strokeWidth="3" strokeLinecap="round"/>
-  </svg>;
-}
+export const GameMascot=GameCharacterArt;
 
 export default function GamesPanel({onClose}:{onClose:()=>void}){
   const [selected,setSelected]=useState<GameId|null>(null),[query,setQuery]=useState(''),[genre,setGenre]=useState('All'),[confirmReset,setConfirmReset]=useState(false),[resetNotice,setResetNotice]=useState('');
@@ -51,7 +37,7 @@ export default function GamesPanel({onClose}:{onClose:()=>void}){
         <div className="games-library-intro"><div><span className="games-eyebrow"><Sparkles size={13}/> PICK YOUR NEXT CHALLENGE</span><h3>Choose a little world</h3><p>Keyboard and touch controls · waves grow faster as you score.</p></div><div className="games-library-stat"><b>15</b><small>GAMES</small></div></div>
         <div className="games-filters"><label className="games-search"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Find a game" aria-label="Find a game"/>{query&&<button type="button" onClick={()=>setQuery('')} aria-label="Clear search"><X size={14}/></button>}</label><div className="games-genres" role="group" aria-label="Filter by game type">{genres.map(g=><button key={g} type="button" className={genre===g?'active':''} onClick={()=>setGenre(g)}>{g}</button>)}</div></div>
         <div className="games-grid">{filtered.map((g)=><button type="button" key={g.id} className="games-card" style={{'--game-accent':g.accent,'--game-deep':g.deep} as React.CSSProperties} onClick={()=>setSelected(g.id)} aria-label={'Play '+g.title+': '+g.desc}>
-          <div className="games-card-top"><span className="games-card-index">{String(GAMES.indexOf(g)+1).padStart(2,'0')}</span><span className="games-card-kind">{g.genre}</span></div><div className="games-card-avatar"><GameMascot game={g} size={60}/><i aria-hidden="true"/></div><div className="games-card-copy"><b>{g.title}</b><span>{g.desc}</span></div><div className="games-card-bottom"><span>{g.controls.split(' · ')[0]}</span><span className="games-card-play"><Play size={13}/></span></div>
+          <div className="games-card-top"><span className="games-card-index">{String(GAMES.indexOf(g)+1).padStart(2,'0')}</span><span className="games-card-kind">{g.genre}</span></div><div className="games-card-avatar"><GameMascot game={g} size={92}/><i aria-hidden="true"/></div><div className="games-card-copy"><b>{g.title}</b><span>{g.desc}</span></div><div className="games-card-bottom"><span>{g.controls.split(' · ')[0]}</span><span className="games-card-play"><Play size={13}/></span></div>
         </button>)}</div>
         {!filtered.length&&<div className="games-no-results"><Search size={22}/><b>No matching games</b><span>Try another title or game type.</span></div>}
         <footer className="games-library-foot"><span><Keyboard size={13}/> Keyboard and touch supported</span><span>{resetNotice||'Scores and highest waves save on this device'}</span><button type="button" className="games-reset-trigger" onClick={()=>{setResetNotice('');setConfirmReset(true)}}><RotateCcw size={13}/>Reset records</button></footer>
