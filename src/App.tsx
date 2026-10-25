@@ -17,6 +17,8 @@ import { MessageSearchFilters, emptySearchFilters, matchesMessageSearch, type Se
 import { containsMention, renderMentionText } from './lib/mentions';
 import SavedMessagesPanel from './SavedMessagesPanel';
 import SkillExchangePanel from './SkillExchangePanel';
+import GamesPanel from './GamesPanel';
+import { Gamepad2 } from 'lucide-react';
 import ScheduledMessagesPanel, { ScheduleTextModal, type ScheduleTarget } from './ScheduledMessagesPanel';
 import ReconnectQueuePanel from './ReconnectQueuePanel';
 import GlobalMessageSearch from './GlobalMessageSearch';
@@ -402,6 +404,7 @@ function Chat({profile,settings,accountPassword,onAccountPasswordChange,onSettin
   const [savedMessagesOpen,setSavedMessagesOpen]=useState(false);
   const [privacyShield,setPrivacyShield]=useState(()=>readJSON<boolean>(PRIVACY_SHIELD_KEY,false));
   const [skillExchangeOpen,setSkillExchangeOpen]=useState(false);
+  const [gamesOpen,setGamesOpen]=useState(false);
   const [scheduledMessagesOpen,setScheduledMessagesOpen]=useState(false);
   const [scheduleTarget,setScheduleTarget]=useState<ScheduleTarget|null>(null);
   const [reconnectQueueOpen,setReconnectQueueOpen]=useState(false);
@@ -1231,6 +1234,7 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
   const friendsBadgeCount=friendsUnreadCount+friendRequestUnreadCount;
   const onKey=(e:React.KeyboardEvent)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};
   return <div className={`chat-app${privacyShield?' privacy-shield':''}${privateRoom?' private-room-open':''}`}>
+    {gamesOpen&&createPortal(<GamesPanel onClose={()=>setGamesOpen(false)}/>,document.body)}
     <header className="topbar">
       <div className="top-brand">
         <img className="brand-mini brand-image" src="/global-chat-logo.svg" alt="GLOBAL CHAT" />
@@ -1245,6 +1249,7 @@ const refreshReactions=useCallback(async(ids:string[],userId:string)=>{if(!ids.l
           {headerMenuOpen&&<div className="header-more-dropdown">{!privateRoom&&authUserId&&<><button type="button" onClick={()=>{setPublicBulkStatus('');setPublicBulkSelected(new Set());setPublicBulkActive(true);setHeaderMenuOpen(false)}}><Check size={17}/><span>Select messages</span></button><ChatComposerSettingsButton userId={authUserId} chatKey="public"/></>}
             <button onClick={()=>{setPrivateError('');setPrivateJoinCode('');setPrivateModal('join');setHeaderMenuOpen(false)}}><KeyRound size={17}/><span>Join Private Chat</span></button>{!privateRoom&&authUserId&&<button type="button" onClick={()=>{setIgnoreListOpen(true);setHeaderMenuOpen(false)}}><EyeOff size={17}/><span>Personal ignore list</span>{Object.keys(activePublicIgnoreList).length>0&&<small className="public-ignore-count">{Object.keys(activePublicIgnoreList).length}</small>}</button>}{!privateRoom&&<><button type="button" aria-expanded={publicSnoozeOptionsOpen} onClick={()=>setPublicSnoozeOptionsOpen(v=>!v)}><Bell size={17}/><span>Snooze Public</span><span className="snooze-chevron">{publicSnoozeOptionsOpen?'−':'+'}</span></button>{publicSnoozeOptionsOpen&&<div className="snooze-duration-options" role="group" aria-label="Snooze Public duration">{[1,2,4,8,12,24].map(hours=><button type="button" key={hours} onClick={()=>{setChatSnooze(authUserId,'public',hours*60*60*1000);setPublicSnoozeUntil(Date.now()+hours*60*60*1000);setPublicSnoozeOptionsOpen(false);setHeaderMenuOpen(false)}}>{hours} hr</button>)}<button type="button" title="Turn Public notifications back on" onClick={()=>{setChatSnooze(authUserId,'public',null);setPublicSnoozeUntil(0);setHeaderMenuOpen(false);setPublicSnoozeOptionsOpen(false)}}>Off</button></div>}</>}
             <button onClick={()=>{setGlobalSearchOpen(true);setHeaderMenuOpen(false)}}><Search size={17}/><span>Search all chats</span></button>{!privateRoom&&<button onClick={()=>{setSearchOpen(true);setHeaderMenuOpen(false)}}><Search size={17}/><span>Search this chat</span></button>}<button onClick={()=>{setEarthPulseOpen(true);setHeaderMenuOpen(false)}}><Globe2 size={17}/><span>Earth Pulse Map</span></button>
+            <button type="button" onClick={()=>{setGamesOpen(true);setHeaderMenuOpen(false)}}><Gamepad2 size={17}/><span>Games</span></button>
             <button onClick={()=>{setSkillExchangeOpen(true);setHeaderMenuOpen(false)}}><GraduationCap size={17}/><span>Skill Exchange</span></button>
             <button onClick={()=>{setSavedMessagesOpen(true);setHeaderMenuOpen(false)}}><Bookmark size={17}/><span>Saved Messages</span></button>
             <button onClick={()=>{setScheduledMessagesOpen(true);setHeaderMenuOpen(false)}}><Clock3 size={17}/><span>Scheduled Messages</span></button>
